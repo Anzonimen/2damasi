@@ -1,0 +1,3 @@
+User-agent: *
+Disallow:
+Sitemap: https://Anzonimen.github.io/2damasi/sitemap.xml

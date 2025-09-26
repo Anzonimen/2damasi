@@ -1,0 +1,13 @@
+{
+    "version": "https://jsonfeed.org/version/1",
+    "title": "ASI",
+    "description": "",
+    "home_page_url": "https://Anzonimen.github.io/2damasi",
+    "feed_url": "https://Anzonimen.github.io/2damasi/feed.json",
+    "user_comment": "",
+    "author": {
+        "name": "Antonio Garcia Llergo"
+    },
+    "items": [
+    ]
+}
