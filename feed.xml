@@ -3,14 +3,14 @@
     <title>Principal</title>
     <link href="https://Anzonimen.github.io/2damasi/feed.xml" rel="self" />
     <link href="https://Anzonimen.github.io/2damasi" />
-    <updated>2025-09-26T13:50:41+02:00</updated>
+    <updated>2025-10-15T14:04:17+02:00</updated>
     <author>
         <name>Antonio Garcia Llergo</name>
     </author>
     <id>https://Anzonimen.github.io/2damasi</id>
 
     <entry>
-        <title>Chrome Hearts</title>
+        <title>Pomodoro</title>
         <author>
             <name>Antonio Garcia Llergo</name>
         </author>
@@ -20,164 +20,45 @@
         <updated>2025-09-26T11:20:50+02:00</updated>
             <summary>
                 <![CDATA[
-                    Chrome Hearts nació en Los Ángeles en 1988 como una firma de&hellip;
+                    Proceso de resolución En esta documentación explicaré los pasos y herramientas que&hellip;
                 ]]>
             </summary>
         <content type="html">
             <![CDATA[
-                <figure class="post__image align-center"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/s-l1200-2.jpg" alt="" width="232" height="233" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/s-l1200-2-xs.jpg 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/s-l1200-2-sm.jpg 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/s-l1200-2-md.jpg 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/s-l1200-2-lg.jpg 1024w"></figure>
+                <article>
+<h3><strong>Proceso de resolución</strong></h3>
 <p> </p>
-<p>Chrome Hearts nació en Los Ángeles en 1988 como una firma de joyería en plata inspirada en la estética motera, gótica y rockera. Con el tiempo expandió su universo hacia ropa de cuero, gafas, muebles y prendas prêt-à-porter, siempre manteniendo una identidad oscura y lujosa, marcada por cruces, dagas y motivos barrocos. Su producción es artesanal y se distingue por la exclusividad: cada pieza está hecha con materiales de gran calidad y sus tiendas suelen ser únicas en su diseño interior. Chrome Hearts es considerada una marca de culto dentro del lujo alternativo, con un fuerte vínculo con celebridades y músicos que la han convertido en un símbolo de estatus irreverente.</p>
-<h3>Prendas más icónicas de Chrome Hearts</h3>
-<article id="broken-planet" class="marca">
-<ul>
-<li><strong>Anillos de plata (Dagger / Cross rings)</strong>
-<p class="desc">Anillos icónicos con motivos de daga, cruces y elementos góticos, muy reconocidos entre collectors y celebridades.</p>
-</li>
-</ul>
-<figure class="post__image post__image--center"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/Captura-de-pantalla-2025-09-26-133833.png" alt="" width="386" height="267" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/Captura-de-pantalla-2025-09-26-133833-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/Captura-de-pantalla-2025-09-26-133833-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/Captura-de-pantalla-2025-09-26-133833-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/Captura-de-pantalla-2025-09-26-133833-lg.png 1024w"></figure>
-<ul>
-<li><strong>Collares y colgantes (Cross, Dagger)</strong>
-<p class="desc">Colgantes de plata con cruces y dagas, piezas centrales del catálogo de joyería artesanal.</p>
-</li>
-</ul>
-<figure class="post__image post__image--center"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/Captura-de-pantalla-2025-09-26-133919.png" alt="" width="121" height="261" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/Captura-de-pantalla-2025-09-26-133919-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/Captura-de-pantalla-2025-09-26-133919-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/Captura-de-pantalla-2025-09-26-133919-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/Captura-de-pantalla-2025-09-26-133919-lg.png 1024w"></figure>
+<p><span style="font-weight: 400;">En esta documentación explicaré los pasos y herramientas que utilicé para crear la aplicación Pomodoro.</span></p>
+<p><span style="font-weight: 400;">En primer lugar, le pedí a ChatGPT que me ayudara a generar un </span><strong>prompt para Gemini</strong><span style="font-weight: 400;">.</span><span style="font-weight: 400;"><br></span><span style="font-weight: 400;"> Este fue el mensaje que le envié:</span></p>
+<p><span style="font-weight: 400;">"Crea un prompt para Gemini en el que solicite el desarrollo de una aplicación de estudio Pomodoro en </span><strong>una sola página</strong><span style="font-weight: 400;"> y en </span><strong>un único archivo HTML</strong><span style="font-weight: 400;">. Quiero que incluya </span><strong>funcionalidades prácticas</strong><span style="font-weight: 400;">, como un </span><strong>menú de apuntes</strong><span style="font-weight: 400;">, un </span><strong>menú de personalización</strong><span style="font-weight: 400;"> y cualquier otra característica útil para una persona que desee estudiar. La aplicación debe ser </span><strong>web responsive</strong><span style="font-weight: 400;"> y </span><strong>multiplataforma</strong><span style="font-weight: 400;">, compatible con teléfonos móviles."</span></p>
+<p><span style="font-weight: 400;">El prompt resultante fue este;</span></p>
+<h3><figure class="post__image"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/foto1.png" alt="" width="649" height="952" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto1-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto1-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto1-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto1-lg.png 1024w"></figure></h3>
 <p> </p>
-<ul>
-<li><strong>Chaquetas y prendas de cuero</strong>
-<p class="desc">Prendas de alta gama en cuero con acabados artesanales y herrajes personalizados.</p>
-</li>
-</ul>
-<figure class="post__image post__image--center"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/Captura-de-pantalla-2025-09-26-134033.png" alt="" width="291" height="280" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/Captura-de-pantalla-2025-09-26-134033-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/Captura-de-pantalla-2025-09-26-134033-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/Captura-de-pantalla-2025-09-26-134033-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/Captura-de-pantalla-2025-09-26-134033-lg.png 1024w"></figure></article>
-<article></article>
-<article>
-<h3>Outfit en Acción</h3>
+<p><span style="font-weight: 400;">Posteriormente, me preguntó si quería adaptar el prompt para que Gemini utilizara </span><strong>Tailwind CSS</strong><span style="font-weight: 400;"> o </span><strong>Material Design inline</strong><span style="font-weight: 400;">, con el objetivo de lograr un aspecto visual más moderno. Le indiqué que, en el prompt, podía incluir </span><strong>cualquier tipo de recurso. </strong><span style="font-weight: 400;">Me actualizó el prompt a este</span></p>
+<h3><figure class="post__image"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/foto2.png" alt="" width="590" height="1126" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto2-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto2-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto2-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto2-lg.png 1024w"></figure></h3>
+<p><span style="font-weight: 400;">Posteriormente, accedí a </span><strong>Gemini</strong><span style="font-weight: 400;"> para observar cómo desarrollaba la aplicación.</span></p>
+<h3> </h3>
+<figure class="post__image"><span style="font-weight: 400;">El resultado fue este:</span><span style="font-weight: 400;"><br></span><span style="font-weight: 400;"><br></span><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/foto3-2.png" alt="" width="1160" height="1098" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto3-2-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto3-2-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto3-2-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto3-2-lg.png 1024w"></figure>
+<h3> </h3>
+<p><span style="font-weight: 400;">Al probar la aplicación, me di cuenta de que la opción para cambiar la fuente de los caracteres se seleccionaba correctamente, pero no aplicaba el cambio. Además, noté que faltaba una opción para cambiar el idioma a inglés, así que le pedí que actualizara la aplicación para incluir esa función.</span></p>
+<h3> </h3>
+<figure class="post__image"><span style="font-weight: 400;"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/foto4.png" alt="" width="1141" height="1149" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto4-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto4-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto4-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto4-lg.png 1024w"></figure></span></p>
+<h3> </h3>
+<p><span style="font-weight: 400;">Gemini actualizó la aplicación e implementó los cambios correctamente.<figure class="post__image"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/foto5.png" alt="" width="1082" height="1009" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto5-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto5-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto5-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto5-lg.png 1024w"></figure></span></p>
+<h3> </h3>
+<p><span style="font-weight: 400;">Posteriormente, le pedí a Gemini que añadiera la opción </span><strong>“Calculadora”</strong><span style="font-weight: 400;">, la cual debía ser completamente funcional. Además, le solicité que, en el apartado de </span><strong>ajustes</strong><span style="font-weight: 400;">, incluyera una opción para </span><strong>exportar el progreso en un archivo PDF</strong><span style="font-weight: 400;">, mostrando los datos en el </span><strong>idioma seleccionado</strong><span style="font-weight: 400;"> en el que se encontrara la aplicación en ese momento.</span></p>
+<h3> </h3>
+<figure class="post__image"><span style="font-weight: 400;"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/foto6-2.png" alt="" width="1098" height="1094" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto6-2-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto6-2-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto6-2-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto6-2-lg.png 1024w"></figure></span></p>
+<figure class="post__image"><span style="font-weight: 400;"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/foto7-2.png" alt="" width="1097" height="1070" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto7-2-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto7-2-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto7-2-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto7-2-lg.png 1024w"></figure></span></p>
+<h3> </h3>
+<p><span style="font-weight: 400;">Para añadir más funcionalidades, le pedí que creara una nueva opción llamada </span><strong>“Calendario”</strong><span style="font-weight: 400;">, en la cual, además de mostrar los días, aparecieran también las </span><strong>tareas pendientes</strong><span style="font-weight: 400;"> de la opción </span><strong>“Tareas”</strong><span style="font-weight: 400;">.</span></p>
+<figure class="post__image"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/foto8.png" alt="" width="1148" height="1076" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto8-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto8-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto8-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto8-lg.png 1024w"></figure>
+<p><span style="font-weight: 400;">Posteriormente, le pedí que implementara un </span><strong>horario semanal personalizable</strong><span style="font-weight: 400;">, de modo que el usuario pudiera </span><strong>añadir sus tareas</strong><span style="font-weight: 400;"> y </span><strong>establecer la hora</strong><span style="font-weight: 400;"> a la que desea realizarlas.</span></p>
+<figure class="post__image"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/foto9.png" alt="" width="1155" height="1079" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto9-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto9-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto9-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto9-lg.png 1024w"></figure>
+<p><span style="font-weight: 400;">Luego, le pedí que creara una nueva opción llamada </span><strong>“Accesos Directos”</strong><span style="font-weight: 400;">, que permitiera al usuario acceder mediante </span><strong>iconos</strong><span style="font-weight: 400;"> a herramientas útiles como </span><strong>WhatsApp Web</strong><span style="font-weight: 400;">, </span><strong>DeepL</strong><span style="font-weight: 400;">, </span><strong>Wikipedia</strong><span style="font-weight: 400;">, </span><strong>YouTube</strong><span style="font-weight: 400;">, y otras aplicaciones que pudieran resultar prácticas para un estudiante.</span></p>
 </article>
-<article></article>
-<article>
-<figure class="post__video"><iframe loading="lazy" width="701" height="393" style="width: 701px; height: 393px;" src="https://www.youtube.com/embed/H-uAc5HLR6c?t=1009s" allowfullscreen="allowfullscreen"></iframe></figure>
-</article>
 <p> </p>
 <p> </p>
-            ]]>
-        </content>
-    </entry>
-    <entry>
-        <title>Broken Planet</title>
-        <author>
-            <name>Antonio Garcia Llergo</name>
-        </author>
-        <link href="https://Anzonimen.github.io/2damasi/pagina-2/"/>
-        <id>https://Anzonimen.github.io/2damasi/pagina-2/</id>
-
-        <updated>2025-09-26T11:20:41+02:00</updated>
-            <summary>
-                <![CDATA[
-                    Broken Planet es una marca mucho más reciente, nacida en Londres alrededor&hellip;
-                ]]>
-            </summary>
-        <content type="html">
-            <![CDATA[
-                <figure class="post__image align-center"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/2/Captura-de-pantalla-2025-09-26-120410.png" alt="" width="265" height="152" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/2/responsive/Captura-de-pantalla-2025-09-26-120410-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/2/responsive/Captura-de-pantalla-2025-09-26-120410-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/2/responsive/Captura-de-pantalla-2025-09-26-120410-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/2/responsive/Captura-de-pantalla-2025-09-26-120410-lg.png 1024w"></figure>
-<p>Broken Planet es una marca mucho más reciente, nacida en Londres alrededor de 2020. Su propuesta se centra en el <em data-start="978" data-end="990">streetwear</em> moderno, con prendas de cortes holgados y gráficos llamativos inspirados en la estética cósmica y futurista. Más allá del estilo, la marca apuesta fuerte por la sostenibilidad: utiliza materiales reciclados, envíos con empaques ecológicos y produce colecciones limitadas para evitar la sobreproducción. Entre sus piezas más reconocidas están las sudaderas, camisetas y conjuntos deportivos, todos con un enfoque en comodidad y diseño urbano. Broken Planet refleja la mentalidad de una nueva generación que combina moda, conciencia ambiental y cultura de la calle.</p>
-<h3>Prendas más icónicas de Broken Planet</h3>
-<p> </p>
-<article id="broken-planet" class="marca">
-<ul>
-<li class="align-left"><strong>Hoodies Oversize con gráficos “cosmic”</strong>
-<p class="desc align-left">Sudaderas con capucha, grandes gráficos inspirados en lo espacial y tipografías llamativas — uno de sus best-sellers.</p>
-</li>
-</ul>
-<figure class="post__image post__image--center"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/2/fgbfn.png" alt="" width="240" height="250" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/2/responsive/fgbfn-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/2/responsive/fgbfn-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/2/responsive/fgbfn-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/2/responsive/fgbfn-lg.png 1024w"></figure>
-<ul>
-<li class="align-left"><strong>Camisetas gráficas</strong>
-<p class="desc align-left">Camisetas con estampados distintivos de la marca, pensadas para looks streetwear y oversize.</p>
-</li>
-</ul>
-<figure class="post__image post__image--center"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/2/Captura-de-pantalla-2025-09-26-132344.png" alt="" width="274" height="255" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/2/responsive/Captura-de-pantalla-2025-09-26-132344-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/2/responsive/Captura-de-pantalla-2025-09-26-132344-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/2/responsive/Captura-de-pantalla-2025-09-26-132344-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/2/responsive/Captura-de-pantalla-2025-09-26-132344-lg.png 1024w"></figure>
-<p> </p>
-</article>
-<ul>
-<li class="marca align-left"><strong>Joggers y tracksuits</strong>
-<p class="desc align-left">Pantalones y conjuntos deportivos de corte cómodo que siguen la estética urbana y funcional.</p>
-<figure class="post__image post__image--center"> 
-<img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/2/Captura-de-pantalla-2025-09-26-132446-2.png" alt="" width="231" height="265" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/2/responsive/Captura-de-pantalla-2025-09-26-132446-2-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/2/responsive/Captura-de-pantalla-2025-09-26-132446-2-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/2/responsive/Captura-de-pantalla-2025-09-26-132446-2-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/2/responsive/Captura-de-pantalla-2025-09-26-132446-2-lg.png 1024w"></figure></li>
-</ul>
-<article></article>
-<article>
-<h3>Outfit en Acción</h3>
-<p> </p>
-<figure class="post__video"><iframe loading="lazy" width="703" height="394" style="width: 703px; height: 394px;" src="https://www.youtube.com/embed/JK-5j6bT5Vc" allowfullscreen="allowfullscreen" data-mce-fragment="1"></iframe></figure>
-<p> </p>
-<p> </p>
-</article>
-<article></article>
-<article></article>
-<article></article>
-<article></article>
-<article></article>
-<article></article>
-<article></article>
-<article></article>
-<article></article>
-<article></article>
-<article></article>
-<article></article>
-<article></article>
-            ]]>
-        </content>
-    </entry>
-    <entry>
-        <title>Evisu</title>
-        <author>
-            <name>Antonio Garcia Llergo</name>
-        </author>
-        <link href="https://Anzonimen.github.io/2damasi/pagina-1/"/>
-        <id>https://Anzonimen.github.io/2damasi/pagina-1/</id>
-
-        <updated>2025-09-26T11:12:50+02:00</updated>
-            <summary>
-                <![CDATA[
-                    Evisu es una marca japonesa fundada en 1991 en Osaka. Su nombre&hellip;
-                ]]>
-            </summary>
-        <content type="html">
-            <![CDATA[
-                <figure class="post__image align-center"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/1/Captura-de-pantalla-2025-09-26-120513.png" alt="" width="259" height="142" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-120513-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-120513-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-120513-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-120513-lg.png 1024w"></figure>
-<p> </p>
-<p>Evisu es una marca japonesa fundada en 1991 en Osaka. Su nombre proviene de <em data-start="218" data-end="225">Ebisu</em>, el dios de la prosperidad, y refleja la filosofía de calidad y dedicación artesanal que caracteriza a la firma. En sus inicios, cada par de jeans se producía de forma muy limitada y el logotipo de la gaviota se pintaba a mano en la parte trasera, lo que les dio un aire único y exclusivo. Su producto estrella es el denim de primera calidad, fabricado con técnicas tradicionales japonesas, aunque con el tiempo ampliaron su catálogo a camisetas, sudaderas, accesorios y más. La marca mantiene un espíritu de autenticidad, herencia y cuidado por los detalles, posicionándose como referente del <em data-start="820" data-end="835">denim premium</em>.</p>
-<p> </p>
-<h3>Prendas más icónicas de Evisu</h3>
-<p> </p>
-<article id="evisu" class="marca">
-<ul>
-<li><strong>Selvedge Jeans con la gaviota pintada</strong>
-<p class="desc">El icono de la marca: denim japonés selvedge con el logotipo de la “gaviota” pintado a mano o bordado en el bolsillo trasero.</p>
-</li>
-</ul>
-<figure class="post__image align-center"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/1/Captura-de-pantalla-2025-09-26-123303.png" alt="" width="194" height="255" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-123303-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-123303-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-123303-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-123303-lg.png 1024w"></figure>
-<ul>
-<li><strong>Regular / Loose Fit Jeans</strong>
-<p class="desc">Cortes clásicos en distintos lavados (oscuro, stonewash, envejecido) muy populares entre amantes del denim premium.</p>
-</li>
-</ul>
-<figure class="post__image align-center"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/1/Captura-de-pantalla-2025-09-26-123119-2.png" alt="" width="196" height="286" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-123119-2-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-123119-2-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-123119-2-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-123119-2-lg.png 1024w"></figure>
-<ul>
-<li class="align-center"><strong>Chaquetas vaqueras (Denim jackets)</strong>
-<p class="desc align-left">Chaquetas de denim con detalles pintados o bordados que complementan la estética tradicional de la marca.</p>
-<figure class="post__image align-center"> 
-<img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/1/Captura-de-pantalla-2025-09-26-123512.png" alt="" width="326" height="272" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-123512-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-123512-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-123512-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/1/responsive/Captura-de-pantalla-2025-09-26-123512-lg.png 1024w"></figure></li>
-</ul>
-<p> </p>
-<h3>Outfit en Acción</h3>
-<figure class="post__video"><iframe loading="lazy" width="699" height="389" style="width: 699px; height: 389px;" src="https://www.youtube.com/embed/cLCtXrWx8RE" allowfullscreen="allowfullscreen" data-mce-fragment="1"></iframe></figure>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-<p> </p>
-</article>
             ]]>
         </content>
     </entry>
