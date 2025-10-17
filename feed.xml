@@ -3,7 +3,7 @@
     <title>Principal</title>
     <link href="https://Anzonimen.github.io/2damasi/feed.xml" rel="self" />
     <link href="https://Anzonimen.github.io/2damasi" />
-    <updated>2025-10-15T14:04:17+02:00</updated>
+    <updated>2025-10-17T08:59:09+02:00</updated>
     <author>
         <name>Antonio Garcia Llergo</name>
     </author>
@@ -56,8 +56,10 @@
 <p><span style="font-weight: 400;">Posteriormente, le pedí que implementara un </span><strong>horario semanal personalizable</strong><span style="font-weight: 400;">, de modo que el usuario pudiera </span><strong>añadir sus tareas</strong><span style="font-weight: 400;"> y </span><strong>establecer la hora</strong><span style="font-weight: 400;"> a la que desea realizarlas.</span></p>
 <figure class="post__image"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/foto9.png" alt="" width="1155" height="1079" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto9-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto9-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto9-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto9-lg.png 1024w"></figure>
 <p><span style="font-weight: 400;">Luego, le pedí que creara una nueva opción llamada </span><strong>“Accesos Directos”</strong><span style="font-weight: 400;">, que permitiera al usuario acceder mediante </span><strong>iconos</strong><span style="font-weight: 400;"> a herramientas útiles como </span><strong>WhatsApp Web</strong><span style="font-weight: 400;">, </span><strong>DeepL</strong><span style="font-weight: 400;">, </span><strong>Wikipedia</strong><span style="font-weight: 400;">, </span><strong>YouTube</strong><span style="font-weight: 400;">, y otras aplicaciones que pudieran resultar prácticas para un estudiante.</span></p>
+<figure class="post__image"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/3/foto10.png" alt="" width="920" height="869" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto10-xs.png 300w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto10-sm.png 480w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto10-md.png 768w ,https://Anzonimen.github.io/2damasi/media/posts/3/responsive/foto10-lg.png 1024w"></figure>
 </article>
-<p> </p>
+<p class="align-center"><strong>Enlace a la App Web</strong></p>
+<p class="align-center"><a>https://anzonimen.github.io/2damasi/Pomodoro/</a></p>
 <p> </p>
             ]]>
         </content>
