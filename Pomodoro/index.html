@@ -1,0 +1,1904 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Pro - App de Estudio con IA</title>
+    
+    <!-- Tailwind CSS desde CDN para un diseño rápido y responsive -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons para una interfaz limpia -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Google Fonts: Inter y Roboto Slab -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Roboto+Slab:wght@400;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <!-- Librería jsPDF para la exportación de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        /*
+         * ESTILOS PERSONALIZADOS Y VARIABLES DE TEMA
+         * Aquí definimos las paletas de colores, fuentes y animaciones
+         * que la aplicación utilizará.
+        */
+        :root {
+            /* Fuente por defecto */
+            --font-main: 'Inter', sans-serif;
+            --font-alt: 'Roboto Slab', serif;
+            --font-mono: 'Space Mono', monospace;
+            
+            /* Paleta de colores base (Azul) */
+            --color-bg: #F0F4F8; /* Fondo principal */
+            --color-surface: #FFFFFF; /* Superficie de tarjetas y menús */
+            --color-primary: #3B82F6; /* Color de acento principal */
+            --color-primary-dark: #2563EB; /* Acento para hover */
+            --color-text-base: #1F2937; /* Texto principal */
+            --color-text-muted: #6B7280; /* Texto secundario */
+            --color-border: #E5E7EB; /* Bordes */
+            --color-success: #10B981; /* Color para éxito/completado */
+            --color-danger: #EF4444; /* Color para peligro/eliminar */
+        }
+        
+        /* Tema Oscuro */
+        .dark {
+            --color-bg: #111827;
+            --color-surface: #1F2937;
+            --color-primary: #60A5FA;
+            --color-primary-dark: #3B82F6;
+            --color-text-base: #F9FAFB;
+            --color-text-muted: #9CA3AF;
+            --color-border: #374151;
+        }
+
+        /* --- Paletas de Colores Adicionales --- */
+        /* Paleta Verde */
+        body[data-color-theme="green"] {
+            --color-primary: #22C55E;
+            --color-primary-dark: #16A34A;
+        }
+        .dark[data-color-theme="green"] {
+            --color-primary: #4ADE80;
+            --color-primary-dark: #22C55E;
+        }
+
+        /* Paleta Violeta */
+        body[data-color-theme="violet"] {
+            --color-primary: #8B5CF6;
+            --color-primary-dark: #7C3AED;
+        }
+        .dark[data-color-theme="violet"] {
+            --color-primary: #A78BFA;
+            --color-primary-dark: #8B5CF6;
+        }
+
+        /* Paleta Roja */
+        body[data-color-theme="red"] {
+            --color-primary: #EF4444;
+            --color-primary-dark: #DC2626;
+        }
+        .dark[data-color-theme="red"] {
+            --color-primary: #F87171;
+            --color-primary-dark: #EF4444;
+        }
+
+        /* --- Estilos de Fuentes Adicionales --- */
+        body[data-font-theme="inter"] { --font-main: 'Inter', sans-serif; }
+        body[data-font-theme="roboto-slab"] { --font-main: 'Roboto Slab', serif; }
+        body[data-font-theme="space-mono"] { --font-main: 'Space Mono', monospace; }
+
+        /* Aplicar variables de CSS con Tailwind */
+        body {
+            font-family: var(--font-main);
+            background-color: var(--color-bg);
+            color: var(--color-text-base);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Clases personalizadas para reutilizar estilos temáticos */
+        .bg-surface { background-color: var(--color-surface); }
+        .bg-primary { background-color: var(--color-primary); }
+        .hover\:bg-primary-dark:hover { background-color: var(--color-primary-dark); }
+        .text-primary { color: var(--color-primary); }
+        .text-muted { color: var(--color-text-muted); }
+        .border-custom { border-color: var(--color-border); }
+        .ring-primary:focus { ring-color: var(--color-primary); }
+        .stroke-primary { stroke: var(--color-primary); }
+        .fill-primary { fill: var(--color-primary); }
+        .fill-bg { fill: var(--color-bg); }
+        .fill-surface { fill: var(--color-surface); }
+
+        /* Animación para el círculo de progreso */
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.5s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+
+        /* Ocultar scrollbar */
+        .tasks-container::-webkit-scrollbar, .calendar-day-tasks::-webkit-scrollbar, .schedule-grid-container::-webkit-scrollbar { display: none; }
+        .tasks-container, .calendar-day-tasks, .schedule-grid-container { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Estilos para transiciones de pestañas */
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Animación suave para la aparición de elementos */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+
+        /* Indicador de carga y Modales */
+        #loading-overlay, #modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.3s ease;
+        }
+        #loading-overlay.hidden, #modal-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        .spinner {
+            width: 56px;
+            height: 56px;
+            border: 8px solid var(--color-surface);
+            border-bottom-color: var(--color-primary);
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Estilos para celdas del calendario */
+        .calendar-day {
+            transition: background-color 0.2s ease;
+        }
+        .calendar-day:hover {
+            background-color: rgba(128, 128, 128, 0.1);
+            cursor: pointer;
+        }
+
+        /* Estilos para Horario */
+        .schedule-grid {
+            display: grid;
+            grid-template-columns: 60px repeat(7, 1fr);
+        }
+        .schedule-cell {
+            position: relative;
+            min-height: 50px;
+        }
+        .schedule-event {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            overflow: hidden;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <!-- Indicador de carga global -->
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Modales -->
+    <div id="modal-overlay" class="hidden">
+        <!-- Modal para Calendario -->
+        <div id="event-modal" class="bg-surface rounded-lg shadow-xl p-6 w-11/12 max-w-md transform transition-transform duration-300 scale-95 hidden">
+            <h2 id="modal-title" class="text-2xl font-bold mb-4"></h2>
+            <form id="event-form">
+                <input type="hidden" id="event-date-input">
+                <div>
+                    <label for="event-text-input" class="block text-sm font-medium text-muted" data-i18n-key="modalEventTitle">Título del Evento</label>
+                    <input type="text" id="event-text-input" class="mt-1 w-full p-2 border border-custom rounded-md bg-transparent focus:outline-none focus:ring-2 ring-primary" required>
+                </div>
+                <div class="mt-4">
+                    <label for="event-time-input" class="block text-sm font-medium text-muted" data-i18n-key="modalEventTime">Hora</label>
+                    <input type="time" id="event-time-input" class="mt-1 w-full p-2 border border-custom rounded-md bg-transparent focus:outline-none focus:ring-2 ring-primary">
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" class="cancel-btn px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500" data-i18n-key="btnCancel">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 rounded-md bg-primary text-white hover:bg-primary-dark" data-i18n-key="btnSave">Guardar</button>
+                </div>
+            </form>
+        </div>
+         <!-- Modal para Horario -->
+        <div id="schedule-modal" class="bg-surface rounded-lg shadow-xl p-6 w-11/12 max-w-md transform transition-transform duration-300 scale-95 hidden">
+            <h2 id="schedule-modal-title" class="text-2xl font-bold mb-4"></h2>
+            <form id="schedule-event-form">
+                <input type="hidden" id="schedule-event-day-input">
+                <input type="hidden" id="schedule-event-time-input">
+                 <input type="hidden" id="schedule-event-id-input">
+                <div>
+                    <label for="schedule-event-text-input" class="block text-sm font-medium text-muted" data-i18n-key="modalEventTitle">Título del Evento</label>
+                    <input type="text" id="schedule-event-text-input" class="mt-1 w-full p-2 border border-custom rounded-md bg-transparent focus:outline-none focus:ring-2 ring-primary" required>
+                </div>
+                <div class="mt-6 flex justify-between">
+                    <div>
+                         <button type="button" id="delete-schedule-event-btn" class="px-4 py-2 rounded-md bg-red-500 text-white hover:bg-red-600 hidden" data-i18n-key="btnDelete">Eliminar</button>
+                    </div>
+                    <div class="flex space-x-3">
+                        <button type="button" class="cancel-btn px-4 py-2 rounded-md bg-gray-200 dark:bg-gray-600 hover:bg-gray-300 dark:hover:bg-gray-500" data-i18n-key="btnCancel">Cancelar</button>
+                        <button type="submit" class="px-4 py-2 rounded-md bg-primary text-white hover:bg-primary-dark" data-i18n-key="btnSave">Guardar</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Contenedor principal de la aplicación -->
+    <div id="app-container" class="flex flex-col md:flex-row h-screen w-screen overflow-hidden">
+        
+        <!-- Menú de Navegación (Lateral en Desktop, Inferior en Móvil) -->
+        <nav class="bg-surface border-t md:border-t-0 md:border-r border-custom order-last md:order-first">
+            <div class="flex md:flex-col justify-around md:justify-start md:px-3 md:py-6 md:space-y-2 h-full overflow-y-auto">
+                <a href="#pomodoro" class="nav-link p-3 rounded-lg flex flex-col items-center space-y-1 md:flex-row md:space-y-0 md:space-x-3 md:w-full md:items-center text-muted hover:text-primary transition-colors duration-200">
+                    <i data-lucide="timer"></i>
+                    <span class="text-xs md:text-base" data-i18n-key="navPomodoro">Pomodoro</span>
+                </a>
+                <a href="#tasks" class="nav-link p-3 rounded-lg flex flex-col items-center space-y-1 md:flex-row md:space-y-0 md:space-x-3 md:w-full md:items-center text-muted hover:text-primary transition-colors duration-200">
+                    <i data-lucide="check-square"></i>
+                    <span class="text-xs md:text-base" data-i18n-key="navTasks">Tareas</span>
+                </a>
+                <a href="#notes" class="nav-link p-3 rounded-lg flex flex-col items-center space-y-1 md:flex-row md:space-y-0 md:space-x-3 md:w-full md:items-center text-muted hover:text-primary transition-colors duration-200">
+                    <i data-lucide="file-text"></i>
+                    <span class="text-xs md:text-base" data-i18n-key="navNotes">Notas</span>
+                </a>
+                 <a href="#schedule" class="nav-link p-3 rounded-lg flex flex-col items-center space-y-1 md:flex-row md:space-y-0 md:space-x-3 md:w-full md:items-center text-muted hover:text-primary transition-colors duration-200">
+                    <i data-lucide="calendar-days"></i>
+                    <span class="text-xs md:text-base" data-i18n-key="navSchedule">Horario</span>
+                </a>
+                <a href="#calendar" class="nav-link p-3 rounded-lg flex flex-col items-center space-y-1 md:flex-row md:space-y-0 md:space-x-3 md:w-full md:items-center text-muted hover:text-primary transition-colors duration-200">
+                    <i data-lucide="calendar"></i>
+                    <span class="text-xs md:text-base" data-i18n-key="navCalendar">Calendario</span>
+                </a>
+                <a href="#shortcuts" class="nav-link p-3 rounded-lg flex flex-col items-center space-y-1 md:flex-row md:space-y-0 md:space-x-3 md:w-full md:items-center text-muted hover:text-primary transition-colors duration-200">
+                    <i data-lucide="app-window"></i>
+                    <span class="text-xs md:text-base" data-i18n-key="navShortcuts">Atajos</span>
+                </a>
+                <a href="#calculator" class="nav-link p-3 rounded-lg flex flex-col items-center space-y-1 md:flex-row md:space-y-0 md:space-x-3 md:w-full md:items-center text-muted hover:text-primary transition-colors duration-200">
+                    <i data-lucide="calculator"></i>
+                    <span class="text-xs md:text-base" data-i18n-key="navCalculator">Calculadora</span>
+                </a>
+                <a href="#stats" class="nav-link p-3 rounded-lg flex flex-col items-center space-y-1 md:flex-row md:space-y-0 md:space-x-3 md:w-full md:items-center text-muted hover:text-primary transition-colors duration-200">
+                    <i data-lucide="bar-chart-2"></i>
+                    <span class="text-xs md:text-base" data-i18n-key="navStats">Estadísticas</span>
+                </a>
+                <a href="#settings" class="nav-link p-3 rounded-lg flex flex-col items-center space-y-1 md:flex-row md:space-y-0 md:space-x-3 md:w-full md:items-center text-muted hover:text-primary transition-colors duration-200">
+                    <i data-lucide="settings"></i>
+                    <span class="text-xs md:text-base" data-i18n-key="navSettings">Ajustes</span>
+                </a>
+            </div>
+        </nav>
+
+        <!-- Contenido Principal -->
+        <main class="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+            
+            <!-- SECCIÓN POMODORO -->
+            <div id="pomodoro" class="tab-content">
+                <div class="max-w-md mx-auto flex flex-col items-center justify-center h-full space-y-8">
+                    <!-- Círculo de Progreso y Temporizador -->
+                    <div class="relative w-64 h-64 sm:w-80 sm:h-80">
+                        <svg class="w-full h-full" viewBox="0 0 120 120">
+                            <circle class="stroke-current text-gray-200 dark:text-gray-700" cx="60" cy="60" r="54" fill="none" stroke-width="8"></circle>
+                            <circle id="progress-ring" class="progress-ring__circle stroke-primary" cx="60" cy="60" r="54" fill="none" stroke-width="8" stroke-linecap="round"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span id="timer-display" class="text-5xl sm:text-7xl font-bold font-mono">25:00</span>
+                            <span id="timer-mode" class="text-lg text-muted mt-2" data-i18n-key="modePomodoro">Tiempo de Enfoque</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Controles del Temporizador -->
+                    <div class="flex items-center space-x-4">
+                        <button id="reset-button" class="p-3 bg-surface rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
+                            <i data-lucide="rotate-cw" class="w-6 h-6 text-muted"></i>
+                        </button>
+                        <button id="start-pause-button" class="px-8 py-4 bg-primary text-white text-xl font-bold rounded-full shadow-lg hover:bg-primary-dark transition-transform transform hover:scale-105" data-i18n-key="btnStart">
+                            INICIAR
+                        </button>
+                        <button id="next-button" class="p-3 bg-surface rounded-full shadow-md hover:bg-gray-100 dark:hover:bg-gray-700 transition-all">
+                            <i data-lucide="skip-forward" class="w-6 h-6 text-muted"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN TAREAS -->
+            <div id="tasks" class="tab-content">
+                <div class="max-w-2xl mx-auto">
+                    <h1 class="text-3xl font-bold mb-6" data-i18n-key="titleTasks">Gestor de Tareas</h1>
+                    <div class="bg-surface rounded-lg shadow-md p-4">
+                        <!-- Formulario para agregar tarea -->
+                        <form id="task-form" class="flex flex-col sm:flex-row items-center space-y-2 sm:space-y-0 sm:space-x-2 mb-4">
+                            <input type="text" id="task-input" data-i18n-placeholder-key="placeholderTask" placeholder="Añadir una nueva tarea..." class="w-full px-4 py-2 border border-custom rounded-lg bg-transparent focus:outline-none focus:ring-2 ring-primary transition">
+                            <input type="date" id="task-due-date" class="w-full sm:w-auto px-4 py-2 border border-custom rounded-lg bg-transparent focus:outline-none focus:ring-2 ring-primary transition text-muted">
+                            <button type="submit" class="p-2 w-full sm:w-auto bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors">
+                                <i data-lucide="plus" class="w-6 h-6 mx-auto"></i>
+                            </button>
+                        </form>
+                        <!-- Lista de tareas -->
+                        <div id="task-list" class="space-y-2 tasks-container max-h-[60vh] overflow-y-auto pr-2">
+                           <!-- Las tareas se insertan aquí dinámicamente -->
+                        </div>
+                    </div>
+                    <div id="task-stats" class="text-center mt-4 text-muted"></div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN NOTAS -->
+            <div id="notes" class="tab-content">
+                 <div class="max-w-3xl mx-auto h-full flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h1 class="text-3xl font-bold" data-i18n-key="titleNotes">Bloc de Notas</h1>
+                        <div class="flex space-x-2">
+                             <button id="import-notes-btn" title="Importar" class="p-2 text-muted hover:text-primary transition"><i data-lucide="upload"></i></button>
+                             <button id="export-notes-btn" title="Exportar" class="p-2 text-muted hover:text-primary transition"><i data-lucide="download"></i></button>
+                             <button id="clear-notes-btn" title="Limpiar" class="p-2 text-red-500 hover:text-red-700 transition"><i data-lucide="trash-2"></i></button>
+                        </div>
+                    </div>
+                    <textarea id="notes-editor" class="w-full flex-1 p-4 border border-custom rounded-lg bg-surface resize-none focus:outline-none focus:ring-2 ring-primary" data-i18n-placeholder-key="placeholderNotes" placeholder="Escribe tus apuntes aquí..."></textarea>
+                    <input type="file" id="notes-file-input" class="hidden" accept=".txt">
+                </div>
+            </div>
+
+            <!-- SECCIÓN HORARIO -->
+            <div id="schedule" class="tab-content">
+                <div class="w-full h-full flex flex-col">
+                    <h1 class="text-3xl font-bold mb-4 flex-shrink-0" data-i18n-key="titleSchedule">Horario Semanal</h1>
+                    <div class="flex-grow overflow-auto schedule-grid-container">
+                        <div id="schedule-grid" class="schedule-grid min-w-[800px]">
+                            <!-- El contenido del horario se genera aquí -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN CALENDARIO -->
+            <div id="calendar" class="tab-content">
+                <div class="max-w-4xl mx-auto h-full flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <button id="prev-month-btn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><i data-lucide="chevron-left"></i></button>
+                        <h1 id="calendar-header" class="text-2xl font-bold"></h1>
+                        <button id="next-month-btn" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700"><i data-lucide="chevron-right"></i></button>
+                    </div>
+                    <div id="calendar-weekdays" class="grid grid-cols-7 gap-2 text-center font-semibold text-muted text-sm mb-2"></div>
+                    <div id="calendar-grid" class="grid grid-cols-7 grid-rows-6 gap-2 flex-1">
+                        <!-- Los días se generan aquí dinámicamente -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SECCIÓN ACCESOS DIRECTOS -->
+            <div id="shortcuts" class="tab-content">
+                 <div class="max-w-4xl mx-auto">
+                    <h1 class="text-3xl font-bold mb-6" data-i18n-key="titleShortcuts">Accesos Directos</h1>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                        <!-- WhatsApp -->
+                        <a href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer" class="bg-surface rounded-lg shadow-md p-6 flex flex-col items-center justify-center space-y-3 hover:shadow-lg transition-shadow">
+                             <svg class="w-12 h-12 text-green-500" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>WhatsApp</title><path fill="currentColor" d="M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2 22l5.25-1.38c1.45.79 3.08 1.21 4.79 1.21 5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2M12.04 3.6c4.54 0 8.24 3.7 8.24 8.24s-3.7 8.24-8.24 8.24c-1.53 0-3-.42-4.29-1.19l-.3-.18-3.18.84.85-3.11-.2-.32c-.85-1.35-1.31-2.91-1.31-4.52 0-4.54 3.7-8.24 8.24-8.24m4.52 10.16c-.25-.12-1.47-.72-1.7-.82s-.39-.12-.55.12c-.16.25-.64.82-.79.99s-.3.19-.55.06c-.25-.12-1.06-.39-2-1.23s-1.4-1.92-1.57-2.24c-.16-.31-.02-.48.11-.6s.25-.3.37-.45c.12-.12.16-.21.25-.34s.04-.25-.02-.37c-.06-.12-.55-1.32-.75-1.81s-.4-.41-.55-.41-.31-.01-.48-.01c-.16 0-.42.06-.64.31s-.85.82-1.04 2c-.19 1.18.19 2.32.52 3.12.33.8 1.52 2.37 3.69 3.25 2.17.88 2.65.69 3.43.43.78-.26 1.47-.94 1.7-1.47s.25-1.04.18-1.16c-.07-.12-.25-.19-.5-.31Z"/></svg>
+                             <span class="font-semibold">WhatsApp Web</span>
+                        </a>
+                        <!-- DeepL -->
+                        <a href="https://www.deepl.com/translator" target="_blank" rel="noopener noreferrer" class="bg-surface rounded-lg shadow-md p-6 flex flex-col items-center justify-center space-y-3 hover:shadow-lg transition-shadow">
+                            <svg class="w-12 h-12 text-blue-800" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>DeepL</title><path fill="currentColor" d="M20.211 3.789H8.544v5.301h5.301v2.65h-5.3v5.301h11.667v-5.3h-5.3v-2.65h5.3zM3.789 20.211V3.789H0V24h20.211v-3.789z"/></svg>
+                            <span class="font-semibold">DeepL</span>
+                        </a>
+                        <!-- Wikipedia -->
+                        <a href="https://www.wikipedia.org/" target="_blank" rel="noopener noreferrer" class="bg-surface rounded-lg shadow-md p-6 flex flex-col items-center justify-center space-y-3 hover:shadow-lg transition-shadow">
+                             <svg class="w-12 h-12 text-black dark:text-white" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Wikipedia</title><path fill="currentColor" d="M11.984.008c-.28.016-.544.024-.8.024-1.664 0-3.344-.24-4.96-1.04L4.16 1.1C1.6 2.4.008 5.216.008 8.52c0 4.28 2.92 7.848 6.936 8.784l.8.184.144-.816-.168-.024c-3.12-.472-5.52-3.176-5.52-6.12 0-2.84 1.752-5.32 4.256-6.4l2.056-.88.6 3.528-3.512 2.128.96 5.568 2.376-3.84 2.376 3.84.96-5.568-3.512-2.128.6-3.528 2.056.88c2.504 1.08 4.256 3.56 4.256 6.4 0 2.944-2.4 5.648-5.52 6.12l-.168.024.144.816.8-.184c4.016-.936 6.936-4.504 6.936-8.784 0-3.304-1.6-6.12-4.16-7.424l-2.064-1.12c-1.616.8-3.296 1.04-4.96 1.04-.256 0-.52-.008-.8-.024z"/></svg>
+                             <span class="font-semibold">Wikipedia</span>
+                        </a>
+                        <!-- YouTube -->
+                        <a href="https://www.youtube.com/" target="_blank" rel="noopener noreferrer" class="bg-surface rounded-lg shadow-md p-6 flex flex-col items-center justify-center space-y-3 hover:shadow-lg transition-shadow">
+                            <svg class="w-12 h-12 text-red-600" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>YouTube</title><path fill="currentColor" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+                            <span class="font-semibold">YouTube</span>
+                        </a>
+                         <!-- Google Drive -->
+                        <a href="https://drive.google.com/" target="_blank" rel="noopener noreferrer" class="bg-surface rounded-lg shadow-md p-6 flex flex-col items-center justify-center space-y-3 hover:shadow-lg transition-shadow">
+                            <svg class="w-12 h-12 text-gray-700 dark:text-gray-200" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Google Drive</title><path fill="#34A853" d="m8.293 15.2-3.32 5.66L0 20.84l4.98-8.45z"/><path fill="#188038" d="M16.14 12.37 8.29 24l4.98-8.46L16.14 12.37z"/><path fill="#4285F4" d="m7.86 1.16-7.86 13.4L5 14.56l2.86-4.9z"/><path fill="#FFC107" d="M16.14 12.37 24 1.16h-7.86l-2.87 4.9z"/><path fill="#1967D2" d="m5 14.56 2.86-4.9 2.86 4.9-2.86 4.9z"/></svg>
+                            <span class="font-semibold">Google Drive</span>
+                        </a>
+                        <!-- Notion -->
+                        <a href="https://www.notion.so/" target="_blank" rel="noopener noreferrer" class="bg-surface rounded-lg shadow-md p-6 flex flex-col items-center justify-center space-y-3 hover:shadow-lg transition-shadow">
+                            <svg class="w-12 h-12 text-black dark:text-white" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Notion</title><path fill="currentColor" d="M12.44 2.138a.33.33 0 0 0-.272.164L4.19 11.233a.326.326 0 0 0-.02.327l.542 1.343a.328.328 0 0 0 .31.218h4.088l-.514 8.56a.326.326 0 0 0 .327.348h2.696a.326.326 0 0 0 .327-.29l.758-8.618h3.33a.327.327 0 0 0 .31-.218l.543-1.343a.326.326 0 0 0-.02-.327L12.61.302a.327.327 0 0 0-.17-.164Zm.907 8.16H8.258l4.089-6.38Z M18.17 3.51a.326.326 0 0 0-.327.29v16.333a.327.327 0 0 0 .327.327h2.696a.327.327 0 0 0 .327-.327V3.8a.327.327 0 0 0-.327-.29h-2.696Z"/></svg>
+                            <span class="font-semibold">Notion</span>
+                        </a>
+                         <!-- Desmos -->
+                        <a href="https://www.desmos.com/calculator" target="_blank" rel="noopener noreferrer" class="bg-surface rounded-lg shadow-md p-6 flex flex-col items-center justify-center space-y-3 hover:shadow-lg transition-shadow">
+                            <svg class="w-12 h-12 text-green-700" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Desmos</title><path fill="currentColor" d="M12 0C5.372 0 0 5.372 0 12s5.372 12 12 12c2.45 0 4.72-.743 6.634-2.035l-2.32-3.832c-1.12.593-2.422.94-3.815.94-3.538 0-6.423-3.03-6.423-6.758s2.885-6.758 6.424-6.758c1.392 0 2.694.347 3.815.94l2.32-3.832C16.72.743 14.45 0 12 0zm6.918 2.083c-.02.02-.02.04-.04.06L12.22 12l6.658 9.855c.02.02.02.04.04.06 4.09-2.22 6.562-6.622 6.562-11.458C25.48 7.078 22.185 3.328 18.917 2.083z"/></svg>
+                             <span class="font-semibold">Desmos</span>
+                        </a>
+                        <!-- GitHub -->
+                        <a href="https://github.com/" target="_blank" rel="noopener noreferrer" class="bg-surface rounded-lg shadow-md p-6 flex flex-col items-center justify-center space-y-3 hover:shadow-lg transition-shadow">
+                             <svg class="w-12 h-12 text-black dark:text-white" role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>GitHub</title><path fill="currentColor" d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+                             <span class="font-semibold">GitHub</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN CALCULADORA -->
+            <div id="calculator" class="tab-content">
+                <div class="max-w-xs mx-auto flex flex-col items-center justify-center h-full space-y-4">
+                    <h1 class="text-3xl font-bold" data-i18n-key="titleCalculator">Calculadora</h1>
+                    <div class="w-full bg-surface rounded-lg shadow-md p-4 space-y-4">
+                        <!-- Pantalla de la calculadora -->
+                        <div id="calculator-display" class="bg-gray-900 text-white rounded-lg p-4 text-right text-4xl font-mono break-words">0</div>
+                        <!-- Botones -->
+                        <div id="calculator-buttons" class="grid grid-cols-4 gap-2">
+                            <button data-action="clear" class="col-span-2 p-4 text-xl bg-red-500 text-white rounded-lg hover:bg-red-600 font-bold">AC</button>
+                            <button data-action="delete" class="p-4 text-xl bg-gray-500 text-white rounded-lg hover:bg-gray-400 font-bold">DEL</button>
+                            <button data-operator="/" class="p-4 text-xl bg-primary text-white rounded-lg hover:bg-primary-dark font-bold">÷</button>
+
+                            <button data-number="7" class="p-4 text-xl bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">7</button>
+                            <button data-number="8" class="p-4 text-xl bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">8</button>
+                            <button data-number="9" class="p-4 text-xl bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">9</button>
+                            <button data-operator="*" class="p-4 text-xl bg-primary text-white rounded-lg hover:bg-primary-dark font-bold">×</button>
+                            
+                            <button data-number="4" class="p-4 text-xl bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">4</button>
+                            <button data-number="5" class="p-4 text-xl bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">5</button>
+                            <button data-number="6" class="p-4 text-xl bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">6</button>
+                            <button data-operator="-" class="p-4 text-xl bg-primary text-white rounded-lg hover:bg-primary-dark font-bold">−</button>
+                            
+                            <button data-number="1" class="p-4 text-xl bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">1</button>
+                            <button data-number="2" class="p-4 text-xl bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">2</button>
+                            <button data-number="3" class="p-4 text-xl bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">3</button>
+                            <button data-operator="+" class="p-4 text-xl bg-primary text-white rounded-lg hover:bg-primary-dark font-bold">+</button>
+
+                            <button data-number="0" class="col-span-2 p-4 text-xl bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">0</button>
+                            <button data-action="decimal" class="p-4 text-xl bg-gray-700 text-white rounded-lg hover:bg-gray-600 font-bold">.</button>
+                            <button data-action="equals" class="p-4 text-xl bg-green-500 text-white rounded-lg hover:bg-green-600 font-bold">=</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN ESTADÍSTICAS -->
+            <div id="stats" class="tab-content">
+                <div class="max-w-3xl mx-auto">
+                    <h1 class="text-3xl font-bold mb-6" data-i18n-key="titleStats">Tus Estadísticas</h1>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <div class="bg-surface p-6 rounded-lg shadow-md flex flex-col items-center justify-center">
+                            <i data-lucide="timer" class="w-12 h-12 text-primary mb-3"></i>
+                            <span class="text-4xl font-bold" id="stats-pomodoros-today">0</span>
+                            <span class="text-muted" data-i18n-key="statsPomodorosToday">Pomodoros hoy</span>
+                        </div>
+                         <div class="bg-surface p-6 rounded-lg shadow-md flex flex-col items-center justify-center">
+                            <i data-lucide="history" class="w-12 h-12 text-primary mb-3"></i>
+                            <span class="text-4xl font-bold" id="stats-pomodoros-total">0</span>
+                            <span class="text-muted" data-i18n-key="statsPomodorosTotal">Pomodoros totales</span>
+                        </div>
+                        <div class="bg-surface p-6 rounded-lg shadow-md flex flex-col items-center justify-center">
+                            <i data-lucide="clock" class="w-12 h-12 text-primary mb-3"></i>
+                            <span class="text-4xl font-bold" id="stats-focus-time">0h 0m</span>
+                            <span class="text-muted" data-i18n-key="statsFocusTime">Tiempo de enfoque total</span>
+                        </div>
+                        <div class="bg-surface p-6 rounded-lg shadow-md flex flex-col items-center justify-center">
+                            <i data-lucide="check-circle" class="w-12 h-12 text-green-500 mb-3"></i>
+                            <span class="text-4xl font-bold" id="stats-tasks-completed">0</span>
+                            <span class="text-muted" data-i18n-key="statsTasksCompleted">Tareas completadas</span>
+                        </div>
+                         <div class="bg-surface p-6 rounded-lg shadow-md flex flex-col items-center justify-center">
+                            <i data-lucide="list" class="w-12 h-12 text-yellow-500 mb-3"></i>
+                            <span class="text-4xl font-bold" id="stats-tasks-pending">0</span>
+                            <span class="text-muted" data-i18n-key="statsTasksPending">Tareas pendientes</span>
+                        </div>
+                         <div class="bg-surface p-6 rounded-lg shadow-md flex flex-col items-center justify-center">
+                             <i data-lucide="calendar" class="w-12 h-12 text-primary mb-3"></i>
+                            <span class="text-4xl font-bold" id="stats-streak">0</span>
+                            <span class="text-muted" data-i18n-key="statsStreak">Días de racha</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECCIÓN AJUSTES -->
+            <div id="settings" class="tab-content">
+                <div class="max-w-3xl mx-auto space-y-8">
+                    <h1 class="text-3xl font-bold" data-i18n-key="titleSettings">Ajustes</h1>
+                    
+                    <!-- Ajustes del Temporizador -->
+                    <div>
+                        <h2 class="text-xl font-semibold mb-4 border-b border-custom pb-2" data-i18n-key="settingsTimer">Temporizador</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label for="pomodoro-time" class="block text-sm font-medium text-muted" data-i18n-key="settingsFocus">Enfoque (min)</label>
+                                <input type="number" id="pomodoro-time" min="1" class="mt-1 w-full p-2 border border-custom rounded-md bg-surface">
+                            </div>
+                            <div>
+                                <label for="short-break-time" class="block text-sm font-medium text-muted" data-i18n-key="settingsShortBreak">Descanso corto (min)</label>
+                                <input type="number" id="short-break-time" min="1" class="mt-1 w-full p-2 border border-custom rounded-md bg-surface">
+                            </div>
+                            <div>
+                                <label for="long-break-time" class="block text-sm font-medium text-muted" data-i18n-key="settingsLongBreak">Descanso largo (min)</label>
+                                <input type="number" id="long-break-time" min="1" class="mt-1 w-full p-2 border border-custom rounded-md bg-surface">
+                            </div>
+                        </div>
+                         <div class="mt-4">
+                            <label for="long-break-interval" class="block text-sm font-medium text-muted" data-i18n-key="settingsLongBreakInterval">Ciclos para descanso largo</label>
+                            <input type="number" id="long-break-interval" min="1" class="mt-1 w-full p-2 border border-custom rounded-md bg-surface max-w-xs">
+                        </div>
+                    </div>
+
+                    <!-- Personalización de Apariencia -->
+                    <div>
+                        <h2 class="text-xl font-semibold mb-4 border-b border-custom pb-2" data-i18n-key="settingsAppearance">Apariencia</h2>
+                        <div class="space-y-4">
+                            <!-- Modo Claro/Oscuro -->
+                            <div class="flex items-center justify-between">
+                                <span class="font-medium" data-i18n-key="settingsDarkMode">Modo Oscuro</span>
+                                <button id="theme-toggle" class="relative inline-flex items-center h-6 rounded-full w-11 transition-colors bg-gray-200 dark:bg-gray-600">
+                                    <span class="sr-only" data-i18n-key="settingsToggleDarkMode">Activar modo oscuro</span>
+                                    <span class="inline-block w-4 h-4 transform bg-white rounded-full transition-transform translate-x-1 dark:translate-x-6"></span>
+                                </button>
+                            </div>
+                            <!-- Paleta de Colores -->
+                            <div>
+                                <span class="font-medium block mb-2" data-i18n-key="settingsAccentColor">Color de Acento</span>
+                                <div id="color-palette-selector" class="flex space-x-2">
+                                    <button data-color="blue" class="w-8 h-8 rounded-full bg-blue-500 ring-2 ring-offset-2 ring-offset-surface"></button>
+                                    <button data-color="green" class="w-8 h-8 rounded-full bg-green-500"></button>
+                                    <button data-color="violet" class="w-8 h-8 rounded-full bg-violet-500"></button>
+                                    <button data-color="red" class="w-8 h-8 rounded-full bg-red-500"></button>
+                                </div>
+                            </div>
+                             <!-- Fuentes -->
+                            <div>
+                                <span class="font-medium block mb-2" data-i18n-key="settingsFont">Tipografía</span>
+                                <select id="font-selector" class="w-full max-w-xs p-2 border border-custom rounded-md bg-surface">
+                                    <option value="inter">Inter (Sans-Serif)</option>
+                                    <option value="roboto-slab">Roboto Slab (Serif)</option>
+                                    <option value="space-mono">Space Mono (Monospace)</option>
+                                </select>
+                            </div>
+                             <!-- Idioma -->
+                            <div>
+                                <span class="font-medium block mb-2" data-i18n-key="settingsLanguage">Idioma</span>
+                                <div class="flex items-center space-x-2">
+                                    <button id="language-toggle" class="px-4 py-2 text-sm font-semibold rounded-md bg-surface border border-custom">
+                                        <span class="fi fi-es"></span> ES
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ajustes de Sonido y Notificaciones -->
+                    <div>
+                        <h2 class="text-xl font-semibold mb-4 border-b border-custom pb-2" data-i18n-key="settingsSound">Sonido y Notificaciones</h2>
+                         <div class="space-y-4">
+                             <!-- Sonido de Alarma -->
+                             <div>
+                                <span class="font-medium block mb-2" data-i18n-key="settingsAlarmSound">Sonido de Alarma</span>
+                                <select id="alarm-sound-selector" class="w-full max-w-xs p-2 border border-custom rounded-md bg-surface">
+                                    <option value="bell" data-i18n-key="soundBell">Campana</option>
+                                    <option value="beep">Beep</option>
+                                    <option value="digital">Digital</option>
+                                    <option value="none" data-i18n-key="soundNone">Silencio</option>
+                                </select>
+                            </div>
+                            <!-- Volumen -->
+                            <div>
+                                <span class="font-medium block mb-2" data-i18n-key="settingsVolume">Volumen</span>
+                                <input type="range" id="volume-slider" min="0" max="1" step="0.1" class="w-full max-w-xs">
+                            </div>
+                             <!-- Notificaciones -->
+                             <div class="flex items-center justify-between">
+                                <span class="font-medium" data-i18n-key="settingsNotifications">Notificaciones del Navegador</span>
+                                <button id="notifications-toggle" class="px-4 py-2 text-sm rounded-md bg-surface border border-custom" data-i18n-key="btnEnable">Activar</button>
+                            </div>
+                         </div>
+                    </div>
+                    
+                    <!-- Exportar Datos -->
+                    <div>
+                        <h2 class="text-xl font-semibold mb-4 border-b border-custom pb-2" data-i18n-key="settingsExport">Exportar Datos</h2>
+                        <div class="space-y-4">
+                            <button id="export-pdf-btn" class="w-full max-w-xs flex items-center justify-center space-x-2 px-4 py-2 font-semibold rounded-md bg-primary text-white hover:bg-primary-dark transition-colors">
+                                <i data-lucide="file-down"></i>
+                                <span data-i18n-key="btnExportPDF">Exportar Progreso a PDF</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- SCRIPTS DE LA APLICACIÓN -->
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // ===================================================================================
+        // 1. ESTADO Y CONFIGURACIÓN INICIAL
+        // ===================================================================================
+        const AppState = {
+            settings: {
+                pomodoroTime: 25,
+                shortBreakTime: 5,
+                longBreakTime: 15,
+                longBreakInterval: 4,
+                theme: 'light',
+                color: 'blue',
+                font: 'inter',
+                alarmSound: 'bell',
+                volume: 0.5,
+                notificationsEnabled: false,
+                language: 'es',
+            },
+            tasks: [], // Array unificado para tareas y eventos del calendario
+            notes: '',
+            stats: {
+                pomodorosToday: 0,
+                pomodorosTotal: 0,
+                focusTime: 0, // en segundos
+                lastPomodoroDate: null,
+                currentStreak: 0,
+                lastStreakDate: null,
+            },
+            timer: {
+                mode: 'pomodoro', // 'pomodoro', 'shortBreak', 'longBreak'
+                timeLeft: 25 * 60, // en segundos
+                isActive: false,
+                intervalId: null,
+                pomodoroCount: 0, // ciclos completados para el descanso largo
+            },
+            calculator: {
+                currentOperand: '0',
+                previousOperand: '',
+                operation: undefined,
+            },
+            calendar: {
+                currentDate: new Date(),
+            },
+            schedule: {
+                events: {}, // E.g., {'monday-09:00': {id, text}}
+            }
+        };
+
+        // ===================================================================================
+        // 1.B DICCIONARIO DE TRADUCCIONES (i18n)
+        // ===================================================================================
+        const I18n = {
+            translations: {
+                es: {
+                    navPomodoro: 'Pomodoro',
+                    navTasks: 'Tareas',
+                    navNotes: 'Notas',
+                    navSchedule: 'Horario',
+                    navCalendar: 'Calendario',
+                    navShortcuts: 'Atajos',
+                    navCalculator: 'Calculadora',
+                    navStats: 'Estadísticas',
+                    navSettings: 'Ajustes',
+                    modePomodoro: 'Tiempo de Enfoque',
+                    modeShortBreak: 'Descanso Corto',
+                    modeLongBreak: 'Descanso Largo',
+                    btnStart: 'INICIAR',
+                    btnPause: 'PAUSAR',
+                    btnResume: 'REANUDAR',
+                    btnBreakdown: 'Desglosar con IA',
+                    btnSave: 'Guardar',
+                    btnCancel: 'Cancelar',
+                    btnDelete: 'Eliminar',
+                    modalEventTitle: 'Título del Evento',
+                    modalEventTime: 'Hora (opcional)',
+                    modalAddEventTitle: 'Añadir Tarea a',
+                    modalAddScheduleEvent: 'Añadir/Editar Evento',
+                    titleTasks: 'Gestor de Tareas',
+                    placeholderTask: 'Añadir una nueva tarea...',
+                    titleNotes: 'Bloc de Notas',
+                    titleSchedule: 'Horario Semanal',
+                    titleCalendar: 'Calendario de Tareas',
+                    titleShortcuts: 'Accesos Directos',
+                    titleCalculator: 'Calculadora',
+                    placeholderNotes: 'Escribe tus apuntes aquí...',
+                    titleStats: 'Tus Estadísticas',
+                    statsPomodorosToday: 'Pomodoros hoy',
+                    statsPomodorosTotal: 'Pomodoros totales',
+                    statsFocusTime: 'Tiempo de enfoque total',
+                    statsTasksCompleted: 'Tareas completadas',
+                    statsTasksPending: 'Tareas pendientes',
+                    statsStreak: 'Días de racha',
+                    titleSettings: 'Ajustes',
+                    settingsTimer: 'Temporizador',
+                    settingsFocus: 'Enfoque (min)',
+                    settingsShortBreak: 'Descanso corto (min)',
+                    settingsLongBreak: 'Descanso largo (min)',
+                    settingsLongBreakInterval: 'Ciclos para descanso largo',
+                    settingsAppearance: 'Apariencia',
+                    settingsDarkMode: 'Modo Oscuro',
+                    settingsToggleDarkMode: 'Activar modo oscuro',
+                    settingsAccentColor: 'Color de Acento',
+                    settingsFont: 'Tipografía',
+                    settingsLanguage: 'Idioma',
+                    settingsSound: 'Sonido y Notificaciones',
+                    settingsAlarmSound: 'Sonido de Alarma',
+                    soundBell: 'Campana',
+                    soundNone: 'Silencio',
+                    settingsVolume: 'Volumen',
+                    settingsNotifications: 'Notificaciones del Navegador',
+                    settingsExport: 'Exportar Datos',
+                    btnExportPDF: 'Exportar Progreso a PDF',
+                    btnEnable: 'Activar',
+                    btnDisable: 'Desactivar',
+                    btnBlocked: 'Bloqueado',
+                    tasksEmpty: 'No hay tareas pendientes. ¡Añade una!',
+                    tasksPending: 'Pendientes',
+                    tasksCompleted: 'Completadas',
+                    confirmClearNotes: '¿Estás seguro de que quieres borrar todas las notas? Esta acción no se puede deshacer.',
+                    notificationTitle: '¡Tiempo Terminado!',
+                    notificationBodyPomodoro: '¡Buen trabajo! Es hora de un descanso.',
+                    notificationBodyShortBreak: 'El descanso corto ha terminado. ¡A concentrarse!',
+                    notificationBodyLongBreak: 'El descanso largo ha terminado. ¿Listo para otra ronda?',
+                    pdfReportTitle: 'Reporte de Progreso de Pomodoro',
+                    pdfGeneratedOn: 'Generado el:',
+                    weekdaysShort: ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'],
+                    weekdaysLong: ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'],
+                    aiError: 'Error al contactar la IA. Inténtalo de nuevo.',
+                },
+                en: {
+                    navPomodoro: 'Pomodoro',
+                    navTasks: 'Tasks',
+                    navNotes: 'Notes',
+                    navSchedule: 'Schedule',
+                    navCalendar: 'Calendar',
+                    navShortcuts: 'Shortcuts',
+                    navCalculator: 'Calculator',
+                    navStats: 'Statistics',
+                    navSettings: 'Settings',
+                    modePomodoro: 'Focus Time',
+                    modeShortBreak: 'Short Break',
+                    modeLongBreak: 'Long Break',
+                    btnStart: 'START',
+                    btnPause: 'PAUSE',
+                    btnResume: 'RESUME',
+                    btnBreakdown: 'Break down with AI',
+                    btnSave: 'Save',
+                    btnCancel: 'Cancel',
+                    btnDelete: 'Delete',
+                    modalEventTitle: 'Event Title',
+                    modalEventTime: 'Time (optional)',
+                    modalAddEventTitle: 'Add Task to',
+                    modalAddScheduleEvent: 'Add/Edit Event',
+                    titleTasks: 'Task Manager',
+                    placeholderTask: 'Add a new task...',
+                    titleNotes: 'Notepad',
+                    titleSchedule: 'Weekly Schedule',
+                    titleCalendar: 'Task Calendar',
+                    titleShortcuts: 'Direct Access',
+                    titleCalculator: 'Calculator',
+                    placeholderNotes: 'Write your notes here...',
+                    titleStats: 'Your Statistics',
+                    statsPomodorosToday: 'Pomodoros today',
+                    statsPomodorosTotal: 'Total pomodoros',
+                    statsFocusTime: 'Total focus time',
+                    statsTasksCompleted: 'Tasks completed',
+                    statsTasksPending: 'Tasks pending',
+                    statsStreak: 'Streak days',
+                    titleSettings: 'Settings',
+                    settingsTimer: 'Timer',
+                    settingsFocus: 'Focus (min)',
+                    settingsShortBreak: 'Short break (min)',
+                    settingsLongBreak: 'Long break (min)',
+                    settingsLongBreakInterval: 'Cycles for long break',
+                    settingsAppearance: 'Appearance',
+                    settingsDarkMode: 'Dark Mode',
+                    settingsToggleDarkMode: 'Toggle dark mode',
+                    settingsAccentColor: 'Accent Color',
+                    settingsFont: 'Typography',
+                    settingsLanguage: 'Language',
+                    settingsSound: 'Sound & Notifications',
+                    settingsAlarmSound: 'Alarm Sound',
+                    soundBell: 'Bell',
+                    soundNone: 'None',
+                    settingsVolume: 'Volume',
+                    settingsNotifications: 'Browser Notifications',
+                    settingsExport: 'Export Data',
+                    btnExportPDF: 'Export Progress to PDF',
+                    btnEnable: 'Enable',
+                    btnDisable: 'Disable',
+                    btnBlocked: 'Blocked',
+                    tasksEmpty: 'No pending tasks. Add one!',
+                    tasksPending: 'Pending',
+                    tasksCompleted: 'Completed',
+                    confirmClearNotes: 'Are you sure you want to delete all notes? This action cannot be undone.',
+                    notificationTitle: 'Time\'s Up!',
+                    notificationBodyPomodoro: 'Good job! It\'s time for a break.',
+                    notificationBodyShortBreak: 'Short break is over. Time to focus!',
+                    notificationBodyLongBreak: 'Long break is over. Ready for another round?',
+                    pdfReportTitle: 'Pomodoro Progress Report',
+                    pdfGeneratedOn: 'Generated on:',
+                    weekdaysShort: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+                    weekdaysLong: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+                    aiError: 'Error contacting AI. Please try again.',
+                }
+            },
+            t(key) {
+                return this.translations[AppState.settings.language][key] || key;
+            },
+            updateUI() {
+                document.querySelectorAll('[data-i18n-key]').forEach(el => {
+                    const key = el.dataset.i18nKey;
+                    if(el.tagName === 'BUTTON' && key.startsWith('btn') && AppState.timer.isActive) {
+                        // Skip updating start/pause button if timer is running to preserve pause/resume state
+                    } else {
+                        el.textContent = this.t(key);
+                    }
+                });
+                document.querySelectorAll('[data-i18n-placeholder-key]').forEach(el => {
+                    el.placeholder = this.t(el.dataset.i18nPlaceholderKey);
+                });
+
+                // Actualizar textos dinámicos
+                Timer.updateDisplay();
+                Tasks.updateStats();
+                Notifications.updateButton();
+                Calendar.render();
+                Schedule.render();
+                
+                // Actualizar botón de idioma
+                DOM.languageToggle.textContent = AppState.settings.language.toUpperCase();
+            }
+        };
+
+
+        // ===================================================================================
+        // 2. SELECTORES DEL DOM
+        // ===================================================================================
+        const DOM = {
+            // Global
+            loadingOverlay: document.getElementById('loading-overlay'),
+            modalOverlay: document.getElementById('modal-overlay'),
+
+            // Modales
+            eventModal: document.getElementById('event-modal'),
+            modalTitle: document.getElementById('modal-title'),
+            eventForm: document.getElementById('event-form'),
+            eventDateInput: document.getElementById('event-date-input'),
+            eventTextInput: document.getElementById('event-text-input'),
+            eventTimeInput: document.getElementById('event-time-input'),
+            
+            scheduleModal: document.getElementById('schedule-modal'),
+            scheduleModalTitle: document.getElementById('schedule-modal-title'),
+            scheduleEventForm: document.getElementById('schedule-event-form'),
+            scheduleEventDayInput: document.getElementById('schedule-event-day-input'),
+            scheduleEventTimeInput: document.getElementById('schedule-event-time-input'),
+            scheduleEventIdInput: document.getElementById('schedule-event-id-input'),
+            scheduleEventTextInput: document.getElementById('schedule-event-text-input'),
+            deleteScheduleEventBtn: document.getElementById('delete-schedule-event-btn'),
+
+            cancelBtns: document.querySelectorAll('.cancel-btn'),
+
+            // Navegación
+            navLinks: document.querySelectorAll('.nav-link'),
+            tabContents: document.querySelectorAll('.tab-content'),
+            
+            // Pomodoro
+            timerDisplay: document.getElementById('timer-display'),
+            timerMode: document.getElementById('timer-mode'),
+            progressRing: document.getElementById('progress-ring'),
+            startPauseButton: document.getElementById('start-pause-button'),
+            resetButton: document.getElementById('reset-button'),
+            nextButton: document.getElementById('next-button'),
+
+            // Tareas
+            taskForm: document.getElementById('task-form'),
+            taskInput: document.getElementById('task-input'),
+            taskDueDateInput: document.getElementById('task-due-date'),
+            taskList: document.getElementById('task-list'),
+            taskStats: document.getElementById('task-stats'),
+
+            // Notas
+            notesEditor: document.getElementById('notes-editor'),
+            importNotesBtn: document.getElementById('import-notes-btn'),
+            exportNotesBtn: document.getElementById('export-notes-btn'),
+            clearNotesBtn: document.getElementById('clear-notes-btn'),
+            notesFileInput: document.getElementById('notes-file-input'),
+
+            // Horario
+            scheduleGrid: document.getElementById('schedule-grid'),
+
+            // Calendario
+            calendarHeader: document.getElementById('calendar-header'),
+            calendarWeekdays: document.getElementById('calendar-weekdays'),
+            calendarGrid: document.getElementById('calendar-grid'),
+            prevMonthBtn: document.getElementById('prev-month-btn'),
+            nextMonthBtn: document.getElementById('next-month-btn'),
+
+            // Calculadora
+            calculatorDisplay: document.getElementById('calculator-display'),
+            calculatorButtons: document.getElementById('calculator-buttons'),
+
+            // Estadísticas
+            statsPomodorosToday: document.getElementById('stats-pomodoros-today'),
+            statsPomodorosTotal: document.getElementById('stats-pomodoros-total'),
+            statsFocusTime: document.getElementById('stats-focus-time'),
+            statsTasksCompleted: document.getElementById('stats-tasks-completed'),
+            statsTasksPending: document.getElementById('stats-tasks-pending'),
+            statsStreak: document.getElementById('stats-streak'),
+
+            // Ajustes
+            pomodoroTimeInput: document.getElementById('pomodoro-time'),
+            shortBreakTimeInput: document.getElementById('short-break-time'),
+            longBreakTimeInput: document.getElementById('long-break-time'),
+            longBreakIntervalInput: document.getElementById('long-break-interval'),
+            themeToggle: document.getElementById('theme-toggle'),
+            colorPaletteSelector: document.getElementById('color-palette-selector'),
+            fontSelector: document.getElementById('font-selector'),
+            languageToggle: document.getElementById('language-toggle'),
+            alarmSoundSelector: document.getElementById('alarm-sound-selector'),
+            volumeSlider: document.getElementById('volume-slider'),
+            notificationsToggle: document.getElementById('notifications-toggle'),
+            exportPdfBtn: document.getElementById('export-pdf-btn'),
+        };
+
+        // ===================================================================================
+        // 3. PERSISTENCIA DE DATOS (localStorage)
+        // ===================================================================================
+        const Storage = {
+            save() {
+                localStorage.setItem('pomodoroAppState', JSON.stringify(AppState));
+            },
+            load() {
+                const savedState = localStorage.getItem('pomodoroAppState');
+                if (savedState) {
+                    const parsedState = JSON.parse(savedState);
+                    Object.assign(AppState.settings, parsedState.settings);
+                    
+                    if (Array.isArray(parsedState.tasks)) {
+                        // Migración para añadir 'time' si no existe
+                        AppState.tasks = parsedState.tasks.map(task => ({
+                             ...task,
+                             dueDate: task.dueDate || null,
+                             time: task.time || null 
+                        }));
+                    }
+                    AppState.notes = parsedState.notes || '';
+                    Object.assign(AppState.stats, parsedState.stats);
+                    
+                    // Ya no se usa 'calendar.events', se usa 'tasks'
+                    if (parsedState.calendar && Array.isArray(parsedState.calendar.events)) {
+                        // Lógica de migración si se encuentran eventos antiguos
+                        parsedState.calendar.events.forEach(event => {
+                            if (!AppState.tasks.some(t => t.id === event.id)) {
+                                AppState.tasks.push({ ...event, dueDate: event.date, time: event.time });
+                            }
+                        });
+                    }
+
+
+                    if (parsedState.schedule && typeof parsedState.schedule.events === 'object') {
+                        AppState.schedule.events = parsedState.schedule.events;
+                    }
+                    
+                    if (!parsedState.timer?.isActive) {
+                         Object.assign(AppState.timer, parsedState.timer);
+                    } else {
+                        Timer.reset();
+                    }
+                }
+            }
+        };
+
+        // ===================================================================================
+        // 3.B LÓGICA DE LA API DE GEMINI (si es necesaria)
+        // ===================================================================================
+        const Gemini = {
+            API_URL: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:generateContent?key=`,
+            showLoading() { DOM.loadingOverlay.classList.remove('hidden'); },
+            hideLoading() { DOM.loadingOverlay.classList.add('hidden'); },
+            async call(userQuery, systemPrompt) {
+                this.showLoading();
+                try {
+                    const payload = {
+                        contents: [{ parts: [{ text: userQuery }] }],
+                        systemInstruction: { parts: [{ text: systemPrompt }] },
+                    };
+                    const response = await fetch(this.API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const result = await response.json();
+                    const candidate = result.candidates?.[0];
+                    if (candidate && candidate.content?.parts?.[0]?.text) {
+                        return candidate.content.parts[0].text;
+                    } else { throw new Error('Invalid response structure from Gemini API.'); }
+                } catch (error) {
+                    console.error('Gemini API call failed:', error);
+                    alert(I18n.t('aiError'));
+                    return null;
+                } finally {
+                    this.hideLoading();
+                }
+            }
+        };
+
+
+        // ===================================================================================
+        // 4. LÓGICA DEL TEMPORIZADOR
+        // ===================================================================================
+        const Timer = {
+            init() {
+                this.updateDisplay();
+                this.updateProgress(1);
+            },
+            start() {
+                if (AppState.timer.isActive) return;
+                AppState.timer.isActive = true;
+                DOM.startPauseButton.textContent = I18n.t('btnPause');
+                AppState.timer.intervalId = setInterval(() => {
+                    AppState.timer.timeLeft--;
+                    this.updateDisplay();
+                    this.updateProgress(AppState.timer.timeLeft / this.getTotalTime());
+                    if (AppState.timer.timeLeft <= 0) {
+                        this.finish();
+                    }
+                }, 1000);
+            },
+            pause() {
+                if (!AppState.timer.isActive) return;
+                AppState.timer.isActive = false;
+                DOM.startPauseButton.textContent = I18n.t('btnResume');
+                clearInterval(AppState.timer.intervalId);
+                AppState.timer.intervalId = null;
+                Storage.save();
+            },
+            reset() {
+                this.pause();
+                AppState.timer.timeLeft = this.getTotalTime();
+                this.updateDisplay();
+                this.updateProgress(1);
+                DOM.startPauseButton.textContent = I18n.t('btnStart');
+                Storage.save();
+            },
+            next() {
+                this.pause();
+                this.switchMode(true);
+            },
+            finish() {
+                this.pause();
+                Audio.playAlarm();
+                Notifications.show();
+
+                if (AppState.timer.mode === 'pomodoro') {
+                    Stats.recordPomodoro();
+                }
+                
+                this.switchMode(true);
+                this.start();
+            },
+            switchMode(isAutomatic) {
+                const { settings } = AppState;
+                let nextMode;
+
+                if (AppState.timer.mode === 'pomodoro') {
+                    AppState.timer.pomodoroCount++;
+                    if (AppState.timer.pomodoroCount % settings.longBreakInterval === 0) {
+                        nextMode = 'longBreak';
+                    } else {
+                        nextMode = 'shortBreak';
+                    }
+                } else {
+                    nextMode = 'pomodoro';
+                }
+
+                AppState.timer.mode = nextMode;
+                AppState.timer.timeLeft = this.getTotalTime();
+                this.updateDisplay();
+                this.updateProgress(1);
+                
+                if (!isAutomatic) this.pause();
+                Storage.save();
+            },
+            getTotalTime() {
+                const { settings } = AppState;
+                switch (AppState.timer.mode) {
+                    case 'pomodoro': return settings.pomodoroTime * 60;
+                    case 'shortBreak': return settings.shortBreakTime * 60;
+                    case 'longBreak': return settings.longBreakTime * 60;
+                    default: return settings.pomodoroTime * 60;
+                }
+            },
+            updateDisplay() {
+                const minutes = Math.floor(AppState.timer.timeLeft / 60);
+                const seconds = AppState.timer.timeLeft % 60;
+                DOM.timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                
+                const modeKey = {
+                    pomodoro: 'modePomodoro',
+                    shortBreak: 'modeShortBreak',
+                    longBreak: 'modeLongBreak'
+                };
+                DOM.timerMode.textContent = I18n.t(modeKey[AppState.timer.mode]);
+                document.title = `${DOM.timerDisplay.textContent} - ${I18n.t(modeKey[AppState.timer.mode])}`;
+            },
+            updateProgress(percentage) {
+                const radius = DOM.progressRing.r.baseVal.value;
+                const circumference = 2 * Math.PI * radius;
+                DOM.progressRing.style.strokeDasharray = `${circumference} ${circumference}`;
+                const offset = circumference - percentage * circumference;
+                DOM.progressRing.style.strokeDashoffset = offset;
+            }
+        };
+
+        // ===================================================================================
+        // 5. LÓGICA DE TAREAS (UNIFICADA)
+        // ===================================================================================
+        const Tasks = {
+            renderAllViews() {
+                this.render();
+                Calendar.render();
+            },
+            render() {
+                DOM.taskList.innerHTML = '';
+                const tasksToRender = AppState.tasks.sort((a,b) => (a.dueDate || '9999').localeCompare(b.dueDate || '9999') || (a.time || '99').localeCompare(b.time || '99'));
+
+                if (tasksToRender.length === 0) {
+                    DOM.taskList.innerHTML = `<p class="text-center text-muted">${I18n.t('tasksEmpty')}</p>`;
+                } else {
+                    tasksToRender.forEach(task => {
+                        const taskEl = document.createElement('div');
+                        taskEl.className = `flex items-center justify-between p-3 rounded-lg transition-colors ${task.completed ? 'bg-gray-100 dark:bg-gray-800' : 'bg-surface'}`;
+                        
+                        let dateTimeHtml = '';
+                        if (task.dueDate) {
+                             const date = new Date(task.dueDate + 'T00:00:00');
+                             const formattedDate = date.toLocaleDateString(AppState.settings.language, { year: 'numeric', month: 'short', day: 'numeric' });
+                             const formattedTime = task.time ? ` ${task.time}` : '';
+                             dateTimeHtml = `<span class="text-xs text-muted ml-3">${formattedDate}${formattedTime}</span>`;
+                        }
+
+                        taskEl.innerHTML = `
+                            <div class="flex items-center overflow-hidden">
+                                <button data-id="${task.id}" class="toggle-task flex-shrink-0 w-6 h-6 border-2 ${task.completed ? 'border-green-500 bg-green-500' : 'border-custom'} rounded-full flex items-center justify-center">
+                                    ${task.completed ? '<i data-lucide="check" class="w-4 h-4 text-white"></i>' : ''}
+                                </button>
+                                <div class="ml-3 truncate">
+                                  <span contenteditable="false" data-id="${task.id}" class="task-text ${task.completed ? 'line-through text-muted' : ''}">${task.text}</span>
+                                  ${dateTimeHtml}
+                                </div>
+                            </div>
+                            <div class="flex items-center space-x-1">
+                                <button data-id="${task.id}" title="${I18n.t('btnBreakdown')}" class="breakdown-task p-1 text-muted hover:text-primary"><i data-lucide="sparkles" class="w-4 h-4"></i></button>
+                                <button data-id="${task.id}" title="Edit" class="edit-task p-1 text-muted hover:text-primary"><i data-lucide="edit-2" class="w-4 h-4"></i></button>
+                                <button data-id="${task.id}" title="Delete" class="delete-task p-1 text-muted hover:text-red-500"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                            </div>
+                        `;
+                        DOM.taskList.appendChild(taskEl);
+                    });
+                }
+                lucide.createIcons();
+                this.updateStats();
+                Stats.update();
+            },
+            add(text, dueDate, time) {
+                if (!text.trim()) return;
+                const newTask = {
+                    id: Date.now(),
+                    text: text.trim(),
+                    completed: false,
+                    dueDate: dueDate || null,
+                    time: time || null,
+                };
+                AppState.tasks.push(newTask);
+                this.renderAllViews();
+                Storage.save();
+            },
+            toggle(id) {
+                const task = AppState.tasks.find(t => t.id === id);
+                if (task) {
+                    task.completed = !task.completed;
+                    this.renderAllViews();
+                    Storage.save();
+                }
+            },
+            delete(id) {
+                AppState.tasks = AppState.tasks.filter(t => t.id !== id);
+                this.renderAllViews();
+                Storage.save();
+            },
+            edit(id, newText) {
+                const task = AppState.tasks.find(t => t.id === id);
+                if (task && newText.trim()) {
+                    task.text = newText.trim();
+                }
+                this.renderAllViews();
+                Storage.save();
+            },
+            async breakdownWithAI(id) {
+                const task = AppState.tasks.find(t => t.id === id);
+                if (!task) return;
+
+                const systemPrompt = "You are a productivity assistant. Your goal is to break down a larger task into a list of smaller, concrete, and actionable sub-tasks. Provide the output as a simple list, with each sub-task on a new line, starting with a hyphen. Do not add any extra formatting, numbering, or introductory text.";
+                const result = await Gemini.call(task.text, systemPrompt);
+                
+                if (result) {
+                    const subtasks = result.split('\n').map(s => s.replace(/^- /, '').trim()).filter(s => s.length > 0);
+                    subtasks.forEach(subtaskText => { this.add(subtaskText, task.dueDate, task.time); });
+                }
+            },
+            updateStats() {
+                const completed = AppState.tasks.filter(t => t.completed).length;
+                const pending = AppState.tasks.length - completed;
+                DOM.taskStats.textContent = `${I18n.t('tasksPending')}: ${pending} / ${I18n.t('tasksCompleted')}: ${completed}`;
+            }
+        };
+
+        // ===================================================================================
+        // 6. OTRAS LÓGICAS DE MÓDULOS
+        // ===================================================================================
+        const Notes = {
+            init() { DOM.notesEditor.value = AppState.notes; },
+            save() { AppState.notes = DOM.notesEditor.value; Storage.save(); },
+            clear() {
+                if (confirm(I18n.t('confirmClearNotes'))) {
+                    DOM.notesEditor.value = '';
+                    this.save();
+                }
+            },
+            export() {
+                const blob = new Blob([DOM.notesEditor.value], { type: 'text/plain' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `pomodoro-notes-${new Date().toISOString().slice(0, 10)}.txt`;
+                a.click();
+                URL.revokeObjectURL(a.href);
+            },
+            import() { DOM.notesFileInput.click(); },
+            handleFileImport(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => { DOM.notesEditor.value = e.target.result; this.save(); };
+                    reader.readAsText(file);
+                }
+            }
+        };
+
+        const Schedule = {
+            init() {
+                DOM.scheduleGrid.addEventListener('click', (e) => this.handleGridClick(e));
+                DOM.scheduleEventForm.addEventListener('submit', (e) => this.saveEvent(e));
+                DOM.deleteScheduleEventBtn.addEventListener('click', () => this.deleteEvent());
+                this.render();
+            },
+            render() {
+                DOM.scheduleGrid.innerHTML = '';
+                const timeSlots = [];
+                for (let hour = 7; hour <= 22; hour++) {
+                    timeSlots.push(`${String(hour).padStart(2, '0')}:00`);
+                }
+
+                // Header
+                DOM.scheduleGrid.innerHTML += '<div class="sticky top-0 z-10 bg-surface"></div>';
+                const dayNames = I18n.t('weekdaysLong');
+                const weekOrder = [1, 2, 3, 4, 5, 6, 0]; // Lunes a Domingo
+                weekOrder.forEach(dayIndex => {
+                     DOM.scheduleGrid.innerHTML += `<div class="p-2 text-center font-bold sticky top-0 z-10 bg-surface border-b border-l border-custom">${dayNames[dayIndex]}</div>`;
+                });
+
+                // Grid content
+                timeSlots.forEach(time => {
+                    DOM.scheduleGrid.innerHTML += `<div class="p-2 text-right text-sm text-muted border-r border-b border-custom">${time}</div>`;
+                    weekOrder.forEach(dayIndex => {
+                        const dayStr = dayNames[dayIndex].toLowerCase();
+                        const key = `${dayStr}-${time}`;
+                        const event = AppState.schedule.events[key];
+                        let content = '';
+                        if (event) {
+                            content = `<div class="schedule-event p-1 bg-primary text-white rounded-md text-xs" data-key="${key}">
+                                ${event.text}
+                            </div>`;
+                        }
+                        DOM.scheduleGrid.innerHTML += `<div class="schedule-cell border-b border-l border-custom" data-day="${dayStr}" data-time="${time}">${content}</div>`;
+                    });
+                });
+            },
+            handleGridClick(e) {
+                const cell = e.target.closest('.schedule-cell');
+                const eventEl = e.target.closest('.schedule-event');
+                if (eventEl) {
+                    const key = eventEl.dataset.key;
+                    const event = AppState.schedule.events[key];
+                    const [day, time] = key.split('-');
+                    this.openModal(day, time, event.id, event.text);
+                } else if (cell) {
+                    this.openModal(cell.dataset.day, cell.dataset.time);
+                }
+            },
+            openModal(day, time, id = null, text = '') {
+                DOM.scheduleEventForm.reset();
+                DOM.scheduleModal.classList.remove('hidden');
+                DOM.modalOverlay.classList.remove('hidden');
+                setTimeout(() => DOM.scheduleModal.classList.remove('scale-95'), 10);
+                DOM.scheduleModalTitle.textContent = I18n.t('modalAddScheduleEvent');
+                DOM.scheduleEventDayInput.value = day;
+                DOM.scheduleEventTimeInput.value = time;
+                DOM.scheduleEventIdInput.value = id || '';
+                DOM.scheduleEventTextInput.value = text;
+
+                if (id) {
+                    DOM.deleteScheduleEventBtn.classList.remove('hidden');
+                } else {
+                    DOM.deleteScheduleEventBtn.classList.add('hidden');
+                }
+            },
+            closeModal() {
+                DOM.scheduleModal.classList.add('scale-95');
+                setTimeout(() => {
+                    DOM.modalOverlay.classList.add('hidden');
+                    DOM.scheduleModal.classList.add('hidden');
+                }, 300);
+            },
+            saveEvent(e) {
+                e.preventDefault();
+                const text = DOM.scheduleEventTextInput.value;
+                const day = DOM.scheduleEventDayInput.value;
+                const time = DOM.scheduleEventTimeInput.value;
+                const id = DOM.scheduleEventIdInput.value;
+
+                if (!text.trim()) return;
+
+                const key = `${day}-${time}`;
+                AppState.schedule.events[key] = {
+                    id: id || Date.now(),
+                    text: text.trim()
+                };
+
+                Storage.save();
+                this.render();
+                this.closeModal();
+            },
+            deleteEvent() {
+                const day = DOM.scheduleEventDayInput.value;
+                const time = DOM.scheduleEventTimeInput.value;
+                const key = `${day}-${time}`;
+
+                if (key in AppState.schedule.events) {
+                    delete AppState.schedule.events[key];
+                    Storage.save();
+                    this.render();
+                    this.closeModal();
+                }
+            }
+        };
+
+        const Calendar = {
+            init() {
+                DOM.prevMonthBtn.addEventListener('click', () => this.changeMonth(-1));
+                DOM.nextMonthBtn.addEventListener('click', () => this.changeMonth(1));
+                DOM.calendarGrid.addEventListener('click', (e) => this.handleGridClick(e));
+                DOM.eventForm.addEventListener('submit', (e) => this.addOrUpdateTaskFromModal(e));
+                DOM.modalOverlay.addEventListener('click', (e) => {
+                    if (e.target === DOM.modalOverlay) { this.closeEventModal(); Schedule.closeModal(); }
+                });
+                DOM.cancelBtns.forEach(btn => btn.addEventListener('click', () => { this.closeEventModal(); Schedule.closeModal(); }));
+                this.render();
+            },
+            render() {
+                const { currentDate } = AppState.calendar;
+                const { tasks } = AppState;
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
+
+                const monthName = currentDate.toLocaleDateString(AppState.settings.language, { month: 'long', year: 'numeric'});
+                DOM.calendarHeader.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
+                DOM.calendarWeekdays.innerHTML = '';
+                I18n.t('weekdaysShort').forEach(day => { DOM.calendarWeekdays.innerHTML += `<div>${day}</div>`; });
+
+                DOM.calendarGrid.innerHTML = '';
+
+                const firstDayOfMonth = new Date(year, month, 1).getDay();
+                const daysInMonth = new Date(year, month + 1, 0).getDate();
+                const today = new Date();
+
+                for (let i = 0; i < firstDayOfMonth; i++) { DOM.calendarGrid.innerHTML += '<div></div>'; }
+
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const dayCell = document.createElement('div');
+                    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    dayCell.className = 'calendar-day border border-custom p-1.5 flex flex-col min-h-[7rem]';
+                    dayCell.dataset.date = dateStr;
+
+                    let dayNumberClasses = 'font-semibold text-sm';
+                    if (year === today.getFullYear() && month === today.getMonth() && day === today.getDate()) {
+                        dayNumberClasses += ' bg-primary text-white rounded-full w-6 h-6 flex items-center justify-center';
+                    }
+                    
+                    const dayNumber = `<div class="flex-shrink-0"><div class="${dayNumberClasses}">${day}</div></div>`;
+                    const eventsContainer = document.createElement('div');
+                    eventsContainer.className = 'calendar-day-tasks flex-1 overflow-y-auto mt-1 space-y-1';
+
+                    const dayTasks = tasks.filter(task => task.dueDate === dateStr).sort((a,b) => (a.time || '99').localeCompare(b.time || '99'));
+                    dayTasks.forEach(task => {
+                        const taskEl = document.createElement('div');
+                        taskEl.className = `text-xs p-1 rounded flex items-center justify-between transition-colors ${task.completed ? 'bg-green-100 dark:bg-green-900 text-muted line-through' : 'bg-surface border border-custom'}`;
+                        taskEl.innerHTML = `
+                            <div class="flex items-center overflow-hidden">
+                                <input type="checkbox" data-id="${task.id}" class="toggle-task-cb mr-1.5 flex-shrink-0" ${task.completed ? 'checked' : ''}>
+                                <div class="truncate">
+                                    ${task.time ? `<span class="font-bold">${task.time}</span>` : ''}
+                                    <span class="ml-1">${task.text}</span>
+                                </div>
+                            </div>
+                            <button data-id="${task.id}" class="delete-task-btn ml-1 opacity-50 hover:opacity-100 flex-shrink-0"><i data-lucide="x" class="w-3 h-3"></i></button>
+                        `;
+                        eventsContainer.appendChild(taskEl);
+                    });
+                    
+                    dayCell.innerHTML = dayNumber;
+                    dayCell.appendChild(eventsContainer);
+                    DOM.calendarGrid.appendChild(dayCell);
+                }
+                lucide.createIcons();
+            },
+            changeMonth(offset) {
+                AppState.calendar.currentDate.setMonth(AppState.calendar.currentDate.getMonth() + offset);
+                this.render();
+            },
+            handleGridClick(e) {
+                const dayCell = e.target.closest('.calendar-day');
+                const toggleCb = e.target.closest('.toggle-task-cb');
+                const deleteBtn = e.target.closest('.delete-task-btn');
+
+                if (toggleCb) {
+                    Tasks.toggle(parseInt(toggleCb.dataset.id));
+                } else if (deleteBtn) {
+                    Tasks.delete(parseInt(deleteBtn.dataset.id));
+                } else if (dayCell) {
+                    this.openEventModal(dayCell.dataset.date);
+                }
+            },
+            openEventModal(dateStr) {
+                DOM.eventModal.classList.remove('hidden');
+                DOM.modalOverlay.classList.remove('hidden');
+                setTimeout(() => DOM.eventModal.classList.remove('scale-95'), 10);
+                DOM.eventForm.reset();
+                DOM.eventDateInput.value = dateStr;
+                const date = new Date(dateStr + 'T00:00:00');
+                const formattedDate = date.toLocaleDateString(AppState.settings.language, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'});
+                DOM.modalTitle.textContent = `${I18n.t('modalAddEventTitle')} ${formattedDate}`;
+            },
+            closeEventModal() {
+                DOM.eventModal.classList.add('scale-95');
+                setTimeout(() => {
+                    if (DOM.scheduleModal.classList.contains('hidden')) {
+                       DOM.modalOverlay.classList.add('hidden');
+                    }
+                    DOM.eventModal.classList.add('hidden');
+                }, 300);
+            },
+            addOrUpdateTaskFromModal(e) {
+                e.preventDefault();
+                const text = DOM.eventTextInput.value;
+                const time = DOM.eventTimeInput.value;
+                const date = DOM.eventDateInput.value;
+                
+                Tasks.add(text, date, time);
+                this.closeEventModal();
+            },
+        };
+        
+        const Calculator = {
+            init() { this.updateDisplay(); },
+            appendNumber(number) {
+                const { calculator } = AppState;
+                if (number === '.' && calculator.currentOperand.includes('.')) return;
+                calculator.currentOperand = (calculator.currentOperand === '0' && number !== '.') ? number : calculator.currentOperand.toString() + number.toString();
+            },
+            chooseOperation(operation) {
+                const { calculator } = AppState;
+                if (calculator.currentOperand === '') return;
+                if (calculator.previousOperand !== '') { this.compute(); }
+                calculator.operation = operation;
+                calculator.previousOperand = calculator.currentOperand;
+                calculator.currentOperand = '';
+            },
+            compute() {
+                const { calculator } = AppState;
+                let computation;
+                const prev = parseFloat(calculator.previousOperand);
+                const current = parseFloat(calculator.currentOperand);
+                if (isNaN(prev) || isNaN(current)) return;
+                switch (calculator.operation) {
+                    case '+': computation = prev + current; break;
+                    case '-': computation = prev - current; break;
+                    case '*': computation = prev * current; break;
+                    case '/': computation = prev / current; break;
+                    default: return;
+                }
+                calculator.currentOperand = computation;
+                calculator.operation = undefined;
+                calculator.previousOperand = '';
+            },
+            clear() { AppState.calculator = { currentOperand: '0', previousOperand: '', operation: undefined }; },
+            delete() {
+                const { calculator } = AppState;
+                calculator.currentOperand = calculator.currentOperand.toString().slice(0, -1) || '0';
+            },
+            updateDisplay() { DOM.calculatorDisplay.innerText = AppState.calculator.currentOperand; },
+            handleButtonClick(e) {
+                const button = e.target.closest('button');
+                if (!button) return;
+
+                if (button.dataset.number) { this.appendNumber(button.dataset.number); }
+                else if (button.dataset.operator) { this.chooseOperation(button.dataset.operator); }
+                else if (button.dataset.action === 'equals') { this.compute(); }
+                else if (button.dataset.action === 'clear') { this.clear(); }
+                else if (button.dataset.action === 'delete') { this.delete(); }
+                else if (button.dataset.action === 'decimal') { this.appendNumber('.'); }
+                this.updateDisplay();
+            }
+        };
+
+        // ===================================================================================
+        // 7. LÓGICA DE ESTADÍSTICAS
+        // ===================================================================================
+        const Stats = {
+            update() {
+                this.checkDate();
+                const { stats, tasks } = AppState;
+                DOM.statsPomodorosToday.textContent = stats.pomodorosToday;
+                DOM.statsPomodorosTotal.textContent = stats.pomodorosTotal;
+                
+                const hours = Math.floor(stats.focusTime / 3600);
+                const minutes = Math.floor((stats.focusTime % 3600) / 60);
+                DOM.statsFocusTime.textContent = `${hours}h ${minutes}m`;
+                
+                DOM.statsTasksCompleted.textContent = tasks.filter(t => t.completed).length;
+                DOM.statsTasksPending.textContent = tasks.filter(t => !t.completed).length;
+                DOM.statsStreak.textContent = stats.currentStreak;
+            },
+            recordPomodoro() {
+                const { stats, settings } = AppState;
+                this.checkDate();
+                stats.pomodorosToday++;
+                stats.pomodorosTotal++;
+                stats.focusTime += settings.pomodoroTime * 60;
+                this.updateStreak();
+                this.update();
+                Storage.save();
+            },
+            checkDate() {
+                const today = new Date().toISOString().slice(0, 10);
+                if (AppState.stats.lastPomodoroDate !== today) {
+                    AppState.stats.pomodorosToday = 0;
+                    AppState.stats.lastPomodoroDate = today;
+                }
+            },
+            updateStreak() {
+                const today = new Date();
+                const todayStr = today.toISOString().slice(0, 10);
+                const { stats } = AppState;
+
+                if (stats.lastStreakDate === todayStr) return;
+
+                const yesterday = new Date(today);
+                yesterday.setDate(today.getDate() - 1);
+                
+                if (stats.lastStreakDate === yesterday.toISOString().slice(0, 10)) {
+                    stats.currentStreak++;
+                } else {
+                    stats.currentStreak = 1;
+                }
+                stats.lastStreakDate = todayStr;
+            }
+        };
+
+        // ===================================================================================
+        // 8. LÓGICA DE AJUSTES Y APARIENCIA
+        // ===================================================================================
+        const Settings = {
+            init() {
+                this.loadInputs();
+                this.applyAll();
+            },
+            loadInputs() {
+                const { settings } = AppState;
+                DOM.pomodoroTimeInput.value = settings.pomodoroTime;
+                DOM.shortBreakTimeInput.value = settings.shortBreakTime;
+                DOM.longBreakTimeInput.value = settings.longBreakTime;
+                DOM.longBreakIntervalInput.value = settings.longBreakInterval;
+                DOM.fontSelector.value = settings.font;
+                DOM.alarmSoundSelector.value = settings.alarmSound;
+                DOM.volumeSlider.value = settings.volume;
+            },
+            save() {
+                const { settings } = AppState;
+                settings.pomodoroTime = parseInt(DOM.pomodoroTimeInput.value) || 25;
+                settings.shortBreakTime = parseInt(DOM.shortBreakTimeInput.value) || 5;
+                settings.longBreakTime = parseInt(DOM.longBreakTimeInput.value) || 15;
+                settings.longBreakInterval = parseInt(DOM.longBreakIntervalInput.value) || 4;
+                settings.font = DOM.fontSelector.value;
+                settings.alarmSound = DOM.alarmSoundSelector.value;
+                settings.volume = parseFloat(DOM.volumeSlider.value);
+                
+                this.applyFont();
+                Storage.save();
+
+                if (!AppState.timer.isActive) {
+                    Timer.reset();
+                }
+            },
+            applyAll() {
+                this.applyTheme();
+                this.applyColor();
+                this.applyFont();
+            },
+            toggleTheme() {
+                AppState.settings.theme = AppState.settings.theme === 'light' ? 'dark' : 'light';
+                this.applyTheme();
+                Storage.save();
+            },
+            applyTheme() {
+                document.documentElement.classList.toggle('dark', AppState.settings.theme === 'dark');
+                DOM.themeToggle.querySelector('span:last-child').classList.toggle('dark:translate-x-6', AppState.settings.theme === 'dark');
+            },
+            setColor(color) {
+                AppState.settings.color = color;
+                this.applyColor();
+                Storage.save();
+            },
+            applyColor() {
+                document.body.dataset.colorTheme = AppState.settings.color;
+                DOM.colorPaletteSelector.querySelectorAll('button').forEach(btn => {
+                    btn.classList.toggle('ring-2', btn.dataset.color === AppState.settings.color);
+                    btn.classList.toggle('ring-offset-2', btn.dataset.color === AppState.settings.color);
+                    btn.classList.toggle('ring-offset-surface', btn.dataset.color === AppState.settings.color);
+                });
+            },
+            applyFont() {
+                document.body.dataset.fontTheme = AppState.settings.font;
+            },
+            toggleLanguage() {
+                AppState.settings.language = AppState.settings.language === 'es' ? 'en' : 'es';
+                I18n.updateUI();
+                Storage.save();
+            },
+            exportToPDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const { stats, tasks } = AppState;
+                const lang = AppState.settings.language;
+                const now = new Date();
+
+                doc.setFontSize(18);
+                doc.text(I18n.t('pdfReportTitle'), 105, 20, null, null, 'center');
+                doc.setFontSize(10);
+                doc.text(`${I18n.t('pdfGeneratedOn')} ${now.toLocaleDateString(lang)} ${now.toLocaleTimeString(lang)}`, 105, 30, null, null, 'center');
+
+                doc.setFontSize(12);
+                const data = [
+                    [I18n.t('statsPomodorosToday'), stats.pomodorosToday],
+                    [I18n.t('statsPomodorosTotal'), stats.pomodorosTotal],
+                    [I18n.t('statsFocusTime'), `${Math.floor(stats.focusTime / 3600)}h ${Math.floor((stats.focusTime % 3600) / 60)}m`],
+                    [I18n.t('statsTasksCompleted'), tasks.filter(t => t.completed).length],
+                    [I18n.t('statsTasksPending'), tasks.filter(t => !t.completed).length],
+                    [I18n.t('statsStreak'), stats.currentStreak],
+                ];
+
+                let y = 50;
+                data.forEach(item => { doc.text(`${item[0]}: ${item[1]}`, 20, y); y += 10; });
+                doc.save(`pomodoro-report-${now.toISOString().slice(0,10)}.pdf`);
+            }
+        };
+
+        // ===================================================================================
+        // 9. LÓGICA DE SONIDO Y NOTIFICACIONES
+        // ===================================================================================
+        const Audio = {
+            audioContext: new (window.AudioContext || window.webkitAudioContext)(),
+            playAlarm() {
+                const { alarmSound, volume } = AppState.settings;
+                if (alarmSound === 'none' || !this.audioContext) return;
+
+                const osc = this.audioContext.createOscillator();
+                const gain = this.audioContext.createGain();
+                osc.connect(gain);
+                gain.connect(this.audioContext.destination);
+                gain.gain.setValueAtTime(volume, this.audioContext.currentTime);
+
+                switch (alarmSound) {
+                    case 'bell':
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(900, this.audioContext.currentTime);
+                        osc.frequency.exponentialRampToValueAtTime(1200, this.audioContext.currentTime + 0.1);
+                        osc.start();
+                        osc.stop(this.audioContext.currentTime + 0.3);
+                        break;
+                    case 'digital':
+                         osc.type = 'square';
+                         osc.frequency.setValueAtTime(1000, this.audioContext.currentTime);
+                         osc.start();
+                         osc.stop(this.audioContext.currentTime + 0.1);
+                         setTimeout(() => {
+                            const osc2 = this.audioContext.createOscillator();
+                            const gain2 = this.audioContext.createGain();
+                            osc2.connect(gain2);
+                            gain2.connect(this.audioContext.destination);
+                            gain2.gain.setValueAtTime(volume, this.audioContext.currentTime);
+                            osc2.type = 'square';
+                            osc2.frequency.setValueAtTime(1000, this.audioContext.currentTime);
+                            osc2.start();
+                            osc2.stop(this.audioContext.currentTime + 0.1);
+                         }, 150);
+                        break;
+                    case 'beep':
+                    default:
+                        osc.type = 'triangle';
+                        osc.frequency.setValueAtTime(880, this.audioContext.currentTime);
+                        osc.start();
+                        osc.stop(this.audioContext.currentTime + 0.5);
+                        break;
+                }
+            }
+        };
+        
+        const Notifications = {
+            requestPermission() {
+                 if (!('Notification' in window)) return;
+                Notification.requestPermission().then(permission => {
+                    AppState.settings.notificationsEnabled = permission === 'granted';
+                    this.updateButton();
+                    Storage.save();
+                });
+            },
+            show() {
+                if (!AppState.settings.notificationsEnabled) return;
+                
+                const title = I18n.t('notificationTitle');
+                let bodyKey = `notificationBody${AppState.timer.mode.charAt(0).toUpperCase() + AppState.timer.mode.slice(1)}`;
+                new Notification(title, { body: I18n.t(bodyKey) });
+            },
+            updateButton() {
+                const permission = Notification.permission;
+                DOM.notificationsToggle.textContent = I18n.t(permission === 'granted' ? 'btnDisable' : (permission === 'denied' ? 'btnBlocked' : 'btnEnable'));
+                DOM.notificationsToggle.disabled = permission === 'denied';
+                DOM.notificationsToggle.classList.toggle('bg-green-100', permission === 'granted');
+                DOM.notificationsToggle.classList.toggle('text-green-800', permission === 'granted');
+            }
+        };
+
+        // ===================================================================================
+        // 10. MANEJADORES DE EVENTOS
+        // ===================================================================================
+        const EventHandlers = {
+            init() {
+                DOM.navLinks.forEach(link => link.addEventListener('click', this.handleNavClick));
+                DOM.startPauseButton.addEventListener('click', () => AppState.timer.isActive ? Timer.pause() : Timer.start());
+                DOM.resetButton.addEventListener('click', () => Timer.reset());
+                DOM.nextButton.addEventListener('click', () => Timer.next());
+                DOM.taskForm.addEventListener('submit', this.handleTaskAdd);
+                DOM.taskList.addEventListener('click', this.handleTaskListClick);
+                DOM.taskList.addEventListener('focusout', this.handleTaskEditBlur);
+                DOM.taskList.addEventListener('keydown', this.handleTaskEditKey);
+                DOM.notesEditor.addEventListener('input', () => Notes.save());
+                DOM.clearNotesBtn.addEventListener('click', () => Notes.clear());
+                DOM.exportNotesBtn.addEventListener('click', () => Notes.export());
+                DOM.importNotesBtn.addEventListener('click', () => Notes.import());
+                DOM.notesFileInput.addEventListener('change', (e) => Notes.handleFileImport(e));
+                DOM.calculatorButtons.addEventListener('click', (e) => Calculator.handleButtonClick(e));
+
+                const settingsInputs = [DOM.pomodoroTimeInput, DOM.shortBreakTimeInput, DOM.longBreakTimeInput, DOM.longBreakIntervalInput, DOM.fontSelector, DOM.alarmSoundSelector, DOM.volumeSlider];
+                settingsInputs.forEach(input => input.addEventListener('input', () => Settings.save()));
+                
+                DOM.themeToggle.addEventListener('click', () => Settings.toggleTheme());
+                DOM.colorPaletteSelector.addEventListener('click', this.handleColorChange);
+                DOM.languageToggle.addEventListener('click', () => Settings.toggleLanguage());
+                DOM.notificationsToggle.addEventListener('click', () => Notifications.requestPermission());
+                DOM.exportPdfBtn.addEventListener('click', () => Settings.exportToPDF());
+
+                window.addEventListener('beforeunload', () => {
+                    if (AppState.timer.isActive) { Timer.pause(); }
+                    Storage.save();
+                });
+            },
+            handleNavClick(e) {
+                e.preventDefault();
+                const targetId = e.currentTarget.getAttribute('href').substring(1);
+
+                DOM.tabContents.forEach(tab => tab.classList.remove('active', 'fade-in'));
+                document.getElementById(targetId).classList.add('active');
+                void document.getElementById(targetId).offsetWidth; 
+                document.getElementById(targetId).classList.add('fade-in');
+
+                DOM.navLinks.forEach(link => {
+                    link.classList.toggle('text-primary', link.getAttribute('href').substring(1) === targetId);
+                    link.classList.toggle('text-muted', link.getAttribute('href').substring(1) !== targetId);
+                });
+
+                if (targetId === 'stats') Stats.update();
+                else if (targetId === 'calendar') Calendar.render();
+                else if (targetId === 'schedule') Schedule.render();
+                else if (targetId === 'tasks') Tasks.render();
+
+            },
+            handleTaskAdd(e) {
+                e.preventDefault();
+                Tasks.add(DOM.taskInput.value, DOM.taskDueDateInput.value, null);
+                DOM.taskForm.reset();
+            },
+            handleTaskListClick(e) {
+                const button = e.target.closest('button');
+                if (!button) return;
+                const id = parseInt(button.dataset.id);
+
+                if (button.classList.contains('toggle-task')) Tasks.toggle(id);
+                else if (button.classList.contains('delete-task')) Tasks.delete(id);
+                else if (button.classList.contains('breakdown-task')) Tasks.breakdownWithAI(id);
+                else if (button.classList.contains('edit-task')) {
+                    const textSpan = button.closest('.flex.items-center.justify-between').querySelector('.task-text');
+                    textSpan.contentEditable = 'true';
+                    textSpan.focus();
+                    document.execCommand('selectAll', false, null);
+                }
+            },
+            handleTaskEditBlur(e) {
+                if (e.target.classList.contains('task-text')) {
+                    e.target.contentEditable = 'false';
+                    Tasks.edit(parseInt(e.target.dataset.id), e.target.textContent);
+                }
+            },
+            handleTaskEditKey(e) {
+                 if (e.target.classList.contains('task-text') && e.key === 'Enter') {
+                    e.preventDefault();
+                    e.target.blur();
+                }
+            },
+            handleColorChange(e) {
+                if (e.target.tagName === 'BUTTON') Settings.setColor(e.target.dataset.color);
+            },
+        };
+
+        // ===================================================================================
+        // 11. FUNCIÓN DE INICIALIZACIÓN PRINCIPAL
+        // ===================================================================================
+        function main() {
+            Storage.load();
+            Timer.init();
+            Tasks.render();
+            Notes.init();
+            Schedule.init();
+            Calendar.init();
+            Calculator.init();
+            Stats.update();
+            Settings.init();
+            EventHandlers.init();
+            I18n.updateUI();
+
+            document.querySelector('.nav-link[href="#pomodoro"]').click();
+            lucide.createIcons();
+        }
+
+        main();
+    });
+    </script>
+</body>
+</html>
+
+
