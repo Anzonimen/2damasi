@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Reproductor de Audios — Calendario (Pro v8)</title>
+  <title>Reproductor de Audios — Calendario (Pro v10)</title>
   <style>
     :root{
       /* Modo Oscuro (Default) */
@@ -182,15 +182,49 @@
       overflow-y: auto;
       padding-right: 5px;
     }
-    .song-card{display:flex;gap:12px;padding:10px;border-radius:10px;background:var(--card);align-items:center;border:1px solid var(--border-color);transition:transform .12s, box-shadow .12s, opacity .2s, background-color 0.3s, border-color 0.3s;}
-    .song-card + .song-card{margin-top:10px}
-    .song-card:hover{transform:translateY(-4px);box-shadow:0 10px 30px rgba(0,0,0,0.6);border-color:rgba(0,119,255,0.12)}
+
+    /* Estilos de Tarjeta de Canción Minimalista */
+    .song-card {
+      display: grid;
+      grid-template-columns: 60px 1fr 40px; /* Portada, Meta, Botón ... */
+      gap: 12px;
+      padding: 10px;
+      border-radius: 10px;
+      align-items: center;
+      border: 1px solid transparent; 
+      transition: background-color .12s, border-color .12s, opacity .2s;
+      cursor: pointer; /* Toda la tarjeta es clickeable para reproducir */
+      position: relative;
+    }
+    .song-card + .song-card{margin-top:2px} 
+    .song-card:hover{
+      background: var(--card-hover);
+      border-color: rgba(255,255,255,0.02);
+    }
+    html.light-mode .song-card:hover {
+      border-color: rgba(0,0,0,0.05);
+    }
     .song-card.dragging { opacity: 0.4; }
     .song-card.drag-over-active { box-shadow: 0 0 0 2px var(--blue1); }
-    .cover{width:76px;height:76px;border-radius:10px;flex-shrink:0;background:#000;object-fit:cover}
-    .song-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
-    .title{font-weight:700;line-height:1.05;font-size:15px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; cursor: pointer;}
-    .title:hover { text-decoration: underline; }
+
+    .cover{width:60px;height:60px;border-radius:8px;flex-shrink:0;background:#000;object-fit:cover}
+    
+    .song-meta{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+    
+    .title{
+      font-weight:700;
+      line-height:1.2;
+      font-size:15px;
+      color: var(--text-main);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      cursor: text;
+    }
+    .song-card:hover .title {
+      text-decoration: underline;
+    }
+    
     .song-rename-input {
       width: 100%;
       background: var(--btn-hover);
@@ -203,32 +237,47 @@
       padding: 2px 4px;
       outline: none;
     }
-    .meta-small{font-size:12px;color:var(--text-muted); cursor: default; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-    .meta-small[data-action="edit-song"] {
-      cursor: pointer;
+    
+    .meta-small{
+      font-size:13px;
+      color:var(--text-muted); 
+      cursor: text; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis;
     }
-    .meta-small[data-action="edit-song"]:hover {
+    .song-card:hover .meta-small {
       text-decoration: underline;
     }
+    
     .meta-small.details {
       font-size: 11px;
       cursor: default;
+      text-decoration: none !important;
     }
-    .meta-small.details:hover { text-decoration: none; }
+        
+    .song-more-btn {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 50%;
+    }
+    .song-more-btn:hover {
+      background: var(--btn-hover);
+      color: var(--text-main);
+    }
+    .song-more-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
     
-    .action-row{display:flex;gap:8px;flex-wrap:wrap; margin-top: 4px;}
-    .action-row button{flex:1 1 48%;min-width:48%;padding:8px;border-radius:8px;border:1px solid var(--border-color);background:transparent;color:var(--text-main);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px}
-    .action-row button:hover{background:linear-gradient(90deg,var(--blue1),var(--blue2));color:#021}
-    .action-row button:focus-visible { outline: 2px solid var(--blue1); outline-offset: 1px; }
-    .action-row button.btn-remove {
-      background: rgba(255, 71, 87, 0.1);
-      border-color: rgba(255, 71, 87, 0.2);
-      color: var(--red1);
-    }
-    .action-row button.btn-remove:hover {
-      background: var(--red1);
-      color: #fff;
-    }
+    /* --- INICIO: Estilos Calendario Minimalista --- */
     .calendar-wrap{padding:12px;border-radius:12px;background:var(--card);border:1px solid var(--border-color);min-height:520px; transition: background-color 0.3s, border-color 0.3s;}
     .cal-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
     .month-controls{display:flex;gap:8px;align-items:center}
@@ -239,14 +288,41 @@
     .day.empty{background:transparent;border:0;cursor:default}
     .day:focus-visible { outline: 2px solid var(--blue1); outline-offset: 1px; }
     .date-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
-    .date-num{font-weight:800}
+    .date-num{font-weight:800; flex-shrink: 0;}
     .assigned-label{font-size:13px;color:var(--text-muted);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap; margin-left: 8px;}
-    .assigned-wrap{display:flex;align-items:center;gap:0px; flex: 1; min-width: 0;}
+    .assigned-wrap{display:flex;align-items:center;gap:0px; flex: 1; min-width: 0; position: relative;} /* Añadido relative */
     .day-cover{width:60px;height:80px;border-radius:10px;overflow:hidden;flex-shrink:0;background:#000;display:inline-block}
     .day-cover img{width:100%;height:100%;object-fit:cover;display:block}
-    .day-controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
-    .day-controls button{padding:6px 8px;border-radius:8px;border:1px solid var(--border-color);background:transparent;color:var(--text-main);cursor:pointer;font-size:13px}
-    .day-controls button:hover{background:linear-gradient(90deg,var(--blue1),var(--blue2));color:#021}
+    
+    /* Icono Play flotante */
+    .day-play-hover {
+      position: absolute;
+      top: 10px; /* Ajustado para centrarse en la portada (80px / 2 - 20px) */
+      left: 10px; /* Ajustado para centrarse en la portada (60px / 2 - 20px) */
+      width: 40px;
+      height: 40px;
+      background: rgba(0,0,0,0.6);
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease, transform 0.2s ease;
+      transform: scale(0.8);
+    }
+    .day[data-assigned="1"]:hover .day-play-hover {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .day-play-hover svg {
+      width: 24px;
+      height: 24px;
+      fill: currentColor;
+    }
+    
+    .day-controls{ display: none; } /* Ocultamos los botones de texto antiguos */
+    
     .day[data-assigned="1"]:hover{box-shadow:0 10px 30px rgba(0,119,255,0.12);transform:translateY(-4px)}
     .day[data-assigned="0"]:hover{box-shadow:0 6px 14px rgba(0,0,0,0.4);transform:translateY(-2px)}
     .day.selected{box-shadow:0 0 0 2px var(--blue1);transform:translateY(-2px)}
@@ -261,6 +337,14 @@
       align-items: center;
       margin-top: 8px;
     }
+    
+    /* Contenedor para iconos inferiores */
+    .day-icon-controls {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
     .day-note-icon {
       width: 24px;
       height: 24px;
@@ -278,6 +362,30 @@
     .day-note-icon.has-note {
       color: var(--blue1);
     }
+    
+    /* Botón "..." del día */
+    .day-more-btn {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 50%;
+      padding: 0;
+    }
+    .day-more-btn:hover {
+      background: var(--btn-hover);
+      color: var(--text-main);
+    }
+    .day-more-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: currentColor;
+    }
+    
     .ring {
       position: absolute;
       left: 50%;
@@ -298,6 +406,8 @@
       40% { transform: translate(-50%, -50%) scale(1.05); opacity: 0.6; }
       100% { transform: translate(-50%, -50%) scale(2.6); opacity: 0; }
     }
+    /* --- FIN: Estilos Calendario Minimalista --- */
+
     .player{display:flex;align-items:center;gap:12px;padding:12px;border-radius:10px;background:var(--card);border:1px solid var(--border-color); transition: background-color 0.3s, border-color 0.3s;}
     .player .cover{width:60px;height:60px;border-radius:10px;object-fit:cover}
     .player .info{flex:1;min-width:0}
@@ -465,6 +575,68 @@
     }
     .queue-remove-btn:hover { color: var(--red1); }
 
+    /* Estilos Menú Contextual */
+    .context-menu {
+      position: fixed;
+      z-index: 200;
+      background: var(--card);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      display: none;
+      padding: 6px;
+      min-width: 200px;
+    }
+    html.light-mode .context-menu {
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    }
+    .context-menu-item {
+      padding: 10px 12px;
+      font-size: 14px;
+      cursor: pointer;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .context-menu-item:hover {
+      background: var(--btn-hover);
+    }
+    .context-menu-item.danger {
+      color: var(--red1);
+    }
+    .context-menu-item.danger:hover {
+      background: rgba(255, 71, 87, 0.1);
+    }
+    .context-menu-divider {
+      height: 1px;
+      background: var(--border-color);
+      margin: 6px 0;
+    }
+
+    /* Estilos del Modal "Añadir a Playlist" */
+    #addToPlaylistModalOverlay .modal-box {
+      max-width: 350px;
+    }
+    #addToPlaylistModalList {
+      max-height: 300px;
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+    .playlist-modal-item {
+      padding: 12px 15px;
+      font-size: 15px;
+      border-bottom: 1px solid var(--border-color);
+      cursor: pointer;
+    }
+    .playlist-modal-item:last-child {
+      border-bottom: none;
+    }
+    .playlist-modal-item:hover {
+      background: var(--btn-hover);
+    }
+
 
     @media(max-width:900px){
       .main{grid-template-columns:1fr}
@@ -485,7 +657,8 @@
         .date-num { font-size: 14px; }
         .assigned-label { display: none; }
         .day-cover { width: 40px; height: 60px; border-radius: 6px; }
-        .day-controls button { font-size: 11px; padding: 4px 6px; }
+        .day-play-hover { width: 30px; height: 30px; top: 15px; left: 5px; } /* Ajustado para portadas más pequeñas */
+        .day-play-hover svg { width: 18px; height: 18px; }
         .player .controls { flex-wrap: wrap; gap: 12px; }
         .progress-wrap { order: -1; width: 100%; flex-basis: 100%; margin: 8px 0; }
         #audioVisualizer { bottom: 12px; left: 0; right: 0; width: 100%; }
@@ -510,9 +683,8 @@
       <aside class="sidebar" id="sidebar">
         <div class="controls">
           <input id="fileInput" type="file" accept="audio/*" multiple style="display:none" />
-          <input id="folderInput" type="file" webkitdirectory directory multiple style="display:none" /> <!-- NUEVO INPUT -->
-          <button id="addBtn" class="btn">Subir Audio(s)</button>
-          <button id="addFolderBtn" class="btn">Subir Carpeta (Playlist)</button> <!-- NUEVO BOTÓN -->
+          <input id="folderInput" type="file" webkitdirectory directory multiple style="display:none" />
+          <button id="addLibraryBtn" class="btn">Añadir a la biblioteca</button>
         </div>
         <div id="playlistsContainer">
           <div class="playlist-header">
@@ -585,6 +757,10 @@
     </footer>
   </div>
 
+  <div id="contextMenu" class="context-menu">
+    <!-- Contenido dinámico -->
+  </div>
+
   <!-- Modal de Alerta/Confirmación -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-box">
@@ -654,6 +830,19 @@
     </div>
   </div>
 
+  <!-- Modal "Añadir a Playlist" -->
+  <div class="modal-overlay" id="addToPlaylistModalOverlay">
+    <div class="modal-box">
+      <h3 style="margin-top:0;">Añadir a...</h3>
+      <div id="addToPlaylistModalList">
+        <!-- Lista de playlists se genera aquí -->
+      </div>
+      <div class="modal-buttons" style="margin-top: 20px;">
+        <button id="addToPlaylistModalClose" class="btn cancel">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
@@ -668,6 +857,7 @@
     let selectedPlaylistId = 'all', isRenaming = false, songSearchTerm = '';
     let draggedSongId = null, draggedSongElement = null, draggedQueueItem = null;
     let repeatMode = 'off', isShuffle = false;
+    let currentSongToAddToPlaylist = null;
     
     let playQueue = [];
     let currentQueueIndex = -1;
@@ -675,10 +865,8 @@
     // DOM Cache
     const songsContainer = document.getElementById('songsContainer');
     const fileInput = document.getElementById('fileInput');
-    const addBtn = document.getElementById('addBtn');
-    const folderInput = document.getElementById('folderInput'); // NUEVO
-    const addFolderBtn = document.getElementById('addFolderBtn'); // NUEVO
-    // const uploadCoverBtn = document.getElementById('uploadCoverBtn'); // Movido
+    const addLibraryBtn = document.getElementById('addLibraryBtn');
+    const folderInput = document.getElementById('folderInput'); 
     const exportBtn = document.getElementById('exportBtn');
     const importBtn = document.getElementById('importBtn');
     const importInput = document.getElementById('importInput');
@@ -706,7 +894,7 @@
     const searchBar = document.getElementById('searchBar');
     const shuffleBtn = document.getElementById('shuffleBtn');
     const repeatBtn = document.getElementById('repeatBtn');
-    const queueBtn = document.getElementById('queueBtn'); // Nuevo
+    const queueBtn = document.getElementById('queueBtn');
     const playIcon = playPauseBtn.querySelector('.play-icon');
     const pauseIcon = playPauseBtn.querySelector('.pause-icon');
     
@@ -742,6 +930,11 @@
     const queueClearBtn = document.getElementById('queueClearBtn');
     const queueCloseBtn = document.getElementById('queueCloseBtn');
 
+    const contextMenu = document.getElementById('contextMenu');
+    const addToPlaylistModalOverlay = document.getElementById('addToPlaylistModalOverlay');
+    const addToPlaylistModalList = document.getElementById('addToPlaylistModalList');
+    const addToPlaylistModalClose = document.getElementById('addToPlaylistModalClose');
+
     // Audio y Visualizador
     const audio = new Audio();
     const visualizerCanvas = document.getElementById('audioVisualizer');
@@ -750,7 +943,7 @@
     let visualizerInitialized = false;
     let raf = null, currentPreviewAudio = null;
 
-    // --- Lógica de Modales ---
+    // --- Lógica de Modales (Principal y Edición) ---
     function showModal(message, showCancel = false) {
       modalMessage.textContent = message;
       modalCancel.style.display = showCancel ? 'block' : 'none';
@@ -814,6 +1007,7 @@
       e.target.value = '';
     });
     
+    // --- Lógica de Modales (Nota y Cola) ---
     function showNoteModal(dateKey) {
       noteModalTitle.textContent = `Nota del ${dateKey}`;
       noteTextarea.value = calendarNotes[dateKey] || '';
@@ -840,7 +1034,6 @@
     noteSave.addEventListener('click', () => { if (noteEditResolve) noteEditResolve(true); });
     noteCancel.addEventListener('click', () => { if (noteEditResolve) noteEditResolve(false); });
 
-    // Modal de la Cola
     queueBtn.addEventListener('click', () => {
       renderQueueModal();
       queueModalOverlay.classList.add('visible');
@@ -881,17 +1074,15 @@
         const index = parseInt(item.dataset.index, 10);
         playQueue.splice(index, 1);
         if (index === currentQueueIndex) {
-          // Si se elimina la canción actual, se detiene y avanza
-          stopPlayback(false); // No limpiar cola
+          stopPlayback(false);
           if (playQueue.length > currentQueueIndex) {
-            playSongFromQueue(currentQueueIndex); // Toca la nueva canción en este índice
+            playSongFromQueue(currentQueueIndex);
           }
         } else if (index < currentQueueIndex) {
-          currentQueueIndex--; // Ajustar índice
+          currentQueueIndex--;
         }
         renderQueueModal();
       } else if (item) {
-        // Reproducir al hacer clic
         const index = parseInt(item.dataset.index, 10);
         playSongFromQueue(index);
       }
@@ -921,20 +1112,56 @@
       if (draggedQueueItem) {
         draggedQueueItem.classList.remove('dragging');
         draggedQueueItem = null;
-        
-        // Reconstruir playQueue desde el DOM
         const newQueueIndices = Array.from(queueList.querySelectorAll('.queue-item')).map(item => parseInt(item.dataset.index, 10));
         const newQueue = newQueueIndices.map(index => playQueue[index]);
         playQueue = newQueue;
-        
-        // Actualizar el índice de la canción actual
         if (currentPlayingSongId) {
           currentQueueIndex = playQueue.indexOf(currentPlayingSongId);
         }
-        renderQueueModal(); // Re-renderizar con los nuevos índices correctos
+        renderQueueModal();
       }
     });
 
+    // --- Lógica Modal "Añadir a Playlist" ---
+    function showAddToPlaylistModal(songId) {
+      currentSongToAddToPlaylist = songId;
+      const sortedPlaylists = Object.entries(playlists).sort(([,a],[,b]) => a.name.localeCompare(b.name));
+      if (sortedPlaylists.length === 0) {
+        addToPlaylistModalList.innerHTML = `<div style="padding: 20px; color: var(--text-muted); text-align: center;">No has creado ninguna playlist.</div>`;
+      } else {
+        addToPlaylistModalList.innerHTML = sortedPlaylists.map(([id, pl]) => 
+          `<div class="playlist-modal-item" data-playlist-id="${id}">${pl.name}</div>`
+        ).join('');
+      }
+      addToPlaylistModalOverlay.classList.add('visible');
+    }
+    
+    addToPlaylistModalList.addEventListener('click', async (e) => {
+      const item = e.target.closest('.playlist-modal-item');
+      if (item) {
+        const playlistId = item.dataset.playlistId;
+        const songId = currentSongToAddToPlaylist;
+        if (playlistId && songId && playlists[playlistId]) {
+          if (!playlists[playlistId].songIds.includes(songId)) {
+            playlists[playlistId].songIds.push(songId);
+            saveState();
+            await showAlert(`Añadido a "${playlists[playlistId].name}"`);
+            if (selectedPlaylistId === playlistId) {
+              renderSongs(); 
+            }
+          } else {
+            await showAlert(`Esa canción ya está en "${playlists[playlistId].name}"`);
+          }
+          addToPlaylistModalOverlay.classList.remove('visible');
+          currentSongToAddToPlaylist = null;
+        }
+      }
+    });
+    
+    addToPlaylistModalClose.addEventListener('click', () => {
+      addToPlaylistModalOverlay.classList.remove('visible');
+      currentSongToAddToPlaylist = null;
+    });
 
     // --- Utilidades y Estado ---
     function fmtDateKey(d){ const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
@@ -982,7 +1209,7 @@
         audioFiles = JSON.parse(localStorage.getItem(FILES_KEY) || '{}');
         assignments = JSON.parse(localStorage.getItem(ASSIGN_KEY) || '{}');
         playlists = JSON.parse(localStorage.getItem(PLAYLISTS_KEY) || '{}');
-        calendarNotes = JSON.parse(localStorage.getItem(CALENDAR_NOTES_KEY) || '{}'); // Nuevo
+        calendarNotes = JSON.parse(localStorage.getItem(CALENDAR_NOTES_KEY) || '{}');
       }catch(e){ audioFiles = {}; assignments = {}; playlists = {}; calendarNotes = {}; }
     }
     function saveState(){
@@ -990,7 +1217,7 @@
         localStorage.setItem(FILES_KEY, JSON.stringify(audioFiles));
         localStorage.setItem(ASSIGN_KEY, JSON.stringify(assignments));
         localStorage.setItem(PLAYLISTS_KEY, JSON.stringify(playlists));
-        localStorage.setItem(CALENDAR_NOTES_KEY, JSON.stringify(calendarNotes)); // Nuevo
+        localStorage.setItem(CALENDAR_NOTES_KEY, JSON.stringify(calendarNotes));
       }catch(e){ console.warn('saveState failed', e); }
     }
 
@@ -1030,19 +1257,16 @@
       if(keys.length === 0){
         songsContainer.innerHTML = `<div style="color:var(--text-muted); padding: 10px;">
           ${songSearchTerm ? 'No hay coincidencias.' : (selectedPlaylistId === 'all' ? 'No hay audios.' : 'Esta playlist está vacía.')}
-          ${selectedPlaylistId === 'all' ? 'Usa "Subir audio" o arrastra archivos.' : 'Arrastra canciones aquí desde "Todas las Canciones".'}
+          ${selectedPlaylistId === 'all' ? 'Usa "Añadir a la biblioteca" o arrastra archivos.' : 'Arrastra canciones aquí desde "Todas las Canciones".'}
         </div>`;
         return;
       }
+      
       songsContainer.innerHTML = keys.map(id => {
         const f = audioFiles[id];
         const title = f.name || 'Sin Título';
         const subtitle = `${f.artist || 'Artista Desconocido'} • ${f.album || 'Álbum Desconocido'}`;
         const coverSrc = f.coverDataUrl || f.dataUrl || emptyCoverSVG;
-        const isPlaylistView = selectedPlaylistId !== 'all';
-        const actionButton = isPlaylistView
-          ? `<button data-action="remove-from-playlist" class="btn-remove" title="Quitar de la playlist">Quitar</button>`
-          : `<button data-action="play" title="Reproducir esta vista">Reproducir</button>`;
           
         return `
           <div class="song-card" data-id="${id}" draggable="true">
@@ -1050,14 +1274,10 @@
             <div class="song-meta">
               <div class="title" data-action="edit-song" title="${title}">${title}</div>
               <div class="meta-small" data-action="edit-song" title="${subtitle}">${subtitle}</div>
-              <div class="meta-small details">${shortSize(f.size)} • ${new Date(f.createdAt).toLocaleString()}</div>
-              <div class="action-row">
-                ${actionButton}
-                <button data-action="add-to-queue" title="Añadir a la cola">Añadir a Cola</button>
-                <button data-action="edit" title="Editar canción">Editar</button>
-                <button data-action="delete" title="Eliminar audio">Eliminar</button>
-              </div>
             </div>
+            <button class="song-more-btn" data-action="more" title="Más opciones">
+              <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </button>
           </div>`;
       }).join('');
     }
@@ -1066,6 +1286,7 @@
       weekdayRow.innerHTML = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'].map(n => `<div>${n}</div>`).join('');
     }
 
+    // --- INICIO: Renderizado del Calendario (MODIFICADO) ---
     function renderCalendar(){
       monthLabel.textContent = current.toLocaleString('es-ES', { month: 'long' }) + ' ' + current.getFullYear();
       const first = new Date(current.getFullYear(), current.getMonth(), 1);
@@ -1075,24 +1296,27 @@
       for(let i=0;i<startWeekDay;i++) cells.push(null);
       for(let d=1; d<=totalDays; d++) cells.push(new Date(current.getFullYear(), current.getMonth(), d));
       while(cells.length % 7 !== 0) cells.push(null);
+      
       const cellsHtml = cells.map(dt => {
         if(!dt){ return '<div class="day empty"></div>'; }
+        
         const k = fmtDateKey(dt), fileId = assignments[k], file = (fileId && audioFiles[fileId]) ? audioFiles[fileId] : null;
-        const note = calendarNotes[k]; // Nuevo
+        const note = calendarNotes[k];
         const isToday = (k === todayKey), isSelected = (k === selectedDate);
         const dateNumClass = isToday ? 'date-num" style="color:var(--blue1);"' : 'date-num';
         const dayClasses = `day ${isSelected ? 'selected' : ''}`;
+        
         const coverHtml = file ? `<div class="day-cover"><img src="${file.coverDataUrl || file.dataUrl || emptyCoverSVG}" alt="mini cover" loading="lazy"></div>` : '';
         const labelHtml = file ? `<div class="assigned-label" title="${file.name}">${file.name}</div>` : '<div class="assigned-label"></div>';
         
-        // Modificado: Se renderiza un div vacío si no hay controles, para que 'space-between' funcione
-        const controlsHtml = (file || isSelected) ? `<div class="day-controls">
-            ${file ? '<button data-action="play" title="Reproducir">Play</button>' : ''}
-            ${file ? '<button data-action="add-to-queue" title="Añadir a la cola">Añadir a Cola</button>' : ''}
-            ${file ? '<button data-action="remove" title="Quitar asignación">Quitar</button>' : ''}
-          </div>` : '<div></div>'; // Añadido div vacío como placeholder
-          
-        const noteIconClass = `day-note-icon ${note ? 'has-note' : ''}`; // Nuevo
+        // Icono Play flotante
+        const playIconHover = file ? `
+          <div class="day-play-hover" data-action="play">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+          </div>` : '';
+
+        // Iconos inferiores (Nota y "...")
+        const noteIconClass = `day-note-icon ${note ? 'has-note' : ''}`;
         const noteIcon = `
           <div class="${noteIconClass}" data-action="edit-note" title="Editar nota">
             <svg viewBox="0 0 24 24">
@@ -1101,77 +1325,52 @@
                 : '<path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"></path>'
               }
             </svg>
-          </div>`; // Nuevo
+          </div>`;
+          
+        const moreBtn = `
+          <button class="day-more-btn" data-action="more-day" title="Más opciones">
+            <svg viewBox="0 0 24 24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+          </button>`;
 
         return `
           <div class="${dayClasses}" data-date-key="${k}" data-assigned="${file ? '1' : '0'}" role="button" tabindex="0" aria-label="Día ${dt.getDate()} ${file ? 'asignado a ' + file.name : 'vacío'}">
             <div class="date-top">
               <div class="${dateNumClass}">${dt.getDate()}</div>
-              <div class="assigned-wrap">${coverHtml}${labelHtml}</div>
+              <div class="assigned-wrap">
+                ${coverHtml}
+                ${labelHtml}
+                ${playIconHover}
+              </div>
             </div>
             
-            <!-- MODIFICADO: Envuelto en un 'day-bottom-row' -->
             <div class="day-bottom-row">
-              ${noteIcon}
-              ${controlsHtml}
+              <div class="day-icon-controls">
+                ${noteIcon}
+                ${moreBtn}
+              </div>
             </div>
           </div>`;
       }).join('');
       monthGrid.innerHTML = cellsHtml;
     }
+    // --- FIN: Renderizado del Calendario (MODIFICADO) ---
 
     // --- Listeners de la Biblioteca ---
     songsContainer.addEventListener('click', async (e) => {
-      const button = e.target.closest('button[data-action]');
+      const moreBtn = e.target.closest('[data-action="more"]');
       const editTrigger = e.target.closest('[data-action="edit-song"]');
       const card = e.target.closest('.song-card');
       if (!card) return;
       const id = card.dataset.id;
-      const file = audioFiles[id];
-      if (!file) return;
 
-      if (button) {
-        switch (button.dataset.action) {
-          case 'play':
-            // Construir cola desde la vista actual
-            buildQueueFromCurrentView(id);
-            break;
-          case 'add-to-queue':
-            playQueue.push(id);
-            await showAlert(`"${file.name}" añadido a la cola.`);
-            break;
-          case 'remove-from-playlist':
-            if (selectedPlaylistId !== 'all' && playlists[selectedPlaylistId]) {
-              playlists[selectedPlaylistId].songIds = playlists[selectedPlaylistId].songIds.filter(songId => songId !== id);
-              saveState();
-              renderSongs();
-            }
-            break;
-          case 'edit':
-            showEditSongModal(id);
-            break;
-          case 'delete':
-            if (await showConfirm('¿Seguro que quieres eliminar este audio? Esta acción borrará también todas sus asignaciones.')) {
-              delete audioFiles[id];
-              for(const k of Object.keys(assignments)) {
-                if(assignments[k] === id) delete assignments[k];
-              }
-              for (const plId in playlists) {
-                playlists[plId].songIds = playlists[plId].songIds.filter(songId => songId !== id);
-              }
-              // Eliminar de la cola de reproducción
-              playQueue = playQueue.filter(songId => songId !== id);
-              if (currentPlayingSongId === id) {
-                playNextInQueue();
-              }
-              saveState();
-              renderSongs();
-              renderCalendar();
-            }
-            break;
-        }
+      if (moreBtn) {
+        e.stopPropagation(); 
+        showSongContextMenu(e, id);
       } else if (editTrigger) {
+        e.stopPropagation(); 
         showEditSongModal(id);
+      } else if (card) {
+        buildQueueFromCurrentView(id);
       }
     });
 
@@ -1344,35 +1543,27 @@
         }
     });
 
-    // --- Listeners del Calendario ---
+    // --- INICIO: Listeners del Calendario (MODIFICADO) ---
     monthGrid.addEventListener('click', async (e) => {
       const day = e.target.closest('.day:not(.empty)');
       if (!day) return;
       const k = day.dataset.dateKey;
-      const button = e.target.closest('button[data-action]');
-      const noteIcon = e.target.closest('[data-action="edit-note"]'); // Nuevo
+      const moreBtn = e.target.closest('[data-action="more-day"]');
+      const noteIcon = e.target.closest('[data-action="edit-note"]');
+      const playIcon = e.target.closest('[data-action="play"]');
       const fileId = assignments[k];
 
-      if (button) {
+      if (moreBtn) {
         e.stopPropagation();
-        const action = button.dataset.action;
-        if (action === 'play' && fileId) {
-          buildQueueFromCalendar(k);
-        } else if (action === 'add-to-queue' && fileId) {
-          playQueue.push(fileId);
-          await showAlert(`"${audioFiles[fileId].name}" añadido a la cola.`);
-        } else if (action === 'remove' && fileId) {
-          if (await showConfirm('¿Quitar asignación de este día?')) {
-            delete assignments[k];
-            saveState();
-            if (k === selectedDate) selectedDate = null;
-            renderCalendar();
-          }
-        }
+        showCalendarContextMenu(e, k);
       } else if (noteIcon) {
         e.stopPropagation();
-        showNoteModal(k); // Nueva lógica
+        showNoteModal(k);
+      } else if (playIcon) {
+        e.stopPropagation();
+        if (fileId) buildQueueFromCalendar(k);
       } else {
+        // Clic en cualquier otra parte del día
         if (fileId && audioFiles[fileId]) {
           buildQueueFromCalendar(k);
         } else {
@@ -1382,17 +1573,21 @@
         }
       }
     });
+    // --- FIN: Listeners del Calendario (MODIFICADO) ---
 
     // --- Lógica de Subida de Archivos ---
-    addBtn.addEventListener('click', () => fileInput.click());
+    addLibraryBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showAddLibraryMenu(e);
+    });
+
     fileInput.addEventListener('change', async (e) => {
       const files = Array.from(e.target.files || []);
       for(const f of files) if(f.type && f.type.startsWith('audio/')) await handleFileUpload(f, null);
       e.target.value=''; saveState(); renderSongs(); renderCalendar();
     });
 
-    addFolderBtn.addEventListener('click', () => folderInput.click()); // NUEVO
-    folderInput.addEventListener('change', async (e) => { // NUEVO
+    folderInput.addEventListener('change', async (e) => {
       const files = Array.from(e.target.files || []);
       const audioFilesToUpload = files.filter(f => f.type && f.type.startsWith('audio/'));
       
@@ -1411,15 +1606,16 @@
       await showAlert(`Creando playlist "${folderName}" con ${audioFilesToUpload.length} canciones. La subida comenzará...`);
       
       for (const file of audioFilesToUpload) {
-        const newSongId = await uploadFile(file); // uploadFile ya añade a audioFiles y guarda
-        newPlaylist.songIds.push(newSongId);
+        const newSongId = await uploadFile(file);
+        if (newSongId) {
+          newPlaylist.songIds.push(newSongId);
+        }
       }
       
       playlists[newPlaylistId] = newPlaylist;
       e.target.value = '';
-      saveState(); // Guardar la nueva playlist
+      saveState();
       
-      // Seleccionar y mostrar la nueva playlist
       selectedPlaylistId = newPlaylistId;
       searchBar.value = ''; songSearchTerm = '';
       renderPlaylists();
@@ -1429,6 +1625,7 @@
 
     async function handleFileUpload(file, dateKey){
       const id = await uploadFile(file);
+      if (!id) return null;
       if(dateKey){
         assignments[dateKey] = id;
         selectedDate = dateKey;
@@ -1438,6 +1635,21 @@
     }
 
     async function uploadFile(file){
+      const cleanName = file.name.replace(/\.[^\.]+$/, '');
+      const artist = 'Artista Desconocido';
+      
+      const existingFile = Object.values(audioFiles).find(f => 
+        f.name.toLowerCase() === cleanName.toLowerCase() &&
+        f.artist.toLowerCase() === artist.toLowerCase()
+      );
+      
+      if (existingFile) {
+        const proceed = await showConfirm(`La canción "${cleanName}" (con el mismo artista) ya existe en tu biblioteca. ¿Quieres añadirla de todos modos?`);
+        if (!proceed) {
+          return null;
+        }
+      }
+
       return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = async () => {
@@ -1449,12 +1661,11 @@
             if(maybe) cover = await maybe;
           }catch(err){ console.warn('Error reading cover art', err) }
           const id = 'f_' + Date.now() + '_' + Math.random().toString(36).slice(2,9);
-          const cleanName = file.name.replace(/\.[^\.]+$/, '');
           const ext = file.name.match(/\.[^\.]+$/)?.[0] || '';
           
           audioFiles[id] = { 
             name: cleanName, 
-            artist: 'Artista Desconocido', 
+            artist: artist,
             album: 'Álbum Desconocido',
             ext: ext,
             size: file.size, 
@@ -1468,6 +1679,170 @@
         reader.readAsDataURL(file);
       });
     }
+    
+    // --- Lógica del Menú Contextual ---
+    function closeContextMenu(e) {
+      if (e && e.target.closest('.context-menu')) return;
+      contextMenu.style.display = 'none';
+      contextMenu.innerHTML = '';
+    }
+    
+    function showAddLibraryMenu(e) {
+      const rect = e.target.getBoundingClientRect();
+      contextMenu.innerHTML = `
+        <div class="context-menu-item" data-action="upload-file">Subir Archivo(s)</div>
+        <div class="context-menu-item" data-action="upload-folder">Subir Carpeta (como Playlist)</div>
+      `;
+      contextMenu.style.left = `${rect.left}px`;
+      contextMenu.style.top = `${rect.bottom + 5}px`;
+      contextMenu.style.display = 'block';
+    }
+    
+    function showSongContextMenu(e, songId) {
+      const file = audioFiles[songId];
+      if (!file) return;
+      const isPlaylistView = selectedPlaylistId !== 'all';
+      
+      contextMenu.innerHTML = `
+        <div class="context-menu-item" data-action="play-song" data-id="${songId}">Reproducir</div>
+        <div class="context-menu-item" data-action="add-to-queue-song" data-id="${songId}">Añadir a la cola</div>
+        <div class="context-menu-item" data-action="add-to-playlist" data-id="${songId}">Añadir a playlist...</div>
+        <div class="context-menu-divider"></div>
+        ${isPlaylistView 
+          ? `<div class="context-menu-item" data-action="remove-from-playlist" data-id="${songId}">Quitar de esta playlist</div>` 
+          : ''}
+        <div class="context-menu-item" data-action="edit-song" data-id="${songId}">Editar</div>
+        <div class="context-menu-item danger" data-action="delete-song" data-id="${songId}">Eliminar</div>
+      `;
+      
+      positionContextMenu(e);
+    }
+    
+    // --- INICIO: Nuevo Menú Contextual del Calendario ---
+    function showCalendarContextMenu(e, dateKey) {
+      const fileId = assignments[dateKey];
+      const file = audioFiles[fileId];
+      const note = calendarNotes[dateKey];
+
+      contextMenu.innerHTML = `
+        ${file ? `<div class="context-menu-item" data-action="play-day" data-key="${dateKey}">Reproducir</div>` : ''}
+        ${file ? `<div class="context-menu-item" data-action="add-to-queue-day" data-key="${dateKey}">Añadir a la cola</div>` : ''}
+        ${file ? `<div class="context-menu-item danger" data-action="remove-day" data-key="${dateKey}">Quitar asignación</div>` : ''}
+        ${file ? `<div class="context-menu-divider"></div>` : ''}
+        <div class="context-menu-item" data-action="edit-note-day" data-key="${dateKey}">${note ? 'Editar nota' : 'Añadir nota'}</div>
+      `;
+      
+      positionContextMenu(e);
+    }
+    
+    function positionContextMenu(e) {
+      const x = e.clientX, y = e.clientY;
+      const menuWidth = 200; 
+      const menuHeight = contextMenu.offsetHeight;
+      
+      const finalX = (x + menuWidth > window.innerWidth) ? window.innerWidth - menuWidth - 10 : x;
+      const finalY = (y + menuHeight > window.innerHeight) ? window.innerHeight - menuHeight - 10 : y;
+
+      contextMenu.style.left = `${finalX}px`;
+      contextMenu.style.top = `${finalY}px`;
+      contextMenu.style.display = 'block';
+    }
+    // --- FIN: Nuevo Menú Contextual del Calendario ---
+
+    async function handleContextMenuClick(e) {
+      const item = e.target.closest('.context-menu-item');
+      if (!item) return;
+      
+      const action = item.dataset.action;
+      const songId = item.dataset.id;
+      const dateKey = item.dataset.key;
+      const file = audioFiles[songId];
+
+      closeContextMenu(); // Ocultar menú en cualquier acción
+
+      switch (action) {
+        // Acciones de Subida
+        case 'upload-file':
+          fileInput.click();
+          break;
+        case 'upload-folder':
+          folderInput.click();
+          break;
+        
+        // Acciones de Canción
+        case 'play-song':
+          if (file) buildQueueFromCurrentView(songId);
+          break;
+        case 'add-to-queue-song':
+          if (file) {
+            playQueue.push(songId);
+            await showAlert(`"${file.name}" añadido a la cola.`);
+          }
+          break;
+        case 'add-to-playlist':
+          if (file) showAddToPlaylistModal(songId);
+          break;
+        case 'remove-from-playlist':
+          if (file && selectedPlaylistId !== 'all' && playlists[selectedPlaylistId]) {
+            playlists[selectedPlaylistId].songIds = playlists[selectedPlaylistId].songIds.filter(id => id !== songId);
+            saveState();
+            renderSongs();
+          }
+          break;
+        case 'edit-song':
+          if (file) showEditSongModal(songId);
+          break;
+        case 'delete-song':
+          if (file) {
+            if (await showConfirm('¿Seguro que quieres eliminar este audio? Esta acción borrará también todas sus asignaciones.')) {
+              delete audioFiles[songId];
+              for(const k of Object.keys(assignments)) {
+                if(assignments[k] === songId) delete assignments[k];
+              }
+              for (const plId in playlists) {
+                playlists[plId].songIds = playlists[plId].songIds.filter(id => id !== songId);
+              }
+              playQueue = playQueue.filter(id => id !== songId);
+              if (currentPlayingSongId === songId) {
+                playNextInQueue();
+              }
+              saveState();
+              renderSongs();
+              renderCalendar();
+            }
+          }
+          break;
+          
+        // --- INICIO: Acciones del Calendario ---
+        case 'play-day':
+          if (dateKey) buildQueueFromCalendar(dateKey);
+          break;
+        case 'add-to-queue-day':
+          const dayFileId = assignments[dateKey];
+          if (dayFileId && audioFiles[dayFileId]) {
+            playQueue.push(dayFileId);
+            await showAlert(`"${audioFiles[dayFileId].name}" añadido a la cola.`);
+          }
+          break;
+        case 'remove-day':
+          if (dateKey && assignments[dateKey]) {
+            if (await showConfirm('¿Quitar asignación de este día?')) {
+              delete assignments[dateKey];
+              saveState();
+              if (dateKey === selectedDate) selectedDate = null;
+              renderCalendar();
+            }
+          }
+          break;
+        case 'edit-note-day':
+          if (dateKey) showNoteModal(dateKey);
+          break;
+        // --- FIN: Acciones del Calendario ---
+      }
+    }
+    
+    document.addEventListener('click', closeContextMenu);
+    contextMenu.addEventListener('click', handleContextMenuClick);
 
     // --- Import/Export/Clear/Theme ---
     exportBtn.addEventListener('click', () => {
@@ -1517,7 +1892,7 @@
     }
     themeToggleBtn.addEventListener('click', toggleTheme);
 
-    // --- Lógica del Reproductor (REHECHA) ---
+    // --- Lógica del Reproductor ---
     
     function buildQueueFromCurrentView(startSongId) {
       let keys;
@@ -1567,7 +1942,6 @@
         if (playQueue.length === 1) playSongFromQueue(0);
         return;
       };
-      // Barajar todo excepto el elemento actual
       const currentSongId = playQueue.splice(currentQueueIndex, 1)[0];
       for (let i = playQueue.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
@@ -1591,7 +1965,7 @@
       const songId = playQueue[index];
       const file = audioFiles[songId];
       if (!file) {
-        playNextInQueue(); // Saltar si el archivo no existe
+        playNextInQueue();
         return;
       }
 
@@ -1608,7 +1982,6 @@
         updatePlayerUI(file);
         startRAF();
         
-        // Buscar si esta canción está en el calendario para pulso
         const dateKey = Object.keys(assignments).find(key => assignments[key] === songId);
         if (dateKey) {
           triggerPulseOnDate(dateKey);
@@ -1638,7 +2011,7 @@
 
     function playPrevInQueue() {
       if (audio.currentTime > 3 || currentQueueIndex === 0) {
-        audio.currentTime = 0; // Reiniciar canción
+        audio.currentTime = 0;
       } else if (currentQueueIndex > 0) {
         playSongFromQueue(currentQueueIndex - 1);
       }
@@ -1795,7 +2168,7 @@
           const pct = (audio.currentTime / audio.duration) * 100; 
           progressFill.style.width = pct + '%'; 
         }
-        drawVisualizer(); // Dibujar visualizador en cada frame
+        drawVisualizer();
         raf = requestAnimationFrame(tick); 
       } 
       raf = requestAnimationFrame(tick); 
@@ -1851,8 +2224,10 @@
         if (filesToUpload.length > 0) {
             await showAlert(`Se encontraron ${filesToUpload.length} archivos de audio. Subiendo...`);
             for (const file of filesToUpload) {
-                await handleFileUpload(file, dateKey);
-                assigned = true;
+                const newId = await handleFileUpload(file, dateKey);
+                if (newId) {
+                  assigned = true;
+                }
             }
         }
         return assigned;
@@ -1916,7 +2291,7 @@
       e.preventDefault();
       let node = e.target;
       while(node){
-        if(node.classList && (node.classList.contains('day') || node === monthGrid || node === playlistsContainer || node === songsContainer)) return;
+        if(node.classList && (node.classList.contains('day') || node === monthGrid || node === playlistsContainer || node === songsContainer || node.closest('.context-menu'))) return;
         node = node.parentElement;
       }
       if (e.dataTransfer.items && e.dataTransfer.items.length > 0) handleDrop(e, null);
@@ -1965,3 +2340,5 @@
   </script>
 </body>
 </html>
+
+
