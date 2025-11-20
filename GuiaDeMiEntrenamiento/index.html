@@ -636,14 +636,18 @@
           const validateAndFinish = () => {
               const newErrors = [];
               Object.entries(currentWorkoutData).forEach(([name, data]) => {
-                  if (data.completed && (data.reps === 0 || data.reps === '0' || !data.reps)) {
+                  // Validación estricta: debe tener series > 0 Y repeticiones > 0 si está marcado como completado
+                  const invalidReps = data.reps === 0 || data.reps === '0' || !data.reps;
+                  const invalidSets = data.sets === 0 || data.sets === '0' || !data.sets;
+
+                  if (data.completed && (invalidReps || invalidSets)) {
                       newErrors.push(name);
                   }
               });
               
               if (newErrors.length > 0) {
                   setErrors(newErrors);
-                  showToast("Error: Ejercicios completados con 0 repeticiones.");
+                  showToast("Error: Ejercicios completados deben tener series y repeticiones.");
                   return;
               }
               
