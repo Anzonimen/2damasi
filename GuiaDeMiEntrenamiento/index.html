@@ -608,9 +608,11 @@
           handleFinishWorkout, 
           setShowPlateCalc, 
           darkMode, 
-          cardClass 
+          cardClass,
+          showToast
         }) => {
           const [expandedInfo, setExpandedInfo] = useState({});
+          const [errors, setErrors] = useState([]);
           
           const toggleInfo = (name) => {
             setExpandedInfo(prev => ({...prev, [name]: !prev[name]}));
@@ -629,6 +631,24 @@
           const toggleCompletion = (exerciseName) => {
               const current = currentWorkoutData[exerciseName]?.completed || false;
               updateExercise(exerciseName, 'completed', !current);
+          };
+
+          const validateAndFinish = () => {
+              const newErrors = [];
+              Object.entries(currentWorkoutData).forEach(([name, data]) => {
+                  if (data.completed && (data.reps === 0 || data.reps === '0' || !data.reps)) {
+                      newErrors.push(name);
+                  }
+              });
+              
+              if (newErrors.length > 0) {
+                  setErrors(newErrors);
+                  showToast("Error: Ejercicios completados con 0 repeticiones.");
+                  return;
+              }
+              
+              setErrors([]);
+              handleFinishWorkout();
           };
 
           const totalExercises = routine.blocks.reduce((acc, block) => acc + block.exercises.length, 0);
@@ -666,10 +686,12 @@
                       {block.exercises.map((ex, eIdx) => {
                         const storedData = currentWorkoutData[ex.name] || {};
                         const data = { sets: 0, reps: 0, weight: '', completed: false, ...storedData };
+                        const isError = errors.includes(ex.name);
+                        
                         return (
                           <div 
                             key={ex.name} 
-                            className={`p-4 rounded-xl border transition-all ${data.completed ? (darkMode ? 'bg-green-900/10 border-green-900/30' : 'bg-green-50 border-green-200') : cardClass}`}
+                            className={`p-4 rounded-xl border transition-all ${isError ? 'border-red-500 bg-red-500/10' : (data.completed ? (darkMode ? 'bg-green-900/10 border-green-900/30' : 'bg-green-50 border-green-200') : cardClass)}`}
                           >
                             <div className="flex justify-between items-start mb-4">
                               <div>
@@ -771,7 +793,7 @@
               </div>
               <div className="mt-8 mb-8">
                  <button 
-                   onClick={handleFinishWorkout}
+                   onClick={validateAndFinish}
                    className="w-full py-4 rounded-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg hover:shadow-amber-900/30 transform hover:scale-[1.02] transition-all"
                  >
                    Suficiente por hoy (Finalizar)
@@ -962,6 +984,10 @@
           const [workoutNotes, setWorkoutNotes] = useState(''); 
           const fileInputRef = useRef(null);
 
+          const showToast = (msg) => {
+             setToast({ show: true, msg });
+          };
+
           useEffect(() => {
             const savedHistory = localStorage.getItem('anzos_history');
             const savedTheme = localStorage.getItem('anzos_theme');
@@ -1004,7 +1030,7 @@
 
           const handleFinishWorkout = () => {
             if (Object.keys(currentWorkoutData).length === 0) {
-              setToast({ show: true, msg: "No has registrado ningún ejercicio." });
+              showToast("No has registrado ningún ejercicio.");
               return;
             }
             const newRecord = {
@@ -1020,7 +1046,7 @@
             setHistory(updatedHistory);
             localStorage.setItem('anzos_history', JSON.stringify(updatedHistory));
             
-            setToast({ show: true, msg: "¡Entrenamiento guardado!" });
+            showToast("¡Entrenamiento guardado!");
             setCurrentWorkoutData({});
             setWorkoutNotes('');
             setTimerRunning(false);
@@ -1035,7 +1061,7 @@
                   const newHistory = history.filter(h => h.id !== sessionId);
                   setHistory(newHistory);
                   localStorage.setItem('anzos_history', JSON.stringify(newHistory));
-                  setToast({ show: true, msg: "Registro eliminado" });
+                  showToast("Registro eliminado");
               }
           };
 
@@ -1045,7 +1071,7 @@
               const text = `🔥 Anzo's Style - Entrenamiento Completado\n🏋️‍♂️ ${session.routineName}\n📅 ${new Date(session.date).toLocaleDateString()}\n⏱️ Tiempo: ${time}\n🏆 Ejercicios: ${exercisesCount}\n\n¡Seguimos sumando! 💪`;
               
               navigator.clipboard.writeText(text).then(() => {
-                  setToast({ show: true, msg: "Resumen copiado al portapapeles" });
+                  showToast("Resumen copiado al portapapeles");
               }, () => {
                   alert("No se pudo copiar al portapapeles");
               });
@@ -1061,7 +1087,7 @@
                      if (Array.isArray(importedData)) {
                          setHistory(importedData);
                          localStorage.setItem('anzos_history', JSON.stringify(importedData));
-                         setToast({ show: true, msg: "Datos importados con éxito" });
+                         showToast("Datos importados con éxito");
                          setShowSettings(false);
                      } else {
                          alert("Formato de archivo inválido");
@@ -1221,7 +1247,7 @@
                           if(confirm("¿Estás seguro? Esta acción es irreversible.")) {
                             setHistory([]);
                             localStorage.removeItem('anzos_history');
-                            setToast({ show: true, msg: "Historial eliminado" });
+                            showToast("Historial eliminado");
                             setShowSettings(false);
                           }
                         }}
@@ -1306,6 +1332,7 @@
                     setShowPlateCalc={setShowPlateCalc}
                     darkMode={darkMode}
                     cardClass={cardClass}
+                    showToast={showToast}
                   />
                 )}
                 {view === 'stats' && (
