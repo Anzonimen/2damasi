@@ -123,6 +123,12 @@
         const Save = ({ className, size = 24 }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         );
+        const Trash2 = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+        );
+        const Share2 = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+        );
 
         // --- DATA ---
         const ROUTINES = {
@@ -775,7 +781,7 @@
           );
         };
 
-        const StatsView = ({ history, cardClass }) => {
+        const StatsView = ({ history, cardClass, onDelete, onShare }) => {
           const totalWorkouts = history.length;
           const [rmWeight, setRmWeight] = useState('');
           const [rmReps, setRmReps] = useState('');
@@ -909,8 +915,21 @@
                                       <p className="font-bold text-lg">{session.routineName}</p>
                                       <p className="text-sm opacity-60">{new Date(session.date).toLocaleDateString()} &bull; {formatTime(session.duration || 0)}</p>
                                   </div>
-                                  <div className="text-right">
-                                      <p className="font-mono text-sm">{Object.keys(session.exercises).length} Ejer.</p>
+                                  <div className="flex items-center gap-2">
+                                      <button 
+                                        onClick={() => onShare(session)}
+                                        className="p-2 rounded-full hover:bg-stone-500/20 text-stone-500 transition-colors"
+                                        title="Compartir resumen"
+                                      >
+                                         <Share2 size={18} />
+                                      </button>
+                                      <button 
+                                        onClick={() => onDelete(session.id)}
+                                        className="p-2 rounded-full hover:bg-red-500/20 text-stone-500 hover:text-red-500 transition-colors"
+                                        title="Eliminar registro"
+                                      >
+                                         <Trash2 size={18} />
+                                      </button>
                                   </div>
                               </div>
                               {session.notes && (
@@ -1009,6 +1028,27 @@
             setTimerVisible(false);
             setView('home');
             scrollToTop();
+          };
+
+          const handleDeleteSession = (sessionId) => {
+              if(confirm("¿Seguro que quieres borrar este entrenamiento?")) {
+                  const newHistory = history.filter(h => h.id !== sessionId);
+                  setHistory(newHistory);
+                  localStorage.setItem('anzos_history', JSON.stringify(newHistory));
+                  setToast({ show: true, msg: "Registro eliminado" });
+              }
+          };
+
+          const handleShareSession = (session) => {
+              const exercisesCount = Object.keys(session.exercises).length;
+              const time = formatTime(session.duration);
+              const text = `🔥 Anzo's Style - Entrenamiento Completado\n🏋️‍♂️ ${session.routineName}\n📅 ${new Date(session.date).toLocaleDateString()}\n⏱️ Tiempo: ${time}\n🏆 Ejercicios: ${exercisesCount}\n\n¡Seguimos sumando! 💪`;
+              
+              navigator.clipboard.writeText(text).then(() => {
+                  setToast({ show: true, msg: "Resumen copiado al portapapeles" });
+              }, () => {
+                  alert("No se pudo copiar al portapapeles");
+              });
           };
 
           const handleImportBackup = (event) => {
@@ -1272,6 +1312,8 @@
                   <StatsView 
                     history={history}
                     cardClass={cardClass}
+                    onDelete={handleDeleteSession}
+                    onShare={handleShareSession}
                   />
                 )}
               </main>
