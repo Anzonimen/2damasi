@@ -1,1293 +1,1411 @@
 <!DOCTYPE html>
-<html lang="es" class="">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Anzo's Style</title>
     
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS --><script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400..700;1,400..700&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap" rel="stylesheet">
-    
-    <!-- XLSX.js CDN (para exportar a Excel) -->
-    <!-- Añadido shim para compatibilidad con ES5 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/shim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    
-    <!-- Estilos personalizados -->
-    <style>
-        /* Asignación de fuentes */
-        body {
-            /* Merriweather como fuente principal 'sans' */
-            font-family: 'Merriweather', 'Times New Roman', serif;
-        }
-        
-        /* Lora para títulos y elementos destacados */
-        .font-lora {
-            font-family: 'Lora', 'Times New Roman', serif;
-        }
-        
-        /* Merriweather para el cuerpo de texto */
-        .font-merriweather {
-            font-family: 'Merriweather', 'Times New Roman', serif;
-        }
-
-        /* Animación del Loader */
-        @keyframes pulse-loader {
-            0%, 100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.7;
-                transform: scale(1.05);
-            }
-        }
-        #loader {
-            animation: pulse-loader 2s ease-in-out infinite;
-        }
-        
-        /* Animación suave de aparición */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-
-        /* Transición suave de altura para el menú móvil */
-        #menu-links {
-            transition: max-height 0.3s ease-out;
-        }
-        
-        /* Estilos para scroll-behavior (aunque JS lo manejará) */
-        html {
-            scroll-behavior: smooth;
-        }
-        
-        /* Estilos de scrollbar personalizados */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #a8a8a8;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #888;
-        }
-        
-        /* Estilos de scrollbar modo oscuro */
-        .dark ::-webkit-scrollbar-track {
-            background: #2d3748; /* gray-800 */
-        }
-        .dark ::-webkit-scrollbar-thumb {
-            background: #718096; /* gray-500 */
-        }
-        .dark ::-webkit-scrollbar-thumb:hover {
-            background: #a0aec0; /* gray-400 */
-        }
-        
-        /* Ocultar flechas en input[type=number] */
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
-        input[type=number] {
-            -moz-appearance: textfield;
-        }
-    </style>
-</head>
-<body class="bg-gray-100 dark:bg-gray-900 text-gray-800 dark:text-gray-200 font-merriweather transition-colors duration-300">
-
-    <!-- ==== Loader ==== -->
-    <div id="loader" class="fixed inset-0 z-[100] flex items-center justify-center bg-gray-100 dark:bg-gray-900">
-        <h1 class="text-4xl md:text-5xl font-lora font-bold text-blue-600 dark:text-blue-400">Anzo's Style</h1>
-    </div>
-
-    <!-- ==== Header ==== -->
-    <header class="sticky top-0 z-40 w-full bg-white/90 dark:bg-gray-800/90 backdrop-blur-lg shadow-md transition-colors duration-300">
-        <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
-                <!-- Logo/Título -->
-                <div class="flex-shrink-0">
-                    <a href="#" data-page="home" class="text-2xl font-lora font-bold text-blue-600 dark:text-blue-400">Anzo's Style</a>
-                </div>
-                
-                <!-- Menú de Navegación (Escritorio) -->
-                <div class="hidden md:block">
-                    <div class="ml-10 flex items-center space-x-4">
-                        <a href="#" data-page="start-routine" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400">Comenzar Rutina</a>
-                        <a href="#" data-page="routine-chest" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400">Pecho y Tríceps</a>
-                        <a href="#" data-page="routine-back" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400">Espalda y Bíceps</a>
-                        <a href="#" data-page="routine-leg" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400">Pierna</a>
-                        <a href="#" data-page="routine-shoulders" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400">Deltoides y Trapecio</a>
-                        <a href="#" data-page="stats" class="nav-link px-3 py-2 rounded-md text-sm font-medium hover:text-blue-600 dark:hover:text-blue-400">Estadísticas</a>
-                    </div>
-                </div>
-
-                <!-- Icono de Configuración y Menú Móvil -->
-                <div class="flex items-center">
-                    <!-- Icono de Configuración -->
-                    <button id="settings-toggle" class="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700 focus:outline-none">
-                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
-                    </button>
-
-                    <!-- Botón Menú Móvil -->
-                    <div class="-mr-2 flex md:hidden ml-2">
-                        <button id="menu-toggle" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white" aria-controls="menu-links" aria-expanded="false">
-                            <span class="sr-only">Abrir menú principal</span>
-                            <!-- Icono de hamburguesa -->
-                            <svg id="menu-icon-open" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                            <!-- Icono de X -->
-                            <svg id="menu-icon-close" class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Panel Menú Móvil -->
-            <div class="md:hidden hidden max-h-0" id="menu-links">
-                <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                    <a href="#" data-page="start-routine" class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:text-blue-600 dark:hover:text-blue-400">Comenzar Rutina</a>
-                    <a href="#" data-page="routine-chest" class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:text-blue-600 dark:hover:text-blue-400">Pecho y Tríceps</a>
-                    <a href="#" data-page="routine-back" class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:text-blue-600 dark:hover:text-blue-400">Espalda y Bíceps</a>
-                    <a href="#" data-page="routine-leg" class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:text-blue-600 dark:hover:text-blue-400">Pierna</a>
-                    <a href="#" data-page="routine-shoulders" class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:text-blue-600 dark:hover:text-blue-400">Deltoides y Trapecio</a>
-                    <a href="#" data-page="stats" class="nav-link block px-3 py-2 rounded-md text-base font-medium hover:text-blue-600 dark:hover:text-blue-400">Estadísticas</a>
-                </div>
-            </div>
-        </nav>
-    </header>
-
-    <!-- ==== Panel de Configuración (Dropdown) ==== -->
-    <div id="settings-panel" class="hidden absolute top-16 right-4 z-30 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 transition-all duration-300 transform origin-top-right">
-        <div class="p-4 space-y-4">
-            <!-- Modo Claro/Oscuro -->
-            <div class="flex items-center justify-between">
-                <span class="text-sm font-medium">Modo Oscuro</span>
-                <button id="dark-mode-toggle" class="relative inline-flex flex-shrink-0 h-6 w-11 border-2 border-transparent rounded-full cursor-pointer transition-colors ease-in-out duration-200 focus:outline-none bg-gray-200 dark:bg-blue-600">
-                    <span class="sr-only">Toggle Dark Mode</span>
-                    <span class="inline-block w-5 h-5 rounded-full bg-white shadow transform transition ease-in-out duration-200 translate-x-0 dark:translate-x-5"></span>
-                </button>
-            </div>
-            
-            <!-- Reiniciar Estadísticas -->
-            <div>
-                <button id="reset-stats-btn" class="w-full text-left px-3 py-2 rounded-md text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors duration-200">
-                    Reiniciar Estadísticas
-                </button>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- ==== Contenido Principal (SPA) ==== -->
-    <main id="app-content" class="container mx-auto p-4 sm:p-6 lg:p-8">
-
-        <!-- ==== Página: Home ==== -->
-        <section id="home" class="app-page fade-in">
-            <div class="text-center max-w-3xl mx-auto bg-white dark:bg-gray-800 p-8 md:p-12 rounded-xl shadow-lg">
-                <h1 class="text-4xl md:text-5xl font-lora font-bold text-gray-900 dark:text-white mb-8">
-                    Bienvenido a tu viaje
-                </h1>
-                <div class="space-y-6 text-left text-base md:text-lg leading-relaxed text-gray-700 dark:text-gray-300">
-                    <p>Hola, soy Antonio, un apasionado del entrenamiento y del desarrollo personal. Hace más de dos años decidí dar un paso importante: empezar a cuidarme, tanto física como mentalmente. Desde entonces, el gimnasio se ha convertido en mucho más que un lugar donde entreno; es el espacio donde me desafío, crezco y descubro de lo que realmente soy capaz.</p>
-                    <p>A lo largo de este camino he aprendido que el progreso no solo se mide en kilos levantados o centímetros ganados, sino en constancia, disciplina y actitud. Mi cuerpo ha cambiado, sí, pero sobre todo ha cambiado mi forma de pensar, mi confianza y mi manera de afrontar la vida.</p>
-                    <p>Después de muchas horas de práctica, errores y aprendizajes, he desarrollado una forma de entrenar que se adapta a mí y me permite mejorar día a día. Y aunque sé que cada persona es única, quiero compartir mi experiencia para que otros puedan encontrar su propio camino hacia una versión mejor de sí mismos.</p>
-                    <p>Esta página nace con un propósito: inspirarte, motivarte y acompañarte en tu proceso. Aquí compartiré mis rutinas, consejos, reflexiones y todo lo que me ha ayudado a mantenerme constante, incluso cuando las ganas flaquean. Porque entrenar no es solo una cuestión de fuerza física, sino también de mentalidad, constancia y pasión.</p>
-                    <p>Si estás aquí, es porque quieres dar un paso más. Quiero que sepas que puedes lograrlo, y que con esfuerzo y dedicación los resultados llegan. Este no es solo mi viaje, también puede ser el tuyo.</p>
-                </div>
-                <button data-page="start-routine" class="nav-link mt-10 px-8 py-3 bg-blue-600 text-white text-lg font-lora font-semibold rounded-full shadow-lg hover:bg-blue-700 transform hover:scale-105 transition-all duration-300">
-                    Comenzar Rutina
-                </button>
-            </div>
-        </section>
-
-        <!-- ==== Página: Comenzar Rutina ==== -->
-        <section id="start-routine" class="app-page hidden">
-            
-            <!-- Vista 1: Selección de Rutina -->
-            <div id="routine-selection" class="fade-in">
-                <h2 class="text-3xl md:text-4xl font-lora font-bold text-center mb-10">Selecciona tu Rutina</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    
-                    <!-- Card Pecho -->
-                    <div class="routine-card bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl">
-                        <div class="p-6 text-center">
-                            <h3 class="text-2xl font-lora font-semibold mb-4">Pecho y Tríceps</h3>
-                            <button data-routine="chest" class="select-routine-btn w-full px-6 py-2 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition-colors duration-300">
-                                Seleccionar rutina
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Card Espalda -->
-                    <div class="routine-card bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl">
-                        <div class="p-6 text-center">
-                            <h3 class="text-2xl font-lora font-semibold mb-4">Espalda y Bíceps</h3>
-                            <button data-routine="back" class="select-routine-btn w-full px-6 py-2 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition-colors duration-300">
-                                Seleccionar rutina
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Card Pierna -->
-                    <div class="routine-card bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl">
-                        <div class="p-6 text-center">
-                            <h3 class="text-2xl font-lora font-semibold mb-4">Pierna</h3>
-                            <button data-routine="leg" class="select-routine-btn w-full px-6 py-2 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition-colors duration-300">
-                                Seleccionar rutina
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- Card Deltoides -->
-                    <div class="routine-card bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden transform hover:-translate-y-2 transition-all duration-300 hover:shadow-2xl">
-                        <div class="p-6 text-center">
-                            <h3 class="text-2xl font-lora font-semibold mb-4">Deltoides y Trapecio</h3>
-                            <button data-routine="shoulders" class="select-routine-btn w-full px-6 py-2 bg-blue-600 text-white font-semibold rounded-full hover:bg-blue-700 transition-colors duration-300">
-                                Seleccionar rutina
-                            </button>
-                        </div>
-                    </div>
-                    
-                </div>
-            </div>
-            
-            <!-- Vista 2: Seguimiento de Rutina (se rellena con JS) -->
-            <div id="routine-tracker" class="hidden fade-in">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 id="tracker-title" class="text-3xl md:text-4xl font-lora font-bold"></h2>
-                    <button id="back-to-selection" class="text-sm text-blue-600 dark:text-blue-400 hover:underline">&larr; Volver a seleccionar</button>
-                </div>
-
-                <!-- Barra de Progreso -->
-                <div class="mb-6">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-sm font-medium text-blue-700 dark:text-blue-300">Progreso de la Rutina</span>
-                        <span id="progress-text" class="text-sm font-medium text-blue-700 dark:text-blue-300">0 / 0 Completados</span>
-                    </div>
-                    <div class="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
-                        <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-500" style="width: 0%"></div>
-                    </div>
-                </div>
-
-                <!-- Lista de Ejercicios (se rellena con JS) -->
-                <div id="tracker-list" class="space-y-6">
-                    <!-- Contenido dinámico de ejercicios -->
-                </div>
-                
-                <!-- Botón de Finalizar -->
-                <div class="text-center mt-10">
-                    <button id="finish-routine-btn" class="px-10 py-3 bg-green-600 text-white text-lg font-lora font-semibold rounded-full shadow-lg hover:bg-green-700 transform hover:scale-105 transition-all duration-300">
-                        Suficiente por hoy
-                    </button>
-                </div>
-            </div>
-
-        </section>
-        
-        <!-- ==== Página: Pecho y Tríceps (Solo lectura) ==== -->
-        <section id="routine-chest" class="app-page hidden fade-in">
-            <h2 class="text-3xl md:text-4xl font-lora font-bold mb-8">Rutina: Pecho y Tríceps</h2>
-            <div id="routine-chest-content" class="space-y-8">
-                <!-- Contenido generado por JS -->
-            </div>
-        </section>
-
-        <!-- ==== Página: Espalda y Bíceps (Solo lectura) ==== -->
-        <section id="routine-back" class="app-page hidden fade-in">
-            <h2 class="text-3xl md:text-4xl font-lora font-bold mb-8">Rutina: Espalda y Bíceps</h2>
-            <div id="routine-back-content" class="space-y-8">
-                <!-- Contenido generado por JS -->
-            </div>
-        </section>
-
-        <!-- ==== Página: Pierna (Solo lectura) ==== -->
-        <section id="routine-leg" class="app-page hidden fade-in">
-            <h2 class="text-3xl md:text-4xl font-lora font-bold mb-8">Rutina: Pierna</h2>
-            <div id="routine-leg-content" class="space-y-8">
-                <!-- Contenido generado por JS -->
-            </div>
-        </section>
-        
-        <!-- ==== Página: Deltoides y Trapecio (Solo lectura) ==== -->
-        <section id="routine-shoulders" class="app-page hidden fade-in">
-            <h2 class="text-3xl md:text-4xl font-lora font-bold mb-8">Rutina: Deltoides y Trapecio</h2>
-            <div id="routine-shoulders-content" class="space-y-8">
-                <!-- Contenido generado por JS -->
-            </div>
-        </section>
-
-        <!-- ==== Página: Estadísticas ==== -->
-        <section id="stats" class="app-page hidden fade-in">
-            <h2 class="text-3xl md:text-4xl font-lora font-bold mb-8">Estadísticas</h2>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Resumen Semanal -->
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-lora font-semibold mb-4">Resumen Semanal</h3>
-                    <div class="flex items-baseline space-x-2">
-                        <span id="stats-weekly-count" class="text-5xl font-bold text-blue-600 dark:text-blue-400">0</span>
-                        <span class="text-lg text-gray-600 dark:text-gray-400">Entrenamientos</span>
-                    </div>
-                </div>
-
-                <!-- Progreso General (Gráfico Simple) -->
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                    <h3 class="text-xl font-lora font-semibold mb-4">Progreso General (Total)</h3>
-                    <div class="space-y-2" id="stats-graph">
-                        <!-- Gráfico simple generado por JS -->
-                        <p class="text-gray-500 dark:text-gray-400">Aún no hay datos para mostrar.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Historial de Rutinas -->
-            <div class="mt-10 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-lora font-semibold">Historial de Rutinas</h3>
-                    <button id="export-excel-btn" class="px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-full shadow-md hover:bg-green-700 transition-colors duration-300">
-                        Exportar a Excel (.xlsx)
-                    </button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full min-w-max text-left">
-                        <thead>
-                            <tr class="border-b border-gray-200 dark:border-gray-700">
-                                <th class="py-3 px-4 text-sm font-semibold uppercase">Fecha</th>
-                                <th class="py-3 px-4 text-sm font-semibold uppercase">Rutina</th>
-                                <th class="py-3 px-4 text-sm font-semibold uppercase">Ejercicios Completados</th>
-                            </tr>
-                        </thead>
-                        <tbody id="stats-history-table">
-                            <!-- Filas generadas por JS -->
-                            <tr>
-                                <td colspan="3" class="text-center py-6 text-gray-500 dark:text-gray-400">No hay rutinas completadas.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-    </main>
-    
-    <!-- ==== Cronómetro Persistente ==== -->
-    <div id="persistent-timer" class="hidden fixed bottom-6 right-6 z-50 bg-gray-900 dark:bg-white text-white dark:text-gray-900 rounded-lg shadow-2xl p-4 w-60">
-        <h4 class="font-lora text-lg font-semibold text-center mb-2">Cronómetro</h4>
-        <div id="timer-display" class="text-5xl font-mono text-center mb-3">00:00</div>
-        <div class="flex justify-around">
-            <button id="timer-start-pause" class="w-16 px-3 py-1 bg-green-500 dark:bg-green-600 text-white rounded hover:bg-green-600 dark:hover:bg-green-700 transition-colors">
-                Iniciar
-            </button>
-            <button id="timer-reset" class="w-16 px-3 py-1 bg-red-500 dark:bg-red-600 text-white rounded hover:bg-red-600 dark:hover:bg-red-700 transition-colors">
-                Reset
-            </button>
-        </div>
-    </div>
-
-    <!-- ==== Botón Scroll-to-Top ==== -->
-    <button id="scroll-to-top" class="hidden fixed bottom-6 left-6 z-50 p-3 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 focus:outline-none transition-all duration-300 opacity-0">
-        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
-        </svg>
-    </button>
-    
-    <!-- ==== Toast Notification ==== -->
-    <div id="toast" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-xl transition-all duration-300 transform translate-y-10 opacity-0">
-        <div class="flex items-center justify-between">
-            <span id="toast-message" class="mr-4">Mensaje</span>
-            <div id="toast-actions" class="flex space-x-2">
-                <!-- Botones de confirmación (opcional) -->
-            </div>
-        </div>
-    </div>
-
-
-    <!-- ==== JavaScript Principal ==== -->
-    <script>
-        // --- BASE DE DATOS DE RUTINAS ---
-        const routinesDB = {
-            'chest': {
-                id: 'chest',
-                name: 'Pecho y Tríceps',
-                blocks: [
-                    { 
-                        name: 'Fuerza Pectoral', 
-                        exercises: [
-                            { id: 'c1', name: 'Press banca unilateral en máquina', details: '6x5 rep, 80-85% RM', description: 'Siéntate y ajusta el asiento. Empuja el manillar hacia adelante de forma controlada, enfocándote en el pectoral. Regresa lentamente.' },
-                            { id: 'c2', name: 'Press inclinado con mancuernas', details: '5x8 rep', description: 'En un banco inclinado, baja las mancuernas a los lados del pecho, codos a 45º. Empuja hacia arriba y júntalas.' }
-                        ]
+    <!-- Tailwind Config --><script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Lora', 'serif'],
+                        display: ['Merriweather', 'serif'],
                     },
-                    {
-                        name: 'Hipertrofia Pectoral',
-                        exercises: [
-                            { id: 'c3', name: 'Press en máquina convergente', details: '4x10-12 rep', description: 'Ajusta el asiento. Empuja los manillares hasta que casi se toquen, apretando el pecho. Vuelve controlado.' },
-                            { id: 'c4', name: 'Peck deck', details: '3x10 rep + dropset', description: 'Siéntate con la espalda recta. Lleva los manillares al centro apretando el pecho. Aguanta 1 segundo y regresa.' },
-                            { id: 'c5', name: 'Peck deck de pie', details: '3x al fallo', description: 'Usando poleas, inclínate ligeramente y junta las manos al frente, cruzándolas un poco. Contracción máxima.' }
-                        ]
+                    animation: {
+                        'fade-in': 'fadeIn 0.8s ease-out',
+                        'fade-in-up': 'fadeInUp 1s ease-out',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                        'bounce-short': 'bounceShort 1s infinite',
                     },
-                    {
-                        name: 'Tríceps',
-                        exercises: [
-                            { id: 'c6', name: 'Press cerrado en banca', details: '5x8-10 rep', description: 'Agarre a la anchura de los hombros. Baja la barra al esternón, codos pegados al cuerpo. Empuja con los tríceps.' },
-                            { id: 'c7', name: 'Press francés con barra Z', details: '4x10-12 rep', description: 'Tumbado, baja la barra Z hacia la frente o detrás de la cabeza, codos fijos. Extiende con los tríceps.' },
-                            { id: 'c8', name: 'Extensiones en polea con cuerda', details: '4x12-15 rep', description: 'De pie, codos fijos a los costados. Extiende la cuerda hacia abajo separando las manos al final. Aprieta el tríceps.' },
-                            { id: 'c9', name: 'Extensión overhead con mancuerna', details: '4x12-15 rep', description: 'Sentado o de pie, sujeta una mancuerna con ambas manos. Baja la mancuerna detrás de la cabeza, codos apuntando al techo. Extiende.' }
-                        ]
-                    },
-                    {
-                        name: 'Finisher',
-                        exercises: [
-                            { id: 'c10', name: 'Press JM', details: '4x8-10 rep, peso moderado', description: 'Híbrido entre press cerrado y francés. Baja la barra hacia el cuello/clavícula, codos adelante. Empuja.' }
-                        ]
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        bounceShort: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-10px)' },
+                        }
                     }
-                ]
-            },
-            'back': {
-                id: 'back',
-                name: 'Espalda y Bíceps',
-                blocks: [
-                    {
-                        name: 'Espalda (tirón vertical y horizontal)',
-                        exercises: [
-                            { id: 'b1', name: 'Jalón al pecho abierto', details: '2 series al fallo + parciales', description: 'Agarre abierto. Tira de la barra hacia la parte superior del pecho, sacando pecho y retrayendo escápulas. Vuelve controlado.' },
-                            { id: 'b2', name: 'Remo Gironda', details: '2 series al fallo + parciales', description: 'Sentado, pies en la plataforma. Tira del agarre hacia el abdomen, retrayendo escápulas. Espalda recta.' },
-                            { id: 'b3', name: 'Remo en punta', details: '2 series al fallo', description: 'Agarra la barra T. Mantén la espalda recta y paralela al suelo. Tira de la barra hacia el pecho, codos pegados.' }
-                        ]
-                    },
-                    {
-                        name: 'Espalda (unilateral y estiramiento)',
-                        exercises: [
-                            { id: 'b4', name: 'Remo unilateral en máquina', details: '3 series', description: 'Siéntate de lado o de frente. Tira del manillar hacia la cadera, rotando el torso ligeramente. Enfócate en el dorsal.' },
-                            { id: 'b5', name: 'Pullover unilateral en polea alta', details: '3 series al fallo con dropset', description: 'De pie, coge el estribo. Brazo casi recto, llévalo en un arco hacia tu cadera, apretando el dorsal.' }
-                        ]
-                    },
-                    {
-                        name: 'Bíceps',
-                        exercises: [
-                            { id: 'b6', name: 'Predicador con barra Z o mancuernas', details: '3 series al fallo', description: 'Apoya los tríceps en el banco. Baja la barra de forma controlada y súbela apretando el bíceps. No extiendas del todo.' },
-                            { id: 'b7', name: 'Curl inclinado con mancuernas', details: '3 series al fallo', description: 'En banco inclinado, deja colgar los brazos. Sube una mancuerna y luego la otra, supinando la muñeca. Estira bien.' }
-                        ]
-                    },
-                    {
-                        name: 'Finisher',
-                        exercises: [
-                            { id: 'b8', name: 'Peso muerto convencional modo bombeo', details: '3-4x12-15 rep, 60-70% RM', description: 'Agarre prono. Espalda recta, baja la barra rozando las piernas hasta la espinilla. Sube apretando glúteos e isquios.' }
-                        ]
-                    }
-                ]
-            },
-            'leg': {
-                id: 'leg',
-                name: 'Pierna',
-                blocks: [
-                    {
-                        name: 'Isquiotibiales',
-                        exercises: [
-                            { id: 'l1', name: 'Curl femoral sentado', details: '2x6-8 rep al fallo + parciales', description: 'Ajusta el rodillo sobre los tobillos. Flexiona las rodillas llevando los talones hacia el glúteo. Regresa lento.' },
-                            { id: 'l2', name: 'Curl femoral tumbado', details: '2x6-8 rep al fallo + parciales', description: 'Tumbado boca abajo. Flexiona las rodillas llevando los talones al glúteo. Aprieta los isquios.' }
-                        ]
-                    },
-                    {
-                        name: 'Cuádriceps',
-                        exercises: [
-                            { id: 'l3', name: 'Hack Squat', details: '3x6-8 rep al fallo', description: 'Espalda pegada al respaldo, pies a la anchura de los hombros. Baja rompiendo el paralelo (90º). Empuja con los cuádriceps.' },
-                            { id: 'l4', name: 'Squat en multipower', details: '3x6-8 rep al fallo', description: 'Barra sobre los trapecios. Pies ligeramente adelantados. Baja la cadera como si te sentaras. Mantén espalda recta.' }
-                        ]
-                    },
-                    {
-                        name: 'Peso muerto / glúteo',
-                        exercises: [
-                            { id: 'l5', name: 'Peso muerto rumano con cinturón', details: '3x6-8 rep', description: 'Espalda recta. Baja la barra rozando las piernas, cadera hacia atrás. Siente el estiramiento en isquios. Sube con la cadera.' }
-                        ]
-                    },
-                    {
-                        name: 'Aislantes y accesorios',
-                        exercises: [
-                            { id: 'l6', name: 'Extensión de cuádriceps', details: '3 series + dropset', description: 'Sentado, ajusta el rodillo en el tobillo. Extiende las piernas apretando el cuádriceps. Aguanta 1 seg y baja.' },
-                            { id: 'l7', name: 'Abductores y aductores', details: '3 series + dropset', description: 'En la máquina, empuja hacia afuera (abductor) o hacia adentro (aductor) de forma controlada.' },
-                            { id: 'l8', name: 'Gemelos', details: '3 series de 30 segundos', description: 'En máquina o de pie. Eleva los talones lo máximo posible. Aguanta 1 seg y baja estirando bien.' }
-                        ]
-                    }
-                ]
-            },
-            'shoulders': {
-                id: 'shoulders',
-                name: 'Deltoides y Trapecio',
-                blocks: [
-                    {
-                        name: 'Deltoide anterior / fuerza',
-                        exercises: [
-                            { id: 's1', name: 'Press militar con barra', details: '5x6-8 rep', description: 'De pie o sentado. Barra a la altura de la clavícula. Empuja la barra sobre la cabeza, codos hacia adelante. Vuelve controlado.' },
-                            { id: 's2', name: 'Press con mancuernas sentado', details: '4x8-10 rep', description: 'Sentado con respaldo. Sube las mancuernas desde los hombros hasta estirar brazos. Baja controlado.' }
-                        ]
-                    },
-                    {
-                        name: 'Deltoide lateral / aislantes',
-                        exercises: [
-                            { id: 's3', name: 'Elevaciones laterales', details: '4x12-15 rep', description: 'Ligeramente inclinado. Eleva las mancuernas a los lados, codos semi-flexionados, hasta altura del hombro.' },
-                            { id: 's4', name: 'Pájaros o elevaciones posteriores', details: '4x12-15 rep', description: 'Inclinado (pecho paralelo al suelo) o en máquina. Eleva los brazos lateralmente, apretando el deltoides posterior.' },
-                            { id: 's5', name: 'Face Pulls', details: '3-4x12-15 rep', description: 'Con cuerda en polea alta. Tira de la cuerda hacia la cara, separando las manos. Rota externamente los hombros.' }
-                        ]
-                    },
-                    {
-                        name: 'Trapecio / bombeo',
-                        exercises: [
-                            { id: 's6', name: 'Encogimientos con barra o mancuernas', details: '4x12-15 rep', description: 'De pie, con barra o mancuernas. Encoge los hombros hacia las orejas. No uses los brazos. Aguanta 1 seg.' },
-                            { id: 's7', name: 'Remo al mentón', details: '3x10-12 rep', description: 'Agarre cerrado en barra Z o polea. Tira de la barra hacia el mentón, codos por encima de las manos. Controla la bajada.' }
-                        ]
-                    },
-                    {
-                        name: 'Finisher',
-                        exercises: [
-                            { id: 's8', name: 'Elevaciones frontales', details: '2-3x10-12 rep', description: 'Con mancuernas o disco. Eleva el peso al frente, brazo recto, hasta la altura del hombro. Baja lento.' },
-                            { id: 's9', name: 'Press banca moderado', details: '2-3x10-12 rep', description: 'Como el press banca estándar, pero con peso más ligero para bombear el deltoide anterior.' }
-                        ]
-                    }
-                ]
-            }
-        };
-
-        // --- ESTADO GLOBAL ---
-        const state = {
-            currentPage: 'home',
-            darkMode: false,
-            stats: {
-                history: [], // { date, name, exercisesCompleted, totalExercises }
-            },
-            timer: {
-                isRunning: false,
-                startTime: 0,
-                elapsedTime: 0,
-                intervalId: null
-            },
-            currentRoutine: null // { routineId, name, exercises: [ { id, name, details, completed, sets, weight } ] }
-        };
-
-        // --- SELECTORES DOM ---
-        const $ = (selector) => document.querySelector(selector);
-        const $$ = (selector) => document.querySelectorAll(selector);
-
-        const dom = {
-            html: $('html'),
-            loader: $('#loader'),
-            header: $('header'),
-            appContent: $('#app-content'),
-            appPages: $$('.app-page'),
-            navLinks: $$('.nav-link'),
-            menuToggle: $('#menu-toggle'),
-            menuIconOpen: $('#menu-icon-open'),
-            menuIconClose: $('#menu-icon-close'),
-            menuLinks: $('#menu-links'),
-            settingsToggle: $('#settings-toggle'),
-            settingsPanel: $('#settings-panel'),
-            darkModeToggle: $('#dark-mode-toggle'),
-            resetStatsBtn: $('#reset-stats-btn'),
-            scrollToTopBtn: $('#scroll-to-top'),
-            toast: $('#toast'),
-            toastMessage: $('#toast-message'),
-            toastActions: $('#toast-actions'),
-            // Páginas
-            routineSelection: $('#routine-selection'),
-            routineTracker: $('#routine-tracker'),
-            selectRoutineBtns: $$('.select-routine-btn'),
-            trackerTitle: $('#tracker-title'),
-            trackerList: $('#tracker-list'),
-            progressText: $('#progress-text'),
-            progressBar: $('#progress-bar'),
-            finishRoutineBtn: $('#finish-routine-btn'),
-            backToSelectionBtn: $('#back-to-selection'),
-            // Contenedores de rutinas (lectura)
-            routineContainers: {
-                chest: $('#routine-chest-content'),
-                back: $('#routine-back-content'),
-                leg: $('#routine-leg-content'),
-                shoulders: $('#routine-shoulders-content'),
-            },
-            // Estadísticas
-            statsWeeklyCount: $('#stats-weekly-count'),
-            statsGraph: $('#stats-graph'),
-            statsHistoryTable: $('#stats-history-table'),
-            exportExcelBtn: $('#export-excel-btn'),
-            // Cronómetro
-            persistentTimer: $('#persistent-timer'),
-            timerDisplay: $('#timer-display'),
-            timerStartPauseBtn: $('#timer-start-pause'),
-            timerResetBtn: $('#timer-reset'),
-        };
-
-        // --- NAVEGACIÓN SPA ---
-        function navigateTo(pageId) {
-            if (!pageId) return;
-
-            // Ocultar todas las páginas
-            dom.appPages.forEach(page => page.classList.add('hidden'));
-
-            // Mostrar la página solicitada
-            const targetPage = $(`#${pageId}`);
-            if (targetPage) {
-                targetPage.classList.remove('hidden');
-                targetPage.classList.add('fade-in');
-                state.currentPage = pageId;
-            }
-
-            // Actualizar enlaces activos
-            dom.navLinks.forEach(link => {
-                if (link.dataset.page === pageId) {
-                    link.classList.add('text-blue-600', 'dark:text-blue-400', 'font-bold');
-                } else {
-                    link.classList.remove('text-blue-600', 'dark:text-blue-400', 'font-bold');
-                }
-            });
-
-            // Ocultar menú móvil después de la navegación
-            if (!dom.menuLinks.classList.contains('hidden')) {
-                toggleMobileMenu();
-            }
-            
-            // Ocultar panel de configuración
-            hideSettingsPanel();
-
-            // Volver arriba
-            window.scrollTo(0, 0);
-        }
-
-        // --- RENDERIZADO DE RUTINAS (SOLO LECTURA) ---
-        function renderReadOnlyRoutines() {
-            Object.values(routinesDB).forEach(routine => {
-                const container = dom.routineContainers[routine.id];
-                if (!container) return;
-                
-                let html = '';
-                routine.blocks.forEach(block => {
-                    html += `
-                        <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg">
-                            <h3 class="text-2xl font-lora font-semibold mb-6 border-b border-gray-200 dark:border-gray-700 pb-2">${block.name}</h3>
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    `;
-                    block.exercises.forEach(ex => {
-                        html += `
-                            <div class="flex flex-col bg-gray-50 dark:bg-gray-700/50 rounded-lg shadow-md overflow-hidden">
-                                <div class="p-4 flex-grow">
-                                    <h4 class="font-lora font-semibold text-lg">${ex.name}</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">${ex.details}</p>
-                                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-3">${ex.description}</p>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    html += `</div></div>`;
-                });
-                container.innerHTML = html;
-            });
-        }
-        
-        // --- LÓGICA DE SEGUIMIENTO DE RUTINA ---
-        
-        function startRoutineTracking(routineId) {
-            const routineData = routinesDB[routineId];
-            if (!routineData) return;
-
-            // 1. Inicializar estado de la rutina actual
-            const allExercises = routineData.blocks.flatMap(b => b.exercises);
-            state.currentRoutine = {
-                routineId: routineId,
-                name: routineData.name,
-                exercises: allExercises.map(ex => ({
-                    ...ex,
-                    completed: false,
-                    sets: 0,
-                    weight: ''
-                }))
-            };
-            
-            // 2. Mostrar la vista del tracker y ocultar la selección
-            dom.routineSelection.classList.add('hidden');
-            dom.routineTracker.classList.remove('hidden');
-            dom.trackerTitle.textContent = routineData.name;
-            
-            // 3. Renderizar la lista de ejercicios del tracker
-            renderTrackerList();
-            
-            // 4. Actualizar barra de progreso
-            updateProgressBar();
-            
-            // 5. Mostrar el cronómetro persistente
-            dom.persistentTimer.classList.remove('hidden');
-            dom.persistentTimer.classList.add('fade-in');
-        }
-        
-        function stopRoutineTracking() {
-            // 1. Ocultar tracker, mostrar selección
-            dom.routineTracker.classList.add('hidden');
-            dom.routineSelection.classList.remove('hidden');
-            
-            // 2. Limpiar estado
-            state.currentRoutine = null;
-            
-            // 3. Ocultar cronómetro
-            dom.persistentTimer.classList.add('hidden');
-            dom.persistentTimer.classList.remove('fade-in');
-            
-            // 4. Opcional: resetear cronómetro si se desea
-            // resetTimer();
-        }
-
-        function renderTrackerList() {
-            if (!state.currentRoutine) return;
-            
-            let html = '';
-            const routineData = routinesDB[state.currentRoutine.routineId];
-            
-            routineData.blocks.forEach(block => {
-                html += `
-                    <div class="bg-white dark:bg-gray-800 p-4 md:p-6 rounded-xl shadow-lg">
-                        <h3 class="text-xl font-lora font-semibold mb-4 border-b border-gray-200 dark:border-gray-700 pb-2">${block.name}</h3>
-                        <div class="space-y-4">
-                `;
-                
-                block.exercises.forEach(exData => {
-                    // Encontrar el estado actual de este ejercicio
-                    const exState = state.currentRoutine.exercises.find(e => e.id === exData.id);
-                    
-                    html += `
-                        <div class="tracker-exercise p-4 rounded-lg ${exState.completed ? 'bg-green-50 dark:bg-green-900/30' : 'bg-gray-50 dark:bg-gray-700/50'} transition-colors duration-300" data-exercise-id="${exState.id}">
-                            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                <div class="mb-2 sm:mb-0 flex-grow">
-                                    <h4 class="font-lora font-semibold text-lg">${exState.name}</h4>
-                                    <p class="text-sm text-gray-600 dark:text-gray-400">${exState.details}</p>
-
-                                    <p class="text-sm text-gray-700 dark:text-gray-300 mt-2">${exState.description}</p>
-                                </div>
-                                <div class="flex-shrink-0">
-                                    <button class="complete-btn p-2 rounded-full ${exState.completed ? 'bg-green-500 text-white' : 'bg-gray-200 dark:bg-gray-600'}" title="Marcar como completado">
-                                        <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4">
-                                <!-- Contador de Series -->
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Series</label>
-                                    <div class="flex items-center">
-                                        <button class="set-btn-minus w-8 h-8 rounded-l-md bg-gray-200 dark:bg-gray-600 font-bold hover:bg-gray-300 dark:hover:bg-gray-500">-</button>
-                                        <input type="number" class="set-input w-12 h-8 text-center bg-white dark:bg-gray-700 border-t border-b border-gray-300 dark:border-gray-500" value="${exState.sets}" min="0">
-                                        <button class="set-btn-plus w-8 h-8 rounded-r-md bg-gray-200 dark:bg-gray-600 font-bold hover:bg-gray-300 dark:hover:bg-gray-500">+</button>
-                                    </div>
-                                </div>
-                                <!-- Input de Peso -->
-                                <div>
-                                    <label class="block text-sm font-medium mb-1">Peso (kg)</label>
-                                    <input type="number" class="weight-input w-full h-8 px-2 rounded-md bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-500" value="${exState.weight}" placeholder="0">
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                html += `</div></div>`;
-            });
-            
-            dom.trackerList.innerHTML = html;
-        }
-        
-        function handleTrackerInteraction(e) {
-            const exerciseEl = e.target.closest('.tracker-exercise');
-            if (!exerciseEl) return;
-            
-            const exerciseId = exerciseEl.dataset.exerciseId;
-            const exState = state.currentRoutine.exercises.find(e => e.id === exerciseId);
-            if (!exState) return;
-            
-            let stateChanged = false;
-            
-            // Botón Completar
-            if (e.target.closest('.complete-btn')) {
-                exState.completed = !exState.completed;
-                exerciseEl.classList.toggle('bg-green-50', exState.completed);
-                exerciseEl.classList.toggle('dark:bg-green-900/30', exState.completed);
-                exerciseEl.classList.toggle('bg-gray-50', !exState.completed);
-                exerciseEl.classList.toggle('dark:bg-gray-700/50', !exState.completed);
-                
-                const btn = e.target.closest('.complete-btn');
-                btn.classList.toggle('bg-green-500', exState.completed);
-                btn.classList.toggle('text-white', exState.completed);
-                btn.classList.toggle('bg-gray-200', !exState.completed);
-                btn.classList.toggle('dark:bg-gray-600', !exState.completed);
-                
-                stateChanged = true;
-            }
-            
-            // Botón Set -
-            if (e.target.closest('.set-btn-minus')) {
-                exState.sets = Math.max(0, exState.sets - 1);
-                exerciseEl.querySelector('.set-input').value = exState.sets;
-                stateChanged = true;
-            }
-            
-            // Botón Set +
-            if (e.target.closest('.set-btn-plus')) {
-                exState.sets += 1;
-                exerciseEl.querySelector('.set-input').value = exState.sets;
-                stateChanged = true;
-            }
-            
-            // Input Set
-            if (e.target.classList.contains('set-input')) {
-                exState.sets = parseInt(e.target.value) || 0;
-                stateChanged = true;
-            }
-            
-            // Input Peso
-            if (e.target.classList.contains('weight-input')) {
-                exState.weight = e.target.value;
-                stateChanged = true;
-            }
-            
-            if (stateChanged) {
-                updateProgressBar();
-            }
-        }
-        
-        function updateProgressBar() {
-            if (!state.currentRoutine) return;
-            
-            const total = state.currentRoutine.exercises.length;
-            const completed = state.currentRoutine.exercises.filter(e => e.completed).length;
-            const percentage = total > 0 ? (completed / total) * 100 : 0;
-            
-            dom.progressText.textContent = `${completed} / ${total} Completados`;
-            dom.progressBar.style.width = `${percentage}%`;
-        }
-        
-        function finishRoutine() {
-            if (!state.currentRoutine) return;
-            
-            const total = state.currentRoutine.exercises.length;
-            const completed = state.currentRoutine.exercises.filter(e => e.completed).length;
-            
-            const message = completed === total 
-                ? '¡Rutina completada! ¿Guardar y salir?'
-                : `Completaste ${completed} de ${total} ejercicios. ¿Guardar y salir?`;
-            
-            showToast(message, () => {
-                // Callback de confirmación
-                // 1. Guardar en el historial
-                const newHistoryEntry = {
-                    id: Date.now().toString(),
-                    date: new Date().toISOString(),
-                    name: state.currentRoutine.name,
-                    exercisesCompleted: completed,
-                    totalExercises: total,
-                    details: state.currentRoutine.exercises // Guardar detalles completos
-                };
-                state.stats.history.push(newHistoryEntry);
-                saveStats();
-                
-                // 2. Mostrar toast de éxito
-                showToast('¡Rutina guardada con éxito!', null, 2000);
-                
-                // 3. Limpiar y navegar
-                stopRoutineTracking();
-                navigateTo('home');
-                
-                // 4. Actualizar vista de estadísticas
-                renderStats();
-            });
-        }
-        
-        // --- LÓGICA DEL CRONÓMETRO ---
-        
-        function formatTime(ms) {
-            const totalSeconds = Math.floor(ms / 1000);
-            const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
-            const seconds = (totalSeconds % 60).toString().padStart(2, '0');
-            return `${minutes}:${seconds}`;
-        }
-
-        function updateTimerDisplay() {
-            if (state.timer.isRunning) {
-                state.timer.elapsedTime = Date.now() - state.timer.startTime;
-            }
-            dom.timerDisplay.textContent = formatTime(state.timer.elapsedTime);
-        }
-
-        function startTimer() {
-            if (state.timer.isRunning) return;
-            state.timer.isRunning = true;
-            state.timer.startTime = Date.now() - state.timer.elapsedTime;
-            state.timer.intervalId = setInterval(updateTimerDisplay, 1000);
-            dom.timerStartPauseBtn.textContent = 'Pausar';
-            dom.timerStartPauseBtn.classList.replace('bg-green-500', 'bg-yellow-500');
-            dom.timerStartPauseBtn.classList.replace('dark:bg-green-600', 'dark:bg-yellow-600');
-        }
-        
-        function pauseTimer() {
-            if (!state.timer.isRunning) return;
-            state.timer.isRunning = false;
-            clearInterval(state.timer.intervalId);
-            state.timer.intervalId = null;
-            // elapsedTime ya está actualizado por el último tick del intervalo
-            dom.timerStartPauseBtn.textContent = 'Iniciar';
-            dom.timerStartPauseBtn.classList.replace('bg-yellow-500', 'bg-green-500');
-            dom.timerStartPauseBtn.classList.replace('dark:bg-yellow-600', 'dark:bg-green-600');
-        }
-        
-        function resetTimer() {
-            pauseTimer();
-            state.timer.elapsedTime = 0;
-            updateTimerDisplay();
-        }
-
-        // --- LÓGICA DE ESTADÍSTICAS ---
-        
-        function loadStats() {
-            const savedStats = localStorage.getItem('anzoStats');
-            if (savedStats) {
-                state.stats = JSON.parse(savedStats);
-                // Asegurarse de que el historial sea un array
-                if (!state.stats.history) {
-                    state.stats.history = [];
                 }
             }
         }
-        
-        function saveStats() {
-            localStorage.setItem('anzoStats', JSON.stringify(state.stats));
-        }
-        
-        function renderStats() {
-            // 1. Calcular contador semanal
-            const now = new Date();
-            const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay() + (now.getDay() === 0 ? -6 : 1))); // Lunes
-            startOfWeek.setHours(0, 0, 0, 0);
-            
-            const weeklyWorkouts = state.stats.history.filter(entry => {
-                return new Date(entry.date) >= startOfWeek;
-            });
-            dom.statsWeeklyCount.textContent = weeklyWorkouts.length;
-            
-            // 2. Renderizar historial
-            if (state.stats.history.length === 0) {
-                dom.statsHistoryTable.innerHTML = `
-                    <tr><td colspan="3" class="text-center py-6 text-gray-500 dark:text-gray-400">No hay rutinas completadas.</td></tr>
-                `;
-            } else {
-                let historyHtml = '';
-                // Mostrar las más recientes primero
-                [...state.stats.history].reverse().forEach(entry => {
-                    const date = new Date(entry.date);
-                    historyHtml += `
-                        <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50">
-                            <td class="py-3 px-4">${date.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}</td>
-                            <td class="py-3 px-4">${entry.name}</td>
-                            <td class="py-3 px-4">${entry.exercisesCompleted} / ${entry.totalExercises}</td>
-                        </tr>
-                    `;
-                });
-                dom.statsHistoryTable.innerHTML = historyHtml;
-            }
-            
-            // 3. Renderizar gráfico simple
-            const totals = routinesDB ? { chest: 0, back: 0, leg: 0, shoulders: 0 } : {};
-            let maxCount = 0;
-            state.stats.history.forEach(entry => {
-                const id = entry.routineId || routinesDB[Object.keys(routinesDB).find(key => routinesDB[key].name === entry.name)]?.id;
-                if (id && totals.hasOwnProperty(id)) {
-                    totals[id]++;
-                    if (totals[id] > maxCount) maxCount = totals[id];
-                }
-            });
-
-            if (maxCount === 0) {
-                 dom.statsGraph.innerHTML = `<p class="text-gray-500 dark:text-gray-400">Aún no hay datos para mostrar.</p>`;
-            } else {
-                let graphHtml = '';
-                Object.entries(totals).forEach(([id, count]) => {
-                    const percentage = (count / maxCount) * 100;
-                    graphHtml += `
-                        <div class="flex items-center">
-                            <span class="w-24 text-sm font-medium text-gray-600 dark:text-gray-400">${routinesDB[id].name.split(' ')[0]}</span>
-                            <div class="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-4 mr-2">
-                                <div class="bg-blue-600 h-4 rounded-full" style="width: ${percentage}%"></div>
-                            </div>
-                            <span class="w-8 text-sm font-bold">${count}</span>
-                        </div>
-                    `;
-                });
-                dom.statsGraph.innerHTML = graphHtml;
-            }
-        }
-        
-        function exportStatsToExcel() {
-            if (state.stats.history.length === 0) {
-                showToast('No hay estadísticas para exportar', null, 2000);
-                return;
-            }
-            
-            // Preparar datos para Excel
-            const dataToExport = state.stats.history.map(entry => {
-                const date = new Date(entry.date);
-                return {
-                    'Fecha': date.toLocaleDateString('es-ES'),
-                    'Hora': date.toLocaleTimeString('es-ES'),
-                    'Rutina': entry.name,
-                    'Completados': entry.exercisesCompleted,
-                    'Total': entry.totalExercises,
-                    // Opcional: añadir detalles
-                    // 'Detalles': JSON.stringify(entry.details.filter(ex => ex.sets > 0 || ex.weight !== ''))
-                };
-            });
-
-            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, 'Historial de Rutinas');
-            
-            // Auto-ajustar columnas (simple)
-            const wscols = [
-                { wch: 12 },
-                { wch: 10 },
-                { wch: 25 },
-                { wch: 12 },
-                { wch: 10 },
-                // { wch: 50 } 
-            ];
-            worksheet['!cols'] = wscols;
-
-            // Descargar el archivo
-            XLSX.writeFile(workbook, 'AnzoStyle_Estadisticas.xlsx');
-            showToast('Exportando estadísticas...', null, 2000);
-        }
-        
-        function resetStats() {
-            showToast('¿Seguro que quieres borrar TODO el historial?', () => {
-                state.stats.history = [];
-                saveStats();
-                renderStats();
-                showToast('Estadísticas reiniciadas.', null, 2000);
-            });
-        }
-        
-
-        // --- LÓGICA DE CONFIGURACIÓN Y UI ---
-        
-        function toggleMobileMenu() {
-            const isHidden = dom.menuLinks.classList.contains('hidden');
-            if (isHidden) {
-                dom.menuLinks.classList.remove('hidden');
-                dom.menuLinks.style.maxHeight = dom.menuLinks.scrollHeight + "px";
-                dom.menuIconOpen.classList.add('hidden');
-                dom.menuIconClose.classList.remove('hidden');
-            } else {
-                dom.menuLinks.style.maxHeight = "0px";
-                dom.menuIconOpen.classList.remove('hidden');
-                dom.menuIconClose.classList.add('hidden');
-                // Esperar a que la transición termine para ocultarlo
-                setTimeout(() => {
-                    dom.menuLinks.classList.add('hidden');
-                }, 300);
-            }
-        }
-        
-        function toggleDarkMode() {
-            state.darkMode = !state.darkMode;
-            dom.html.classList.toggle('dark', state.darkMode);
-            localStorage.setItem('anzoDarkMode', state.darkMode);
-            
-            // Actualizar el botón toggle
-            const toggleCircle = dom.darkModeToggle.querySelector('span:last-child');
-            if (state.darkMode) {
-                toggleCircle.style.transform = 'translateX(1.25rem)'; // 1.25rem = 5 * w-5
-            } else {
-                toggleCircle.style.transform = 'translateX(0)';
-            }
-        }
-
-        function loadPreferences() {
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const savedMode = localStorage.getItem('anzoDarkMode');
-            
-            if (savedMode === 'true') {
-                state.darkMode = true;
-            } else if (savedMode === 'false') {
-                state.darkMode = false;
-            } else {
-                state.darkMode = prefersDark;
-            }
-            
-            dom.html.classList.toggle('dark', state.darkMode);
-            
-            // Sincronizar el botón
-            const toggleCircle = dom.darkModeToggle.querySelector('span:last-child');
-            if (state.darkMode) {
-                dom.darkModeToggle.classList.add('bg-blue-600');
-                dom.darkModeToggle.classList.remove('bg-gray-200');
-                toggleCircle.style.transform = 'translateX(1.25rem)';
-            } else {
-                dom.darkModeToggle.classList.add('bg-gray-200');
-                dom.darkModeToggle.classList.remove('bg-blue-600');
-                toggleCircle.style.transform = 'translateX(0)';
-            }
-        }
-        
-        function toggleSettingsPanel() {
-            dom.settingsPanel.classList.toggle('hidden');
-            if (!dom.settingsPanel.classList.contains('hidden')) {
-                dom.settingsPanel.classList.add('fade-in');
-            }
-        }
-        
-        function hideSettingsPanel() {
-            dom.settingsPanel.classList.add('hidden');
-        }
-
-        function handleScroll() {
-            if (window.scrollY > 300) {
-                dom.scrollToTopBtn.classList.remove('hidden', 'opacity-0');
-            } else {
-                dom.scrollToTopBtn.classList.add('opacity-0');
-                // Esperar a que la transición termine para ocultarlo
-                setTimeout(() => {
-                    if (window.scrollY <= 300) { // Comprobar de nuevo
-                        dom.scrollToTopBtn.classList.add('hidden');
-                    }
-                }, 300);
-            }
-        }
-        
-        let toastTimer = null;
-        function showToast(message, confirmCallback = null, duration = 3000) {
-            clearTimeout(toastTimer);
-            dom.toastMessage.textContent = message;
-            dom.toastActions.innerHTML = '';
-            
-            if (confirmCallback) {
-                // Modo confirmación
-                const yesBtn = document.createElement('button');
-                yesBtn.className = 'px-3 py-1 bg-green-500 text-white text-sm rounded hover:bg-green-600';
-                yesBtn.textContent = 'Sí';
-                yesBtn.onclick = () => {
-                    confirmCallback();
-                    hideToast();
-                };
-                
-                const noBtn = document.createElement('button');
-                noBtn.className = 'px-3 py-1 bg-red-500 text-white text-sm rounded hover:bg-red-600';
-                noBtn.textContent = 'No';
-                noBtn.onclick = hideToast;
-                
-                dom.toastActions.append(yesBtn, noBtn);
-                
-            } else {
-                // Modo notificación
-                toastTimer = setTimeout(hideToast, duration);
-            }
-            
-            dom.toast.classList.remove('hidden');
-            setTimeout(() => {
-                dom.toast.classList.remove('translate-y-10', 'opacity-0');
-            }, 10);
-        }
-        
-        function hideToast() {
-            clearTimeout(toastTimer);
-            dom.toast.classList.add('translate-y-10', 'opacity-0');
-            setTimeout(() => {
-                dom.toast.classList.add('hidden');
-            }, 300);
-        }
-
-        // --- INICIALIZACIÓN ---
-        function initApp() {
-            // Cargar preferencias y datos
-            loadPreferences();
-            loadStats();
-            
-            // Renderizar contenido estático
-            renderReadOnlyRoutines();
-            renderStats();
-
-            // Configurar Listeners de Navegación
-            dom.navLinks.forEach(link => {
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    navigateTo(link.dataset.page);
-                });
-            });
-            
-            // Listeners de UI
-            dom.menuToggle.addEventListener('click', toggleMobileMenu);
-            dom.settingsToggle.addEventListener('click', toggleSettingsPanel);
-            dom.darkModeToggle.addEventListener('click', toggleDarkMode);
-            dom.resetStatsBtn.addEventListener('click', resetStats);
-            dom.scrollToTopBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-            window.addEventListener('scroll', handleScroll);
-            
-            // Ocultar panel de config al hacer clic fuera
-            document.addEventListener('click', (e) => {
-                if (!dom.settingsPanel.classList.contains('hidden') && 
-                    !dom.settingsPanel.contains(e.target) && 
-                    !dom.settingsToggle.contains(e.target)) {
-                    hideSettingsPanel();
-                }
-            });
-
-            // Listeners de "Comenzar Rutina"
-            dom.selectRoutineBtns.forEach(btn => {
-                btn.addEventListener('click', () => startRoutineTracking(btn.dataset.routine));
-            });
-            dom.backToSelectionBtn.addEventListener('click', stopRoutineTracking);
-            
-            // Listeners del Tracker (usando delegación de eventos)
-            dom.trackerList.addEventListener('click', handleTrackerInteraction);
-            dom.trackerList.addEventListener('change', handleTrackerInteraction); // Para inputs
-            
-            dom.finishRoutineBtn.addEventListener('click', finishRoutine);
-            
-            // Listeners de Estadísticas
-            dom.exportExcelBtn.addEventListener('click', exportStatsToExcel);
-            
-            // Listeners del Cronómetro
-            dom.timerStartPauseBtn.addEventListener('click', () => {
-                state.timer.isRunning ? pauseTimer() : startTimer();
-            });
-            dom.timerResetBtn.addEventListener('click', resetTimer);
-
-            // Mostrar página de inicio y ocultar loader
-            navigateTo('home');
-            setTimeout(() => {
-                dom.loader.style.transition = 'opacity 0.5s ease-out';
-                dom.loader.style.opacity = '0';
-                setTimeout(() => dom.loader.classList.add('hidden'), 500);
-            }, 1000); // Simular tiempo de carga
-        }
-
-        // Iniciar la aplicación
-        document.addEventListener('DOMContentLoaded', initApp);
-        
     </script>
 
+    <!-- Fonts --><style>
+        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,700;1,400&family=Merriweather:wght@300;400;700&display=swap');
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
+    </style>
+
+    <!-- React & Babel --><script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-stone-50 text-stone-800 dark:bg-stone-950 dark:text-stone-200 transition-colors duration-500">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- ICONS ---
+        const Dumbbell = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m6.5 6.5 11 11"/><path d="m21 21-1-1"/><path d="m3 3 1 1"/><path d="m18 22 4-4"/><path d="m2 6 4-4"/><path d="m3 10 7.9-7.9a2.12 2.12 0 0 1 3 3L6 13a2.12 2.12 0 0 1-3-3Z"/><path d="m14 11 7.9-7.9a2.12 2.12 0 0 1 3 3L17 14a2.12 2.12 0 0 1-3-3Z"/></svg>
+        );
+        const Play = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        );
+        const Pause = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        );
+        const RotateCcw = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+        );
+        const Settings = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.09a2 2 0 0 1-1-1.74v-.47a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.39a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+        );
+        const Moon = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        );
+        const Sun = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+        );
+        const ChevronUp = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="m18 15-6-6-6 6"/></svg>
+        );
+        const CheckCircle = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        );
+        const Menu = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+        );
+        const X = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M18 6 6 18"/><path d="m6 6 18 18"/></svg>
+        );
+        const Trophy = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+        );
+        const Activity = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        );
+        const Download = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+        );
+        const Disc = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+        );
+        const BookOpen = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        );
+        const Info = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
+        );
+
+        // --- DATA ---
+        const ROUTINES = {
+          chest: {
+            id: 'chest',
+            title: "Pecho y Tríceps",
+            description: "Enfoque en empuje pesado y aislamiento muscular.",
+            blocks: [
+              { 
+                title: "Bloque 1 – Fuerza Pectoral", 
+                exercises: [
+                  { 
+                    name: "Press banca unilateral", 
+                    details: "6x5 rep, 80–85% RM",
+                    desc: "Túmbate en un banco plano o usa la máquina. Empuja la carga con un solo brazo mientras mantienes el otro lado estable.",
+                    tips: "Contrae fuerte el abdomen para evitar rotar el torso."
+                  }, 
+                  { 
+                    name: "Press inclinado", 
+                    details: "5x8 rep",
+                    desc: "Usa un banco inclinado a 30-45º. Baja las mancuernas controladamente hasta el pecho superior y empuja.",
+                    tips: "Mantén los codos a 45º respecto al cuerpo, no los abras demasiado."
+                  }
+                ] 
+              },
+              { 
+                title: "Bloque 2 – Hipertrofia Pectoral", 
+                exercises: [
+                  { 
+                    name: "Press máquina convergente", 
+                    details: "4x10–12 rep",
+                    desc: "Sentado en la máquina, empuja hacia adelante juntando las manos al final del recorrido.",
+                    tips: "Concéntrate en apretar el pecho en el punto de máxima contracción."
+                  }, 
+                  { 
+                    name: "Peck deck", 
+                    details: "3x10 rep + dropset",
+                    desc: "En la máquina de aperturas, lleva los brazos hacia el centro manteniendo una ligera flexión de codos.",
+                    tips: "No dejes que los hombros se vayan hacia adelante al abrir."
+                  }, 
+                  { 
+                    name: "Peck deck de pie", 
+                    details: "3x al fallo",
+                    desc: "Variante de pie o inclinado hacia adelante en poleas, buscando el estiramiento máximo.",
+                    tips: "Mantén el pecho alto y orgulloso durante todo el movimiento."
+                  }
+                ] 
+              },
+              { 
+                title: "Bloque 3 – Tríceps", 
+                exercises: [
+                  { 
+                    name: "Press cerrado", 
+                    details: "5x8–10 rep",
+                    desc: "Press de banca con agarre a la anchura de los hombros.",
+                    tips: "Mantén los codos pegados al torso al bajar."
+                  }, 
+                  { 
+                    name: "Press francés", 
+                    details: "4x10–12 rep",
+                    desc: "Tumbado, baja la barra Z hacia la frente flexionando solo los codos.",
+                    tips: "Mantén los codos fijos apuntando al techo."
+                  }, 
+                  { 
+                    name: "Extensiones polea", 
+                    details: "4x12–15 rep",
+                    desc: "De pie frente a la polea alta, extiende los brazos hacia abajo separando la cuerda al final.",
+                    tips: "No uses el impulso del cuerpo, solo mueve los antebrazos."
+                  }, 
+                  { 
+                    name: "Extensión overhead", 
+                    details: "4x12–15 rep",
+                    desc: "Extensión de tríceps por encima de la cabeza con mancuerna o polea.",
+                    tips: "Asegúrate de estirar completamente el tríceps en la bajada."
+                  }
+                ] 
+              },
+              { 
+                title: "Bloque 4 – Finisher", 
+                exercises: [
+                  { 
+                    name: "Press JM", 
+                    details: "4x8–10 rep, peso moderado",
+                    desc: "Híbrido entre press cerrado y press francés. Baja la barra hacia el cuello/mentón.",
+                    tips: "Movimiento técnico: controla la bajada y explota al subir."
+                  }
+                ] 
+              }
+            ]
+          },
+          back: {
+            id: 'back',
+            title: "Espalda y Bíceps",
+            description: "Construcción de amplitud y densidad dorsal.",
+            blocks: [
+              { 
+                title: "Bloque 1 – Espalda (Tirón)", 
+                exercises: [
+                  { 
+                    name: "Jalón al pecho abierto", 
+                    details: "2 series al fallo",
+                    desc: "Sentado, tracciona la barra hacia la parte superior del pecho.",
+                    tips: "Inicia el movimiento bajando las escápulas, no solo tirando con los brazos."
+                  }, 
+                  { 
+                    name: "Remo Gironda", 
+                    details: "2 series al fallo",
+                    desc: "Remo sentado en polea baja. Tira del agarre hacia el abdomen.",
+                    tips: "Mantén la espalda recta y saca pecho al tirar."
+                  }, 
+                  { 
+                    name: "Remo en punta", 
+                    details: "2 series al fallo",
+                    desc: "Con barra T o soporte, inclínate y rema hacia el abdomen.",
+                    tips: "No cargues excesivo peso si comprometes la zona lumbar."
+                  }
+                ] 
+              },
+              { 
+                title: "Bloque 2 – Unilateral", 
+                exercises: [
+                  { 
+                    name: "Remo unilateral", 
+                    details: "3 series",
+                    desc: "Remo con mancuerna o en máquina a una mano.",
+                    tips: "Evita rotar excesivamente el tronco para compensar."
+                  }, 
+                  { 
+                    name: "Pullover unilateral", 
+                    details: "3 series al fallo",
+                    desc: "En polea alta, brazo recto, lleva la mano desde arriba hasta la cadera.",
+                    tips: "Siente el estiramiento en el dorsal al subir el brazo."
+                  }
+                ] 
+              },
+              { 
+                title: "Bloque 3 – Bíceps", 
+                exercises: [
+                  { 
+                    name: "Predicador", 
+                    details: "3 series al fallo",
+                    desc: "Curl de bíceps apoyando los brazos en el banco predicador.",
+                    tips: "Extiende el brazo casi por completo, pero sin hiperextender el codo."
+                  }, 
+                  { 
+                    name: "Curl inclinado", 
+                    details: "3 series al fallo",
+                    desc: "Sentado en banco inclinado, deja caer los brazos y realiza el curl.",
+                    tips: "Mantén los codos atrás para enfatizar la cabeza larga del bíceps."
+                  }
+                ] 
+              },
+              { 
+                title: "Bloque 4 – Finisher", 
+                exercises: [
+                  { 
+                    name: "Peso muerto bombeo", 
+                    details: "3–4x12–15 rep",
+                    desc: "Peso muerto convencional con menos peso, enfocado en la técnica y repeticiones.",
+                    tips: "No rebotes la barra en el suelo, toca y sube."
+                  }
+                ] 
+              }
+            ]
+          },
+          legs: {
+            id: 'legs',
+            title: "Pierna",
+            description: "Entrenamiento completo de tren inferior.",
+            blocks: [
+              { 
+                title: "Bloque 1 – Isquiotibiales", 
+                exercises: [
+                  { 
+                    name: "Curl femoral sentado", 
+                    details: "2x6–8 rep al fallo",
+                    desc: "Sentado en la máquina, flexiona las rodillas llevando los talones hacia abajo.",
+                    tips: "Asegúrate de que la almohadilla te sujete bien los muslos."
+                  }, 
+                  { 
+                    name: "Curl femoral tumbado", 
+                    details: "2x6–8 rep al fallo",
+                    desc: "Tumbado boca abajo, lleva los talones hacia los glúteos.",
+                    tips: "Evita levantar la cadera del banco al contraer."
+                  }
+                ] 
+              },
+              { 
+                title: "Bloque 2 – Cuádriceps", 
+                exercises: [
+                  { 
+                    name: "Hack Squat", 
+                    details: "3x6–8 rep al fallo",
+                    desc: "Sentadilla en máquina Hack, pies adelantados.",
+                    tips: "Baja profundo (rompe el paralelo) sin despegar la espalda del respaldo."
+                  }, 
+                  { 
+                    name: "Squat multipower", 
+                    details: "3x6–8 rep al fallo",
+                    desc: "Sentadilla guiada en máquina Smith.",
+                    tips: "Coloca los pies ligeramente adelantados para enfatizar cuádriceps y proteger rodillas."
+                  }
+                ] 
+              },
+              { 
+                title: "Bloque 3 – Glúteo", 
+                exercises: [
+                  { 
+                    name: "Peso muerto rumano", 
+                    details: "3x6–8 rep",
+                    desc: "Baja la barra rozando las piernas llevando la cadera hacia atrás, con leve flexión de rodillas.",
+                    tips: "La clave es echar el culo atrás, no solo bajar el tronco."
+                  }
+                ] 
+              },
+              { 
+                title: "Bloque 4 – Accesorios", 
+                exercises: [
+                  { 
+                    name: "Extensión cuádriceps", 
+                    details: "3 series + dropset",
+                    desc: "Sentado, extiende las rodillas hasta bloquear.",
+                    tips: "Aguanta 1 segundo arriba en cada repetición."
+                  }, 
+                  { 
+                    name: "Abductores", 
+                    details: "3 series",
+                    desc: "Máquina de abducción (abrir piernas).",
+                    tips: "No te inclines hacia adelante, mantén la espalda pegada."
+                  }, 
+                  { 
+                    name: "Gemelos", 
+                    details: "3 series",
+                    desc: "Elevación de talones de pie o sentado.",
+                    tips: "Rango completo: estira abajo del todo y sube al máximo."
+                  }
+                ] 
+              }
+            ]
+          },
+          delts: {
+            id: 'delts',
+            title: "Deltoides",
+            description: "Hombros 3D y trapecios potentes.",
+            blocks: [
+              { 
+                title: "Bloque 1 – Fuerza", 
+                exercises: [
+                  { 
+                    name: "Press militar", 
+                    details: "5x6–8 rep",
+                    desc: "De pie o sentado, empuja la barra desde el pecho hasta encima de la cabeza.",
+                    tips: "Mete la cabeza entre los brazos al final del movimiento."
+                  }, 
+                  { 
+                    name: "Press mancuernas", 
+                    details: "4x8–10 rep",
+                    desc: "Press de hombros sentado con mancuernas.",
+                    tips: "No choques las mancuernas arriba, mantén la tensión."
+                  }
+                ] 
+              },
+              { 
+                title: "Bloque 2 – Lateral", 
+                exercises: [
+                  { 
+                    name: "Elevaciones laterales", 
+                    details: "4x12–15 rep",
+                    desc: "De pie, eleva los brazos lateralmente hasta la altura de los hombros.",
+                    tips: "Imagina que estás vertiendo agua con una jarra (pulgar ligeramente abajo)."
+                  }, 
+                  { 
+                    name: "Pájaros", 
+                    details: "4x12–15 rep",
+                    desc: "Inclinado hacia adelante, eleva los brazos lateralmente para el deltoides posterior.",
+                    tips: "No juntes las escápulas, el movimiento sale del hombro."
+                  }, 
+                  { 
+                    name: "Face Pulls", 
+                    details: "3–4x12–15 rep",
+                    desc: "En polea alta, tira de la cuerda hacia la cara separando las manos.",
+                    tips: "Los codos deben quedar por encima de los hombros al final."
+                  }
+                ] 
+              },
+              { 
+                title: "Bloque 3 – Trapecio", 
+                exercises: [
+                  { 
+                    name: "Encogimientos", 
+                    details: "4x12–15 rep",
+                    desc: "Con barra o mancuernas, eleva los hombros hacia las orejas.",
+                    tips: "No rotes los hombros, movimiento vertical puro."
+                  }, 
+                  { 
+                    name: "Remo al mentón", 
+                    details: "3x10–12 rep",
+                    desc: "Sube la barra pegada al cuerpo hasta la altura del pecho alto.",
+                    tips: "Los codos siempre deben ir más altos que las manos."
+                  }
+                ] 
+              },
+              { 
+                title: "Bloque 4 – Finisher", 
+                exercises: [
+                  { 
+                    name: "Elevaciones frontales", 
+                    details: "2–3x10–12 rep",
+                    desc: "Eleva el peso frente a ti hasta la altura de los ojos.",
+                    tips: "Controla la bajada para no balancear el cuerpo."
+                  }
+                ] 
+              }
+            ]
+          }
+        };
+
+        const MOTIVATIONAL_QUOTES = [
+          "El dolor es temporal, la satisfacción es para siempre.",
+          "Tu único límite es tu mente.",
+          "No cuentes los días, haz que los días cuenten.",
+          "Disciplina es hacer lo que tienes que hacer, incluso cuando no quieres.",
+          "La mejor versión de ti mismo te está esperando."
+        ];
+
+        // --- UTILS ---
+        const formatTime = (seconds) => {
+          const mins = Math.floor(seconds / 60);
+          const secs = seconds % 60;
+          return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        };
+
+        const exportToCSV = (history) => {
+          if (!history || history.length === 0) {
+            alert("No hay datos para exportar.");
+            return;
+          }
+          let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+          csvContent += "Fecha,Rutina,Ejercicio,Series,Repeticiones,Peso(kg),Notas\n";
+          history.forEach(session => {
+            const date = new Date(session.date).toLocaleDateString();
+            const routineName = session.routineName;
+            const notes = session.notes ? session.notes.replace(/(\r\n|\n|\r)/gm, " ") : ""; 
+            Object.keys(session.exercises).forEach(exName => {
+              const exData = session.exercises[exName];
+              csvContent += `${date},"${routineName}","${exName}",${exData.sets || 0},${exData.reps || 0},"${exData.weight || 0}","${notes}"\n`;
+            });
+          });
+          const encodedUri = encodeURI(csvContent);
+          const link = document.createElement("a");
+          link.setAttribute("href", encodedUri);
+          link.setAttribute("download", "anzos_style_data.csv");
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        };
+
+        // --- COMPONENTS ---
+        const InitialLoader = ({ onFinish }) => {
+          useEffect(() => {
+            const timer = setTimeout(onFinish, 2500);
+            return () => clearTimeout(timer);
+          }, [onFinish]);
+          return (
+            <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black text-gold-500">
+              <div className="animate-pulse mb-4">
+                <Dumbbell size={64} className="text-amber-500" />
+              </div>
+              <h1 className="text-4xl font-serif tracking-widest text-amber-500 animate-fade-in-up">
+                ANZO'S STYLE
+              </h1>
+              <p className="text-gray-400 mt-2 font-light tracking-wider text-sm">
+                Construyendo tu mejor versión
+              </p>
+            </div>
+          );
+        };
+
+        const Toast = ({ message, show, onClose }) => {
+          useEffect(() => {
+            if (show) {
+              const timer = setTimeout(onClose, 3000);
+              return () => clearTimeout(timer);
+            }
+          }, [show, onClose]);
+          if (!show) return null;
+          return (
+            <div className="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-amber-600 text-white px-6 py-3 rounded-full shadow-xl z-50 animate-bounce-short flex items-center gap-2 whitespace-nowrap">
+              <CheckCircle size={20} />
+              <span>{message}</span>
+            </div>
+          );
+        };
+
+        const PlateCalculator = ({ onClose, cardClass }) => {
+          const [targetWeight, setTargetWeight] = useState('');
+          const [barWeight, setBarWeight] = useState(20);
+          const [results, setResults] = useState(null);
+          const calculatePlates = () => {
+            if (!targetWeight || targetWeight < barWeight) {
+              setResults(null);
+              return;
+            }
+            let weightPerSide = (targetWeight - barWeight) / 2;
+            const plates = [25, 20, 15, 10, 5, 2.5, 1.25];
+            const calculated = [];
+            plates.forEach(plate => {
+              while (weightPerSide >= plate) {
+                calculated.push(plate);
+                weightPerSide -= plate;
+              }
+            });
+            setResults(calculated);
+          };
+          useEffect(() => {
+            calculatePlates();
+          }, [targetWeight, barWeight]);
+          return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+              <div className={`w-full max-w-sm p-6 rounded-xl shadow-2xl border ${cardClass}`}>
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-2xl font-serif font-bold flex items-center gap-2">
+                    <Disc className="text-amber-500" /> Calc. Discos
+                  </h2>
+                  <button onClick={onClose}><X size={24} /></button>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-xs uppercase opacity-60 mb-1 block">Peso Total (kg)</label>
+                    <input 
+                      type="number" 
+                      value={targetWeight} 
+                      onChange={e => setTargetWeight(e.target.value)}
+                      className="w-full p-3 rounded-lg bg-stone-500/10 text-2xl font-bold text-center focus:outline-none focus:ring-2 focus:ring-amber-500"
+                      placeholder="Ej: 80"
+                      autoFocus
+                    />
+                  </div>
+                  <div className="flex justify-center gap-4 text-sm">
+                     <button 
+                       onClick={() => setBarWeight(20)} 
+                       className={`px-3 py-1 rounded-full border transition-colors ${barWeight === 20 ? 'bg-amber-500 text-white border-amber-500' : 'border-stone-500/30'}`}
+                     >Barra 20kg</button>
+                     <button 
+                       onClick={() => setBarWeight(15)} 
+                       className={`px-3 py-1 rounded-full border transition-colors ${barWeight === 15 ? 'bg-amber-500 text-white border-amber-500' : 'border-stone-500/30'}`}
+                     >Barra 15kg</button>
+                  </div>
+                  <div className="mt-6 p-4 bg-stone-500/5 rounded-lg min-h-[120px] flex flex-col items-center justify-center">
+                    {results && results.length > 0 ? (
+                      <>
+                        <p className="text-sm opacity-60 mb-3">POR LADO:</p>
+                        <div className="flex flex-wrap justify-center gap-2 animate-slide-up">
+                          {results.map((plate, idx) => (
+                            <div key={idx} className={`
+                              flex items-center justify-center rounded-full font-bold shadow-md border-2 border-stone-700/20
+                              ${plate >= 20 ? 'w-16 h-16 bg-red-600 text-white' : 
+                                plate >= 10 ? 'w-14 h-14 bg-blue-600 text-white' : 
+                                'w-10 h-10 bg-stone-300 text-black'}
+                            `}>
+                              {plate}
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    ) : (
+                       <p className="opacity-40 italic text-center">Introduce un peso mayor a la barra para ver los discos.</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        // --- VIEW COMPONENTS ---
+        const HomeView = ({ setView, accentText, buttonPrimary, darkMode }) => {
+          const [quote] = useState(() => MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)]);
+          return (
+            <div className="pt-24 pb-12 px-4 max-w-4xl mx-auto animate-fade-in">
+              <div className="text-center mb-12">
+                <p className={`text-sm uppercase tracking-[0.3em] mb-4 ${accentText} font-bold`}>
+                  Bienvenido al cambio
+                </p>
+                <h1 className="text-5xl md:text-6xl font-serif font-bold mb-6 leading-tight">
+                  Descubre tu<br/>Verdadera <span className="italic font-light text-amber-500">Fuerza</span>
+                </h1>
+                <div className={`max-w-2xl mx-auto p-6 rounded-lg ${darkMode ? 'bg-stone-900/50' : 'bg-stone-100'}`}>
+                  <p className="italic text-lg opacity-80 font-serif">"{quote}"</p>
+                </div>
+              </div>
+              <div className="space-y-6 text-lg leading-relaxed opacity-90 font-serif text-justify md:text-center">
+                <p>
+                  Hola, soy Antonio. Hace más de dos años decidí que el gimnasio sería mi templo de cambio, 
+                  no solo físico, sino mental. Aquí no solo levanto pesas; desafío mis propios límites.
+                </p>
+                <p>
+                  He aprendido que el progreso real vive en la <strong>constancia</strong> y la <strong>disciplina</strong>. 
+                  Mi cuerpo cambió, pero mi mente se transformó por completo.
+                </p>
+                <p>
+                  He creado <strong>Anzo's Style</strong> para compartir contigo las rutinas que me han forjado. 
+                  No es solo mi viaje, es la herramienta para que comiences el tuyo.
+                </p>
+              </div>
+              <div className="mt-16 text-center">
+                <button 
+                  onClick={() => setView('routine-select')}
+                  className={`px-10 py-4 rounded-full text-xl font-bold tracking-wide ${buttonPrimary}`}
+                >
+                  Comenzar Rutina
+                </button>
+              </div>
+            </div>
+          );
+        };
+
+        const InfoView = ({ routineId, setView, setSelectedRoutineId, setTimerVisible, setTimerRunning, cardClass, accentText, buttonPrimary }) => {
+          const routine = ROUTINES[routineId];
+          const [expandedInfo, setExpandedInfo] = useState({});
+
+          const toggleInfo = (name) => {
+            setExpandedInfo(prev => ({...prev, [name]: !prev[name]}));
+          };
+
+          if (!routine) return null;
+          return (
+            <div className="pt-24 pb-12 px-4 max-w-5xl mx-auto animate-fade-in">
+              <div className="mb-8 flex items-center gap-4">
+                <button onClick={() => setView('home')} className="text-stone-500 hover:text-amber-500 transition-colors">
+                  &larr; Volver
+                </button>
+                <span className="opacity-30">|</span>
+                <h2 className="text-3xl font-serif font-bold">{routine.title}</h2>
+              </div>
+              
+              <div className="w-full h-64 md:h-96 bg-stone-800 rounded-2xl mb-12 overflow-hidden relative shadow-2xl group flex items-center justify-center">
+                <Dumbbell size={120} className="text-stone-700 opacity-50" />
+                <div className="absolute bottom-0 left-0 p-8 bg-gradient-to-t from-black/90 to-transparent w-full">
+                  <p className="text-xl text-stone-300 italic font-serif">{routine.description}</p>
+                </div>
+              </div>
+
+              <div className="grid gap-8 md:grid-cols-2">
+                {routine.blocks.map((block, idx) => (
+                  <div key={idx} className={`p-6 rounded-xl border transition-all hover:border-amber-500/30 ${cardClass}`}>
+                    <h3 className={`text-xl font-bold mb-4 ${accentText}`}>{block.title}</h3>
+                    <ul className="space-y-4">
+                      {block.exercises.map((ex, i) => (
+                        <li key={i} className="flex flex-col">
+                          <div className="flex items-start gap-3">
+                             <div className="mt-1.5 w-2 h-2 rounded-full bg-amber-500 flex-shrink-0" />
+                             <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                   <p className="font-semibold text-lg">{ex.name}</p>
+                                   <button onClick={() => toggleInfo(ex.name)} className="text-stone-400 hover:text-amber-500 transition-colors">
+                                     <Info size={16} />
+                                   </button>
+                                </div>
+                                <p className="text-sm opacity-70 font-mono">{ex.details}</p>
+                             </div>
+                          </div>
+                          {expandedInfo[ex.name] && (
+                            <div className="ml-5 mt-2 p-3 bg-stone-500/10 rounded-lg text-sm animate-fade-in">
+                               <p className="mb-1"><strong>Cómo:</strong> {ex.desc}</p>
+                               <p className="italic text-stone-500 dark:text-stone-400"><strong>Tip:</strong> {ex.tips}</p>
+                            </div>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-12 text-center">
+                   <button 
+                      onClick={() => {
+                          setSelectedRoutineId(routineId);
+                          setView('active-workout');
+                          setTimerVisible(true);
+                          setTimerRunning(true);
+                      }}
+                      className={`px-8 py-3 rounded-full font-bold ${buttonPrimary}`}
+                   >
+                       Entrenar {routine.title} Ahora
+                   </button>
+              </div>
+            </div>
+          );
+        };
+
+        const RoutineSelectionView = ({ setSelectedRoutineId, setView, setTimerVisible, setTimerRunning, cardClass }) => {
+          return (
+            <div className="pt-24 pb-12 px-4 max-w-6xl mx-auto animate-fade-in">
+              <h2 className="text-4xl font-serif font-bold text-center mb-12">Selecciona tu Batalla de Hoy</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {Object.values(ROUTINES).map((routine) => (
+                  <div 
+                    key={routine.id}
+                    onClick={() => {
+                      setSelectedRoutineId(routine.id);
+                      setView('active-workout');
+                      setTimerVisible(true);
+                      setTimerRunning(true);
+                    }}
+                    className={`relative group cursor-pointer overflow-hidden rounded-2xl border transition-all duration-500 transform hover:-translate-y-2 hover:shadow-2xl ${cardClass}`}
+                  >
+                     <div className="absolute inset-0 bg-black/40 group-hover:bg-black/20 transition-all z-10" />
+                     <div className="h-64 w-full bg-stone-800 flex items-center justify-center overflow-hidden">
+                        <div className="text-stone-600 font-bold text-6xl opacity-20 group-hover:scale-110 transition-transform duration-700">
+                          {routine.title.substring(0, 2)}
+                        </div>
+                     </div>
+                     <div className="absolute bottom-0 left-0 w-full p-6 z-20 bg-gradient-to-t from-black via-black/80 to-transparent">
+                       <h3 className="text-2xl font-bold text-white mb-1">{routine.title}</h3>
+                       <p className="text-amber-400 text-sm opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300">
+                         Comenzar Entrenamiento &rarr;
+               </p>
+                     </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        };
+
+        const ActiveWorkoutView = ({ 
+          routine, 
+          currentWorkoutData, 
+          setCurrentWorkoutData, 
+          workoutNotes, 
+          setWorkoutNotes, 
+          handleFinishWorkout, 
+          setShowPlateCalc, 
+          darkMode, 
+          cardClass 
+        }) => {
+          const [expandedInfo, setExpandedInfo] = useState({});
+          
+          const toggleInfo = (name) => {
+            setExpandedInfo(prev => ({...prev, [name]: !prev[name]}));
+          };
+
+          const updateExercise = (exerciseName, field, value) => {
+            setCurrentWorkoutData(prev => ({
+              ...prev,
+              [exerciseName]: {
+                ...(prev[exerciseName] || { sets: 0, reps: 0, weight: '', completed: false }), 
+                [field]: value
+              }
+            }));
+          };
+
+          const toggleCompletion = (exerciseName) => {
+              const current = currentWorkoutData[exerciseName]?.completed || false;
+              updateExercise(exerciseName, 'completed', !current);
+          };
+
+          const totalExercises = routine.blocks.reduce((acc, block) => acc + block.exercises.length, 0);
+          const completedCount = Object.values(currentWorkoutData).filter(e => e.completed).length;
+          const progress = totalExercises > 0 ? Math.round((completedCount / totalExercises) * 100) : 0;
+
+          return (
+            <div className="pt-24 pb-24 px-4 max-w-4xl mx-auto animate-fade-in">
+              <div className={`sticky top-16 z-30 py-4 mb-8 backdrop-blur-xl border-b ${darkMode ? 'bg-stone-950/80 border-stone-800' : 'bg-white/80 border-stone-200'}`}>
+                <div className="flex justify-between items-center mb-2">
+                  <h2 className="text-xl font-bold truncate">{routine.title}</h2>
+                  <div className="flex items-center gap-3">
+                     <button 
+                        onClick={() => setShowPlateCalc(true)}
+                        className="flex items-center gap-1 text-xs bg-stone-500/20 hover:bg-stone-500/30 px-2 py-1 rounded-full transition-colors"
+                     >
+                        <Disc size={14} className="text-amber-500" /> Calc
+                     </button>
+                     <span className="font-mono text-amber-500 font-bold">{progress}%</span>
+                  </div>
+                </div>
+                <div className="w-full h-2 bg-stone-700 rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-amber-500 transition-all duration-500 ease-out"
+                    style={{ width: `${progress}%` }}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-8">
+                {routine.blocks.map((block, bIdx) => (
+                  <div key={bIdx} className="animate-slide-up" style={{ animationDelay: `${bIdx * 100}ms` }}>
+                    <h3 className="text-sm uppercase tracking-widest opacity-60 mb-4 ml-1">{block.title}</h3>
+                    <div className="space-y-4">
+                      {block.exercises.map((ex, eIdx) => {
+                        const storedData = currentWorkoutData[ex.name] || {};
+                        const data = { sets: 0, reps: 0, weight: '', completed: false, ...storedData };
+                        return (
+                          <div 
+                            key={ex.name} 
+                            className={`p-4 rounded-xl border transition-all ${data.completed ? (darkMode ? 'bg-green-900/10 border-green-900/30' : 'bg-green-50 border-green-200') : cardClass}`}
+                          >
+                            <div className="flex justify-between items-start mb-4">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                   <h4 className={`font-bold text-lg ${data.completed ? 'text-green-500' : ''}`}>{ex.name}</h4>
+                                   <button onClick={() => toggleInfo(ex.name)} className="text-stone-400 hover:text-amber-500 transition-colors">
+                                     <Info size={18} />
+                                   </button>
+                                </div>
+                                <p className="text-xs opacity-60 mt-1">{ex.details}</p>
+                              </div>
+                              <button 
+                                onClick={() => toggleCompletion(ex.name)}
+                                className={`p-2 rounded-full transition-all ${data.completed ? 'bg-green-500 text-white' : 'bg-stone-700/20 text-stone-400 hover:bg-stone-700/40'}`}
+                              >
+                                <CheckCircle size={24} />
+                              </button>
+                            </div>
+
+                            {expandedInfo[ex.name] && (
+                                <div className="mb-4 p-3 bg-stone-500/10 rounded-lg text-xs animate-fade-in">
+                                   <p className="mb-1"><strong>Cómo:</strong> {ex.desc}</p>
+                                   <p className="italic text-stone-500 dark:text-stone-400"><strong>Tip:</strong> {ex.tips}</p>
+                                </div>
+                            )}
+
+                            <div className={`grid grid-cols-3 gap-4 transition-opacity duration-300 ${data.completed ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+                              <div className="flex flex-col items-center">
+                                 <label className="text-[10px] uppercase tracking-wider opacity-60 mb-1">Series</label>
+                                 <div className="flex items-center gap-2 bg-stone-500/10 rounded-lg p-1">
+                                    <button 
+                                      className="w-8 h-8 flex items-center justify-center hover:bg-stone-500/20 rounded"
+                                      onClick={() => updateExercise(ex.name, 'sets', Math.max(0, (data.sets || 0) - 1))}
+                                    >-</button>
+                                    <span className="font-mono w-6 text-center font-bold">{data.sets || 0}</span>
+                                    <button 
+                                      className="w-8 h-8 flex items-center justify-center hover:bg-stone-500/20 rounded"
+                                      onClick={() => updateExercise(ex.name, 'sets', (data.sets || 0) + 1)}
+                                    >+</button>
+                                 </div>
+                              </div>
+                              <div className="flex flex-col items-center">
+                                 <label className="text-[10px] uppercase tracking-wider opacity-60 mb-1">Reps</label>
+                                 <div className="flex items-center gap-2 bg-stone-500/10 rounded-lg p-1">
+                                    <button 
+                                      className="w-8 h-8 flex items-center justify-center hover:bg-stone-500/20 rounded"
+                                      onClick={() => updateExercise(ex.name, 'reps', Math.max(0, (data.reps || 0) - 1))}
+                                    >-</button>
+                                    <span className="font-mono w-6 text-center font-bold">{data.reps || 0}</span>
+                                    <button 
+                                      className="w-8 h-8 flex items-center justify-center hover:bg-stone-500/20 rounded"
+                                      onClick={() => updateExercise(ex.name, 'reps', (data.reps || 0) + 1)}
+                                    >+</button>
+                                 </div>
+                              </div>
+                              <div className="flex flex-col items-center">
+                                 <label className="text-[10px] uppercase tracking-wider opacity-60 mb-1">Peso (Kg)</label>
+                                 <div className="flex items-center gap-2 bg-stone-500/10 rounded-lg p-1 w-full">
+                                    <button 
+                                      className="w-8 h-8 flex-shrink-0 flex items-center justify-center hover:bg-stone-500/20 rounded"
+                                      onClick={() => {
+                                          const current = parseFloat(data.weight) || 0;
+                                          updateExercise(ex.name, 'weight', Math.max(0, current - 2.5)); 
+                                      }}
+                                    >-</button>
+                                    <input 
+                                      type="number" 
+                                      placeholder="0"
+                                      className="w-full text-center bg-transparent font-mono font-bold focus:outline-none focus:ring-0 appearance-none" 
+                                      value={data.weight}
+                                      onChange={(e) => updateExercise(ex.name, 'weight', e.target.value)}
+                                      onClick={(e) => e.target.select()} 
+                                    />
+                                    <button 
+                                      className="w-8 h-8 flex-shrink-0 flex items-center justify-center hover:bg-stone-500/20 rounded"
+                                      onClick={() => {
+                                           const current = parseFloat(data.weight) || 0;
+                                           updateExercise(ex.name, 'weight', current + 2.5); 
+                                      }}
+                                    >+</button>
+                                 </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className={`mt-8 p-6 rounded-xl border ${cardClass}`}>
+                 <h3 className="text-lg font-bold mb-3 flex items-center gap-2"><BookOpen size={18}/> Diario de Sensaciones</h3>
+                 <textarea
+                   className="w-full bg-transparent border border-stone-500/20 rounded-lg p-3 focus:outline-none focus:border-amber-500 transition-colors min-h-[100px] text-sm"
+                   placeholder="¿Cómo te sentiste hoy? ¿Alguna molestia? ¿Mucha energía?..."
+                   value={workoutNotes}
+                   onChange={(e) => setWorkoutNotes(e.target.value)}
+                 />
+              </div>
+              <div className="mt-8 mb-8">
+                 <button 
+                   onClick={handleFinishWorkout}
+                   className="w-full py-4 rounded-xl font-bold bg-gradient-to-r from-amber-600 to-orange-600 text-white shadow-lg hover:shadow-amber-900/30 transform hover:scale-[1.02] transition-all"
+                 >
+                   Suficiente por hoy (Finalizar)
+                 </button>
+              </div>
+            </div>
+          );
+        };
+
+        const StatsView = ({ history, cardClass }) => {
+          const totalWorkouts = history.length;
+          const [rmWeight, setRmWeight] = useState('');
+          const [rmReps, setRmReps] = useState('');
+          const calculated1RM = rmWeight && rmReps ? Math.round(rmWeight * (1 + (rmReps / 30))) : 0;
+
+          const getHeatmapData = () => {
+            const last30Days = [...Array(30)].map((_, i) => {
+              const d = new Date();
+              d.setDate(d.getDate() - (29 - i));
+              return d.toISOString().split('T')[0];
+            });
+            
+            return last30Days.map(dateStr => {
+              const count = history.filter(h => h.date.startsWith(dateStr)).length;
+              return { date: dateStr, count };
+            });
+          };
+          const heatmapData = getHeatmapData();
+
+          // Lógica para calcular Récords Personales (PRs)
+          const getPersonalRecords = () => {
+            const records = {};
+            history.forEach(session => {
+                Object.entries(session.exercises).forEach(([name, data]) => {
+                    const weight = parseFloat(data.weight) || 0;
+                    if (weight > 0) {
+                        if (!records[name] || weight > records[name].weight) {
+                            records[name] = { weight: weight, date: session.date };
+                        }
+                    }
+                });
+            });
+            // Convertir a array y ordenar por peso descendente, coger top 3
+            return Object.entries(records)
+                .map(([name, data]) => ({ name, ...data }))
+                .sort((a, b) => b.weight - a.weight)
+                .slice(0, 3);
+          };
+          
+          const personalRecords = getPersonalRecords();
+
+          return (
+            <div className="pt-24 pb-12 px-4 max-w-5xl mx-auto animate-fade-in">
+              <h2 className="text-4xl font-serif font-bold mb-8">Tu Progreso</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                  <div className={`p-6 rounded-xl border ${cardClass} flex items-center gap-4`}>
+                      <div className="p-4 rounded-full bg-amber-500/20 text-amber-500">
+                          <Trophy size={24} />
+                      </div>
+                      <div>
+                          <p className="text-sm opacity-60 uppercase">Total Sesiones</p>
+                          <p className="text-3xl font-bold">{totalWorkouts}</p>
+                      </div>
+                  </div>
+                  <div className={`col-span-1 md:col-span-2 p-6 rounded-xl border ${cardClass} flex flex-col justify-center`}>
+                      <div className="flex items-center gap-2 mb-4">
+                         <Activity size={20} className="text-amber-500"/>
+                         <p className="text-sm opacity-60 uppercase font-bold">Constancia (Últimos 30 días)</p>
+                      </div>
+                      <div className="flex items-end gap-1 h-16 w-full">
+                         {heatmapData.map((d, i) => (
+                           <div 
+                             key={i}
+                             className={`flex-1 rounded-t-sm transition-all hover:opacity-80 relative group ${d.count > 0 ? 'bg-amber-500' : 'bg-stone-500/10'}`}
+                             style={{ height: d.count > 0 ? '100%' : '20%' }}
+                           >
+                              <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 bg-black text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none z-10">
+                                {d.date.slice(5)}: {d.count}
+                              </div>
+                           </div>
+                         ))}
+                      </div>
+                  </div>
+              </div>
+
+              {/* NUEVA SECCIÓN: Récords Personales */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div className={`p-6 rounded-xl border ${cardClass}`}>
+                      <h3 className="font-bold text-xl mb-4 flex items-center gap-2 text-amber-500">
+                          <Trophy size={20}/> Récords Personales (Top 3)
+                      </h3>
+                      {personalRecords.length > 0 ? (
+                          <div className="space-y-4">
+                              {personalRecords.map((pr, idx) => (
+                                  <div key={idx} className="flex justify-between items-center border-b border-stone-500/10 pb-2 last:border-0">
+                                      <div>
+                                          <p className="font-semibold">{pr.name}</p>
+                                          <p className="text-xs opacity-60">{new Date(pr.date).toLocaleDateString()}</p>
+                                      </div>
+                                      <div className="text-xl font-bold font-mono">{pr.weight} <span className="text-xs opacity-50 font-sans">kg</span></div>
+                                  </div>
+                              ))}
+                          </div>
+                      ) : (
+                          <p className="opacity-40 italic text-sm">Registra entrenamientos para ver tus récords aquí.</p>
+                      )}
+                  </div>
+
+                  <div className={`p-6 rounded-xl border ${cardClass}`}>
+                      <h3 className="font-bold text-xl mb-4 flex items-center gap-2"><Dumbbell size={20}/> Calculadora Rápida 1RM</h3>
+                      <div className="flex gap-4 items-end">
+                          <div>
+                              <label className="text-xs uppercase block mb-1 opacity-70">Peso (kg)</label>
+                              <input type="number" value={rmWeight} onChange={e=>setRmWeight(e.target.value)} className="w-24 p-2 rounded bg-stone-500/10 font-mono text-lg" placeholder="0" />
+                          </div>
+                          <div>
+                              <label className="text-xs uppercase block mb-1 opacity-70">Reps</label>
+                              <input type="number" value={rmReps} onChange={e=>setRmReps(e.target.value)} className="w-24 p-2 rounded bg-stone-500/10 font-mono text-lg" placeholder="0" />
+                          </div>
+                          <div className="pb-2 flex-1 text-right">
+                              <span className="text-3xl font-bold text-amber-500 block">{calculated1RM} <span className="text-sm text-stone-500 font-normal">kg</span></span> 
+                              <span className="text-xs opacity-50 uppercase tracking-widest">Máximo Teórico</span>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+
+              <div className="flex justify-between items-center mb-6">
+                  <h3 className="text-2xl font-serif font-bold">Historial Reciente</h3>
+                  <button 
+                      onClick={() => exportToCSV(history)}
+                      className="flex items-center gap-2 px-4 py-2 rounded-lg bg-stone-800 hover:bg-stone-700 text-white transition-colors text-sm"
+                  >
+                      <Download size={16} /> Exportar Excel
+                  </button>
+              </div>
+              <div className="space-y-4">
+                  {history.length === 0 ? (
+                      <div className="text-center py-12 opacity-40">Aún no hay registros. ¡A entrenar!</div>
+                  ) : (
+                      history.slice(0, 10).map((session) => (
+                          <div key={session.id} className={`p-4 rounded-xl border ${cardClass}`}>
+                              <div className="flex justify-between items-center mb-2">
+                                  <div>
+                                      <p className="font-bold text-lg">{session.routineName}</p>
+                                      <p className="text-sm opacity-60">{new Date(session.date).toLocaleDateString()} &bull; {formatTime(session.duration || 0)}</p>
+                                  </div>
+                                  <div className="text-right">
+                                      <p className="font-mono text-sm">{Object.keys(session.exercises).length} Ejer.</p>
+                                  </div>
+                              </div>
+                              {session.notes && (
+                                <div className="mt-2 pt-2 border-t border-stone-500/10">
+                                   <p className="text-xs italic opacity-70">"{session.notes}"</p>
+                                </div>
+                              )}
+                          </div>
+                      ))
+                  )}
+              </div>
+            </div>
+          );
+        };
+
+        // --- MAIN APP ---
+        function AnzosStyleApp() {
+          const [loading, setLoading] = useState(true);
+          const [darkMode, setDarkMode] = useState(true); 
+          const [view, setView] = useState('home'); 
+          const [selectedRoutineId, setSelectedRoutineId] = useState(null);
+          const [history, setHistory] = useState([]);
+          const [showSettings, setShowSettings] = useState(false);
+          const [toast, setToast] = useState({ show: false, msg: '' });
+          const [showPlateCalc, setShowPlateCalc] = useState(false);
+          const [timerTime, setTimerTime] = useState(0);
+          const [timerRunning, setTimerRunning] = useState(false);
+          const [timerVisible, setTimerVisible] = useState(false);
+          const [currentWorkoutData, setCurrentWorkoutData] = useState({}); 
+          const [workoutNotes, setWorkoutNotes] = useState(''); 
+
+          useEffect(() => {
+            const savedHistory = localStorage.getItem('anzos_history');
+            const savedTheme = localStorage.getItem('anzos_theme');
+            if (savedHistory) setHistory(JSON.parse(savedHistory));
+            if (savedTheme) setDarkMode(savedTheme === 'dark');
+          }, []);
+
+          useEffect(() => {
+            localStorage.setItem('anzos_theme', darkMode ? 'dark' : 'light');
+            if (darkMode) {
+              document.documentElement.classList.add('dark');
+            } else {
+              document.documentElement.classList.remove('dark');
+            }
+          }, [darkMode]);
+
+          useEffect(() => {
+            let interval = null;
+            if (timerRunning) {
+              interval = setInterval(() => {
+                setTimerTime(prev => prev + 1);
+              }, 1000);
+            } else if (!timerRunning && timerTime !== 0) {
+              clearInterval(interval);
+            }
+            return () => clearInterval(interval);
+          }, [timerRunning, timerTime]);
+
+          const [showScrollTop, setShowScrollTop] = useState(false);
+          useEffect(() => {
+            const checkScroll = () => {
+              if (window.scrollY > 300) setShowScrollTop(true);
+              else setShowScrollTop(false);
+            };
+            window.addEventListener('scroll', checkScroll);
+            return () => window.removeEventListener('scroll', checkScroll);
+          }, []);
+
+          const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+
+          const handleFinishWorkout = () => {
+            if (Object.keys(currentWorkoutData).length === 0) {
+              setToast({ show: true, msg: "No has registrado ningún ejercicio." });
+              return;
+            }
+            const newRecord = {
+              id: Date.now(),
+              date: new Date().toISOString(),
+              routineId: selectedRoutineId,
+              routineName: ROUTINES[selectedRoutineId].title,
+              exercises: currentWorkoutData,
+              duration: timerTime,
+              notes: workoutNotes 
+            };
+            const updatedHistory = [newRecord, ...history];
+            setHistory(updatedHistory);
+            localStorage.setItem('anzos_history', JSON.stringify(updatedHistory));
+            
+            setToast({ show: true, msg: "¡Entrenamiento guardado!" });
+            setCurrentWorkoutData({});
+            setWorkoutNotes('');
+            setTimerRunning(false);
+            setTimerTime(0);
+            setTimerVisible(false);
+            setView('home');
+            scrollToTop();
+          };
+
+          if (loading) return <InitialLoader onFinish={() => setLoading(false)} />;
+
+          const bgClass = darkMode ? "bg-stone-950 text-stone-200" : "bg-stone-50 text-stone-800";
+          const cardClass = darkMode ? "bg-stone-900 border-stone-800" : "bg-white border-stone-200";
+          const accentText = darkMode ? "text-amber-500" : "text-amber-700";
+          const buttonPrimary = "bg-amber-600 hover:bg-amber-700 text-white shadow-lg shadow-amber-900/20 transition-all transform hover:scale-105 active:scale-95";
+          
+          // Navbar Component
+          const Navbar = () => {
+            const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+            const navLinks = [
+              { name: "Comenzar Rutina", id: 'routine-select' },
+              { name: "Pecho y Tríceps", id: 'info-chest' },
+              { name: "Espalda y Bíceps", id: 'info-back' },
+              { name: "Pierna", id: 'info-legs' },
+              { name: "Deltoides", id: 'info-delts' },
+              { name: "Estadísticas", id: 'stats' },
+            ];
+            return (
+              <nav className={`fixed top-0 w-full z-40 backdrop-blur-md border-b ${darkMode ? 'bg-stone-950/80 border-stone-800' : 'bg-white/80 border-stone-200'} transition-all`}>
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                  <div className="flex items-center justify-between h-16">
+                    <div 
+                      className="flex-shrink-0 flex items-center cursor-pointer group" 
+                      onClick={() => setView('home')}
+                    >
+                      <Dumbbell className={`h-6 w-6 mr-2 ${accentText} group-hover:rotate-12 transition-transform`} />
+                      <span className={`font-serif font-bold text-xl tracking-wider ${darkMode ? 'text-white' : 'text-stone-900'}`}>
+                        Anzo's Style
+                      </span>
+                    </div>
+                    <div className="hidden md:block">
+                      <div className="ml-10 flex items-baseline space-x-4">
+                        {navLinks.map(link => (
+                          <button
+                            key={link.name}
+                            onClick={() => setView(link.id)}
+                            className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${view === link.id ? accentText : 'text-stone-500 hover:text-amber-600'}`}
+                          >
+                            {link.name}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    <div className="hidden md:flex items-center space-x-4">
+                      <button 
+                        onClick={() => setShowSettings(true)}
+                        className="p-2 rounded-full hover:bg-stone-800/10 transition-colors"
+                      >
+                        <Settings size={20} className={darkMode ? 'text-stone-300' : 'text-stone-600'} />
+                      </button>
+                    </div>
+                    <div className="-mr-2 flex md:hidden">
+                      <button 
+                        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                        className="p-2 rounded-md text-stone-400 hover:text-white hover:bg-stone-800"
+                      >
+                        {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                {mobileMenuOpen && (
+                  <div className="md:hidden bg-stone-900 border-t border-stone-800">
+                    <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                      {navLinks.map(link => (
+                        <button
+                          key={link.name}
+                          onClick={() => {
+                            setView(link.id);
+                            setMobileMenuOpen(false);
+                          }}
+                          className="block px-3 py-2 rounded-md text-base font-medium w-full text-left text-stone-300 hover:text-white hover:bg-stone-800"
+                        >
+                          {link.name}
+                        </button>
+                      ))}
+                      <button
+                        onClick={() => { setShowSettings(true); setMobileMenuOpen(false); }}
+                        className="flex items-center px-3 py-2 w-full text-left text-stone-300 hover:text-white"
+                      >
+                        <Settings size={18} className="mr-2" /> Configuración
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </nav>
+            );
+          };
+
+          const SettingsModal = () => {
+            if (!showSettings) return null;
+            return (
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+                <div className={`w-full max-w-md p-6 rounded-xl shadow-2xl border ${cardClass}`}>
+                  <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-serif font-bold">Configuración</h2>
+                    <button onClick={() => setShowSettings(false)}><X size={24} /></button>
+                  </div>
+                  <div className="space-y-6">
+                    <div className="flex items-center justify-between p-4 rounded-lg bg-stone-100 dark:bg-stone-950/50">
+                      <div className="flex items-center gap-3">
+                        {darkMode ? <Moon size={20} className="text-indigo-400"/> : <Sun size={20} className="text-orange-500"/>}
+                        <span className="font-medium">Modo Oscuro</span>
+                      </div>
+                      <button 
+                        onClick={() => setDarkMode(!darkMode)}
+                        className={`w-12 h-6 rounded-full p-1 transition-colors duration-300 ${darkMode ? 'bg-amber-600' : 'bg-stone-300'}`}
+                      >
+                        <div className={`w-4 h-4 rounded-full bg-white transform transition-transform ${darkMode ? 'translate-x-6' : ''}`} />
+                      </button>
+                    </div>
+                    <div className="p-4 rounded-lg border border-red-500/30 bg-red-500/5">
+                      <h3 className="text-red-500 font-bold mb-2">Zona de Peligro</h3>
+                      <p className="text-sm mb-4 opacity-80">Esto borrará todo tu historial de entrenamientos.</p>
+                      <button 
+                        onClick={() => {
+                          if(confirm("¿Estás seguro? Esta acción es irreversible.")) {
+                            setHistory([]);
+                            localStorage.removeItem('anzos_history');
+                            setToast({ show: true, msg: "Historial eliminado" });
+                            setShowSettings(false);
+                          }
+                        }}
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm w-full transition-colors"
+                      >
+                        Reiniciar Estadísticas
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
+          };
+
+          const GlobalTimer = () => {
+            return (
+              <div className={`fixed bottom-4 left-4 z-40 transition-all duration-500 ${timerVisible || timerRunning ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'}`}>
+                <div className={`flex items-center gap-3 p-3 rounded-full shadow-2xl backdrop-blur-md border ${darkMode ? 'bg-stone-900/90 border-stone-700' : 'bg-white/90 border-stone-200'}`}>
+                  <div className={`font-mono text-xl font-bold w-20 text-center ${accentText}`}>
+                    {formatTime(timerTime)}
+                  </div>
+                  <div className="flex gap-1">
+                    <button 
+                      onClick={() => setTimerRunning(!timerRunning)}
+                      className={`p-2 rounded-full ${timerRunning ? 'bg-amber-500/20 text-amber-500' : 'bg-green-500/20 text-green-500'}`}
+                    >
+                      {timerRunning ? <Pause size={18} /> : <Play size={18} />}
+                    </button>
+                    <button 
+                      onClick={() => { setTimerRunning(false); setTimerTime(0); }}
+                      className="p-2 rounded-full hover:bg-stone-500/20 text-stone-500"
+                    >
+                      <RotateCcw size={18} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          };
+
+          return (
+            <div className={`min-h-screen transition-colors duration-500 font-sans ${bgClass}`}>
+              <Navbar />
+              <main className="relative z-0">
+                {view === 'home' && (
+                  <HomeView 
+                    setView={setView}
+                    accentText={accentText}
+                    buttonPrimary={buttonPrimary}
+                    darkMode={darkMode}
+                  />
+                )}
+                {view.startsWith('info-') && (
+                  <InfoView 
+                    routineId={view.replace('info-', '')}
+                    setView={setView}
+                    setSelectedRoutineId={setSelectedRoutineId}
+                    setTimerVisible={setTimerVisible}
+                    setTimerRunning={setTimerRunning}
+                    cardClass={cardClass}
+                    accentText={accentText}
+                    buttonPrimary={buttonPrimary}
+                  />
+                )}
+                {view === 'routine-select' && (
+                  <RoutineSelectionView 
+                    setSelectedRoutineId={setSelectedRoutineId}
+                    setView={setView}
+                    setTimerVisible={setTimerVisible}
+                    setTimerRunning={setTimerRunning}
+                    cardClass={cardClass}
+                  />
+                )}
+                {view === 'active-workout' && selectedRoutineId && (
+                  <ActiveWorkoutView 
+                    routine={ROUTINES[selectedRoutineId]}
+                    currentWorkoutData={currentWorkoutData}
+                    setCurrentWorkoutData={setCurrentWorkoutData}
+                    workoutNotes={workoutNotes}
+                    setWorkoutNotes={setWorkoutNotes}
+                    handleFinishWorkout={handleFinishWorkout}
+                    setShowPlateCalc={setShowPlateCalc}
+                    darkMode={darkMode}
+                    cardClass={cardClass}
+                  />
+                )}
+                {view === 'stats' && (
+                  <StatsView 
+                    history={history}
+                    cardClass={cardClass}
+                  />
+                )}
+              </main>
+
+              <GlobalTimer />
+              
+              {showPlateCalc && (
+                <PlateCalculator 
+                  onClose={() => setShowPlateCalc(false)} 
+                  cardClass={cardClass}
+                />
+              )}
+              
+              <SettingsModal />
+              
+              <Toast show={toast.show} message={toast.msg} onClose={() => setToast({ ...toast, show: false })} />
+
+              {showScrollTop && (
+                <button 
+                  onClick={scrollToTop}
+                  className="fixed bottom-4 right-4 z-30 p-3 rounded-full bg-amber-600 text-white shadow-lg hover:bg-amber-700 transition-all animate-bounce-short"
+                >
+                  <ChevronUp size={24} />
+                </button>
+              )}
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AnzosStyleApp />);
+    </script>
 </body>
 </html>
