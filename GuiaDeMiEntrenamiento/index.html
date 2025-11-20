@@ -63,7 +63,7 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
 
         // --- ICONS ---
         const Dumbbell = ({ className, size = 24 }) => (
@@ -108,6 +108,9 @@
         const Download = ({ className, size = 24 }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
         );
+        const Upload = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+        );
         const Disc = ({ className, size = 24 }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
         );
@@ -116,6 +119,9 @@
         );
         const Info = ({ className, size = 24 }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="16" y2="12"/><line x1="12" x2="12.01" y1="8" y2="8"/></svg>
+        );
+        const Save = ({ className, size = 24 }) => (
+            <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
         );
 
         // --- DATA ---
@@ -128,81 +134,31 @@
               { 
                 title: "Bloque 1 – Fuerza Pectoral", 
                 exercises: [
-                  { 
-                    name: "Press banca unilateral", 
-                    details: "6x5 rep, 80–85% RM",
-                    desc: "Túmbate en un banco plano o usa la máquina. Empuja la carga con un solo brazo mientras mantienes el otro lado estable.",
-                    tips: "Contrae fuerte el abdomen para evitar rotar el torso."
-                  }, 
-                  { 
-                    name: "Press inclinado", 
-                    details: "5x8 rep",
-                    desc: "Usa un banco inclinado a 30-45º. Baja las mancuernas controladamente hasta el pecho superior y empuja.",
-                    tips: "Mantén los codos a 45º respecto al cuerpo, no los abras demasiado."
-                  }
+                  { name: "Press banca unilateral", details: "6x5 rep, 80–85% RM", desc: "Túmbate en un banco plano o usa la máquina. Empuja la carga con un solo brazo mientras mantienes el otro lado estable.", tips: "Contrae fuerte el abdomen para evitar rotar el torso." }, 
+                  { name: "Press inclinado", details: "5x8 rep", desc: "Usa un banco inclinado a 30-45º. Baja las mancuernas controladamente hasta el pecho superior y empuja.", tips: "Mantén los codos a 45º respecto al cuerpo, no los abras demasiado." }
                 ] 
               },
               { 
                 title: "Bloque 2 – Hipertrofia Pectoral", 
                 exercises: [
-                  { 
-                    name: "Press máquina convergente", 
-                    details: "4x10–12 rep",
-                    desc: "Sentado en la máquina, empuja hacia adelante juntando las manos al final del recorrido.",
-                    tips: "Concéntrate en apretar el pecho en el punto de máxima contracción."
-                  }, 
-                  { 
-                    name: "Peck deck", 
-                    details: "3x10 rep + dropset",
-                    desc: "En la máquina de aperturas, lleva los brazos hacia el centro manteniendo una ligera flexión de codos.",
-                    tips: "No dejes que los hombros se vayan hacia adelante al abrir."
-                  }, 
-                  { 
-                    name: "Peck deck de pie", 
-                    details: "3x al fallo",
-                    desc: "Variante de pie o inclinado hacia adelante en poleas, buscando el estiramiento máximo.",
-                    tips: "Mantén el pecho alto y orgulloso durante todo el movimiento."
-                  }
+                  { name: "Press máquina convergente", details: "4x10–12 rep", desc: "Sentado en la máquina, empuja hacia adelante juntando las manos al final del recorrido.", tips: "Concéntrate en apretar el pecho en el punto de máxima contracción." }, 
+                  { name: "Peck deck", details: "3x10 rep + dropset", desc: "En la máquina de aperturas, lleva los brazos hacia el centro manteniendo una ligera flexión de codos.", tips: "No dejes que los hombros se vayan hacia adelante al abrir." }, 
+                  { name: "Peck deck de pie", details: "3x al fallo", desc: "Variante de pie o inclinado hacia adelante en poleas, buscando el estiramiento máximo.", tips: "Mantén el pecho alto y orgulloso durante todo el movimiento." }
                 ] 
               },
               { 
                 title: "Bloque 3 – Tríceps", 
                 exercises: [
-                  { 
-                    name: "Press cerrado", 
-                    details: "5x8–10 rep",
-                    desc: "Press de banca con agarre a la anchura de los hombros.",
-                    tips: "Mantén los codos pegados al torso al bajar."
-                  }, 
-                  { 
-                    name: "Press francés", 
-                    details: "4x10–12 rep",
-                    desc: "Tumbado, baja la barra Z hacia la frente flexionando solo los codos.",
-                    tips: "Mantén los codos fijos apuntando al techo."
-                  }, 
-                  { 
-                    name: "Extensiones polea", 
-                    details: "4x12–15 rep",
-                    desc: "De pie frente a la polea alta, extiende los brazos hacia abajo separando la cuerda al final.",
-                    tips: "No uses el impulso del cuerpo, solo mueve los antebrazos."
-                  }, 
-                  { 
-                    name: "Extensión overhead", 
-                    details: "4x12–15 rep",
-                    desc: "Extensión de tríceps por encima de la cabeza con mancuerna o polea.",
-                    tips: "Asegúrate de estirar completamente el tríceps en la bajada."
-                  }
+                  { name: "Press cerrado", details: "5x8–10 rep", desc: "Press de banca con agarre a la anchura de los hombros.", tips: "Mantén los codos pegados al torso al bajar." }, 
+                  { name: "Press francés", details: "4x10–12 rep", desc: "Tumbado, baja la barra Z hacia la frente flexionando solo los codos.", tips: "Mantén los codos fijos apuntando al techo." }, 
+                  { name: "Extensiones polea", details: "4x12–15 rep", desc: "De pie frente a la polea alta, extiende los brazos hacia abajo separando la cuerda al final.", tips: "No uses el impulso del cuerpo, solo mueve los antebrazos." }, 
+                  { name: "Extensión overhead", details: "4x12–15 rep", desc: "Extensión de tríceps por encima de la cabeza con mancuerna o polea.", tips: "Asegúrate de estirar completamente el tríceps en la bajada." }
                 ] 
               },
               { 
                 title: "Bloque 4 – Finisher", 
                 exercises: [
-                  { 
-                    name: "Press JM", 
-                    details: "4x8–10 rep, peso moderado",
-                    desc: "Híbrido entre press cerrado y press francés. Baja la barra hacia el cuello/mentón.",
-                    tips: "Movimiento técnico: controla la bajada y explota al subir."
-                  }
+                  { name: "Press JM", details: "4x8–10 rep, peso moderado", desc: "Híbrido entre press cerrado y press francés. Baja la barra hacia el cuello/mentón.", tips: "Movimiento técnico: controla la bajada y explota al subir." }
                 ] 
               }
             ]
@@ -215,69 +171,29 @@
               { 
                 title: "Bloque 1 – Espalda (Tirón)", 
                 exercises: [
-                  { 
-                    name: "Jalón al pecho abierto", 
-                    details: "2 series al fallo",
-                    desc: "Sentado, tracciona la barra hacia la parte superior del pecho.",
-                    tips: "Inicia el movimiento bajando las escápulas, no solo tirando con los brazos."
-                  }, 
-                  { 
-                    name: "Remo Gironda", 
-                    details: "2 series al fallo",
-                    desc: "Remo sentado en polea baja. Tira del agarre hacia el abdomen.",
-                    tips: "Mantén la espalda recta y saca pecho al tirar."
-                  }, 
-                  { 
-                    name: "Remo en punta", 
-                    details: "2 series al fallo",
-                    desc: "Con barra T o soporte, inclínate y rema hacia el abdomen.",
-                    tips: "No cargues excesivo peso si comprometes la zona lumbar."
-                  }
+                  { name: "Jalón al pecho abierto", details: "2 series al fallo", desc: "Sentado, tracciona la barra hacia la parte superior del pecho.", tips: "Inicia el movimiento bajando las escápulas, no solo tirando con los brazos." }, 
+                  { name: "Remo Gironda", details: "2 series al fallo", desc: "Remo sentado en polea baja. Tira del agarre hacia el abdomen.", tips: "Mantén la espalda recta y saca pecho al tirar." }, 
+                  { name: "Remo en punta", details: "2 series al fallo", desc: "Con barra T o soporte, inclínate y rema hacia el abdomen.", tips: "No cargues excesivo peso si comprometes la zona lumbar." }
                 ] 
               },
               { 
                 title: "Bloque 2 – Unilateral", 
                 exercises: [
-                  { 
-                    name: "Remo unilateral", 
-                    details: "3 series",
-                    desc: "Remo con mancuerna o en máquina a una mano.",
-                    tips: "Evita rotar excesivamente el tronco para compensar."
-                  }, 
-                  { 
-                    name: "Pullover unilateral", 
-                    details: "3 series al fallo",
-                    desc: "En polea alta, brazo recto, lleva la mano desde arriba hasta la cadera.",
-                    tips: "Siente el estiramiento en el dorsal al subir el brazo."
-                  }
+                  { name: "Remo unilateral", details: "3 series", desc: "Remo con mancuerna o en máquina a una mano.", tips: "Evita rotar excesivamente el tronco para compensar." }, 
+                  { name: "Pullover unilateral", details: "3 series al fallo", desc: "En polea alta, brazo recto, lleva la mano desde arriba hasta la cadera.", tips: "Siente el estiramiento en el dorsal al subir el brazo." }
                 ] 
               },
               { 
                 title: "Bloque 3 – Bíceps", 
                 exercises: [
-                  { 
-                    name: "Predicador", 
-                    details: "3 series al fallo",
-                    desc: "Curl de bíceps apoyando los brazos en el banco predicador.",
-                    tips: "Extiende el brazo casi por completo, pero sin hiperextender el codo."
-                  }, 
-                  { 
-                    name: "Curl inclinado", 
-                    details: "3 series al fallo",
-                    desc: "Sentado en banco inclinado, deja caer los brazos y realiza el curl.",
-                    tips: "Mantén los codos atrás para enfatizar la cabeza larga del bíceps."
-                  }
+                  { name: "Predicador", details: "3 series al fallo", desc: "Curl de bíceps apoyando los brazos en el banco predicador.", tips: "Extiende el brazo casi por completo, pero sin hiperextender el codo." }, 
+                  { name: "Curl inclinado", details: "3 series al fallo", desc: "Sentado en banco inclinado, deja caer los brazos y realiza el curl.", tips: "Mantén los codos atrás para enfatizar la cabeza larga del bíceps." }
                 ] 
               },
               { 
                 title: "Bloque 4 – Finisher", 
                 exercises: [
-                  { 
-                    name: "Peso muerto bombeo", 
-                    details: "3–4x12–15 rep",
-                    desc: "Peso muerto convencional con menos peso, enfocado en la técnica y repeticiones.",
-                    tips: "No rebotes la barra en el suelo, toca y sube."
-                  }
+                  { name: "Peso muerto bombeo", details: "3–4x12–15 rep", desc: "Peso muerto convencional con menos peso, enfocado en la técnica y repeticiones.", tips: "No rebotes la barra en el suelo, toca y sube." }
                 ] 
               }
             ]
@@ -290,69 +206,29 @@
               { 
                 title: "Bloque 1 – Isquiotibiales", 
                 exercises: [
-                  { 
-                    name: "Curl femoral sentado", 
-                    details: "2x6–8 rep al fallo",
-                    desc: "Sentado en la máquina, flexiona las rodillas llevando los talones hacia abajo.",
-                    tips: "Asegúrate de que la almohadilla te sujete bien los muslos."
-                  }, 
-                  { 
-                    name: "Curl femoral tumbado", 
-                    details: "2x6–8 rep al fallo",
-                    desc: "Tumbado boca abajo, lleva los talones hacia los glúteos.",
-                    tips: "Evita levantar la cadera del banco al contraer."
-                  }
+                  { name: "Curl femoral sentado", details: "2x6–8 rep al fallo", desc: "Sentado en la máquina, flexiona las rodillas llevando los talones hacia abajo.", tips: "Asegúrate de que la almohadilla te sujete bien los muslos." }, 
+                  { name: "Curl femoral tumbado", details: "2x6–8 rep al fallo", desc: "Tumbado boca abajo, lleva los talones hacia los glúteos.", tips: "Evita levantar la cadera del banco al contraer." }
                 ] 
               },
               { 
                 title: "Bloque 2 – Cuádriceps", 
                 exercises: [
-                  { 
-                    name: "Hack Squat", 
-                    details: "3x6–8 rep al fallo",
-                    desc: "Sentadilla en máquina Hack, pies adelantados.",
-                    tips: "Baja profundo (rompe el paralelo) sin despegar la espalda del respaldo."
-                  }, 
-                  { 
-                    name: "Squat multipower", 
-                    details: "3x6–8 rep al fallo",
-                    desc: "Sentadilla guiada en máquina Smith.",
-                    tips: "Coloca los pies ligeramente adelantados para enfatizar cuádriceps y proteger rodillas."
-                  }
+                  { name: "Hack Squat", details: "3x6–8 rep al fallo", desc: "Sentadilla en máquina Hack, pies adelantados.", tips: "Baja profundo (rompe el paralelo) sin despegar la espalda del respaldo." }, 
+                  { name: "Squat multipower", details: "3x6–8 rep al fallo", desc: "Sentadilla guiada en máquina Smith.", tips: "Coloca los pies ligeramente adelantados para enfatizar cuádriceps y proteger rodillas." }
                 ] 
               },
               { 
                 title: "Bloque 3 – Glúteo", 
                 exercises: [
-                  { 
-                    name: "Peso muerto rumano", 
-                    details: "3x6–8 rep",
-                    desc: "Baja la barra rozando las piernas llevando la cadera hacia atrás, con leve flexión de rodillas.",
-                    tips: "La clave es echar el culo atrás, no solo bajar el tronco."
-                  }
+                  { name: "Peso muerto rumano", details: "3x6–8 rep", desc: "Baja la barra rozando las piernas llevando la cadera hacia atrás, con leve flexión de rodillas.", tips: "La clave es echar el culo atrás, no solo bajar el tronco." }
                 ] 
               },
               { 
                 title: "Bloque 4 – Accesorios", 
                 exercises: [
-                  { 
-                    name: "Extensión cuádriceps", 
-                    details: "3 series + dropset",
-                    desc: "Sentado, extiende las rodillas hasta bloquear.",
-                    tips: "Aguanta 1 segundo arriba en cada repetición."
-                  }, 
-                  { 
-                    name: "Abductores", 
-                    details: "3 series",
-                    desc: "Máquina de abducción (abrir piernas).",
-                    tips: "No te inclines hacia adelante, mantén la espalda pegada."
-                  }, 
-                  { 
-                    name: "Gemelos", 
-                    details: "3 series",
-                    desc: "Elevación de talones de pie o sentado.",
-                    tips: "Rango completo: estira abajo del todo y sube al máximo."
-                  }
+                  { name: "Extensión cuádriceps", details: "3 series + dropset", desc: "Sentado, extiende las rodillas hasta bloquear.", tips: "Aguanta 1 segundo arriba en cada repetición." }, 
+                  { name: "Abductores", details: "3 series", desc: "Máquina de abducción (abrir piernas).", tips: "No te inclines hacia adelante, mantén la espalda pegada." }, 
+                  { name: "Gemelos", details: "3 series", desc: "Elevación de talones de pie o sentado.", tips: "Rango completo: estira abajo del todo y sube al máximo." }
                 ] 
               }
             ]
@@ -365,69 +241,29 @@
               { 
                 title: "Bloque 1 – Fuerza", 
                 exercises: [
-                  { 
-                    name: "Press militar", 
-                    details: "5x6–8 rep",
-                    desc: "De pie o sentado, empuja la barra desde el pecho hasta encima de la cabeza.",
-                    tips: "Mete la cabeza entre los brazos al final del movimiento."
-                  }, 
-                  { 
-                    name: "Press mancuernas", 
-                    details: "4x8–10 rep",
-                    desc: "Press de hombros sentado con mancuernas.",
-                    tips: "No choques las mancuernas arriba, mantén la tensión."
-                  }
+                  { name: "Press militar", details: "5x6–8 rep", desc: "De pie o sentado, empuja la barra desde el pecho hasta encima de la cabeza.", tips: "Mete la cabeza entre los brazos al final del movimiento." }, 
+                  { name: "Press mancuernas", details: "4x8–10 rep", desc: "Press de hombros sentado con mancuernas.", tips: "No choques las mancuernas arriba, mantén la tensión." }
                 ] 
               },
               { 
                 title: "Bloque 2 – Lateral", 
                 exercises: [
-                  { 
-                    name: "Elevaciones laterales", 
-                    details: "4x12–15 rep",
-                    desc: "De pie, eleva los brazos lateralmente hasta la altura de los hombros.",
-                    tips: "Imagina que estás vertiendo agua con una jarra (pulgar ligeramente abajo)."
-                  }, 
-                  { 
-                    name: "Pájaros", 
-                    details: "4x12–15 rep",
-                    desc: "Inclinado hacia adelante, eleva los brazos lateralmente para el deltoides posterior.",
-                    tips: "No juntes las escápulas, el movimiento sale del hombro."
-                  }, 
-                  { 
-                    name: "Face Pulls", 
-                    details: "3–4x12–15 rep",
-                    desc: "En polea alta, tira de la cuerda hacia la cara separando las manos.",
-                    tips: "Los codos deben quedar por encima de los hombros al final."
-                  }
+                  { name: "Elevaciones laterales", details: "4x12–15 rep", desc: "De pie, eleva los brazos lateralmente hasta la altura de los hombros.", tips: "Imagina que estás vertiendo agua con una jarra (pulgar ligeramente abajo)." }, 
+                  { name: "Pájaros", details: "4x12–15 rep", desc: "Inclinado hacia adelante, eleva los brazos lateralmente para el deltoides posterior.", tips: "No juntes las escápulas, el movimiento sale del hombro." }, 
+                  { name: "Face Pulls", details: "3–4x12–15 rep", desc: "En polea alta, tira de la cuerda hacia la cara separando las manos.", tips: "Los codos deben quedar por encima de los hombros al final." }
                 ] 
               },
               { 
                 title: "Bloque 3 – Trapecio", 
                 exercises: [
-                  { 
-                    name: "Encogimientos", 
-                    details: "4x12–15 rep",
-                    desc: "Con barra o mancuernas, eleva los hombros hacia las orejas.",
-                    tips: "No rotes los hombros, movimiento vertical puro."
-                  }, 
-                  { 
-                    name: "Remo al mentón", 
-                    details: "3x10–12 rep",
-                    desc: "Sube la barra pegada al cuerpo hasta la altura del pecho alto.",
-                    tips: "Los codos siempre deben ir más altos que las manos."
-                  }
+                  { name: "Encogimientos", details: "4x12–15 rep", desc: "Con barra o mancuernas, eleva los hombros hacia las orejas.", tips: "No rotes los hombros, movimiento vertical puro." }, 
+                  { name: "Remo al mentón", details: "3x10–12 rep", desc: "Sube la barra pegada al cuerpo hasta la altura del pecho alto.", tips: "Los codos siempre deben ir más altos que las manos." }
                 ] 
               },
               { 
                 title: "Bloque 4 – Finisher", 
                 exercises: [
-                  { 
-                    name: "Elevaciones frontales", 
-                    details: "2–3x10–12 rep",
-                    desc: "Eleva el peso frente a ti hasta la altura de los ojos.",
-                    tips: "Controla la bajada para no balancear el cuerpo."
-                  }
+                  { name: "Elevaciones frontales", details: "2–3x10–12 rep", desc: "Eleva el peso frente a ti hasta la altura de los ojos.", tips: "Controla la bajada para no balancear el cuerpo." }
                 ] 
               }
             ]
@@ -472,6 +308,20 @@
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
+        };
+
+        const exportBackup = (history) => {
+           if (!history || history.length === 0) {
+             alert("No hay datos para exportar.");
+             return;
+           }
+           const dataStr = JSON.stringify(history);
+           const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+           const exportFileDefaultName = `anzos_backup_${new Date().toLocaleDateString().replace(/\//g, '-')}.json`;
+           const linkElement = document.createElement('a');
+           linkElement.setAttribute('href', dataUri);
+           linkElement.setAttribute('download', exportFileDefaultName);
+           linkElement.click();
         };
 
         // --- COMPONENTS ---
@@ -945,7 +795,6 @@
           };
           const heatmapData = getHeatmapData();
 
-          // Lógica para calcular Récords Personales (PRs)
           const getPersonalRecords = () => {
             const records = {};
             history.forEach(session => {
@@ -958,13 +807,11 @@
                     }
                 });
             });
-            // Convertir a array y ordenar por peso descendente, coger top 3
             return Object.entries(records)
                 .map(([name, data]) => ({ name, ...data }))
                 .sort((a, b) => b.weight - a.weight)
                 .slice(0, 3);
           };
-          
           const personalRecords = getPersonalRecords();
 
           return (
@@ -1001,7 +848,6 @@
                   </div>
               </div>
 
-              {/* NUEVA SECCIÓN: Récords Personales */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <div className={`p-6 rounded-xl border ${cardClass}`}>
                       <h3 className="font-bold text-xl mb-4 flex items-center gap-2 text-amber-500">
@@ -1095,6 +941,7 @@
           const [timerVisible, setTimerVisible] = useState(false);
           const [currentWorkoutData, setCurrentWorkoutData] = useState({}); 
           const [workoutNotes, setWorkoutNotes] = useState(''); 
+          const fileInputRef = useRef(null);
 
           useEffect(() => {
             const savedHistory = localStorage.getItem('anzos_history');
@@ -1162,6 +1009,28 @@
             setTimerVisible(false);
             setView('home');
             scrollToTop();
+          };
+
+          const handleImportBackup = (event) => {
+             const file = event.target.files[0];
+             if (!file) return;
+             const reader = new FileReader();
+             reader.onload = (e) => {
+                 try {
+                     const importedData = JSON.parse(e.target.result);
+                     if (Array.isArray(importedData)) {
+                         setHistory(importedData);
+                         localStorage.setItem('anzos_history', JSON.stringify(importedData));
+                         setToast({ show: true, msg: "Datos importados con éxito" });
+                         setShowSettings(false);
+                     } else {
+                         alert("Formato de archivo inválido");
+                     }
+                 } catch (error) {
+                     alert("Error al leer el archivo");
+                 }
+             };
+             reader.readAsText(file);
           };
 
           if (loading) return <InitialLoader onFinish={() => setLoading(false)} />;
@@ -1276,6 +1145,34 @@
                         <div className={`w-4 h-4 rounded-full bg-white transform transition-transform ${darkMode ? 'translate-x-6' : ''}`} />
                       </button>
                     </div>
+                    
+                    {/* DATA MANAGEMENT */}
+                    <div className="p-4 rounded-lg bg-stone-500/5 border border-stone-500/20">
+                        <h3 className="text-sm uppercase font-bold opacity-60 mb-3">Gestión de Datos</h3>
+                        <div className="flex gap-3">
+                             <button 
+                               onClick={() => exportBackup(history)}
+                               className="flex-1 py-2 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                             >
+                                <Save size={16} /> Exportar Backup
+                             </button>
+                             <button 
+                               onClick={() => fileInputRef.current.click()}
+                               className="flex-1 py-2 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                             >
+                                <Upload size={16} /> Importar
+                             </button>
+                             <input 
+                               type="file" 
+                               ref={fileInputRef} 
+                               className="hidden" 
+                               accept=".json"
+                               onChange={handleImportBackup}
+                             />
+                        </div>
+                        <p className="text-xs opacity-40 mt-2 text-center">Guarda un archivo .json para transferir tus datos a otro dispositivo.</p>
+                    </div>
+
                     <div className="p-4 rounded-lg border border-red-500/30 bg-red-500/5">
                       <h3 className="text-red-500 font-bold mb-2">Zona de Peligro</h3>
                       <p className="text-sm mb-4 opacity-80">Esto borrará todo tu historial de entrenamientos.</p>
