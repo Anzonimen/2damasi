@@ -3,12 +3,24 @@
     <title>Principal</title>
     <link href="https://Anzonimen.github.io/2damasi/feed.xml" rel="self" />
     <link href="https://Anzonimen.github.io/2damasi" />
-    <updated>2025-11-25T18:20:28+01:00</updated>
+    <updated>2025-11-26T12:43:12+01:00</updated>
     <author>
         <name>Antonio Garcia Llergo</name>
     </author>
     <id>https://Anzonimen.github.io/2damasi</id>
 
+    <entry>
+        <title>ClonarApp</title>
+        <author>
+            <name>Antonio Garcia Llergo</name>
+        </author>
+        <link href="https://Anzonimen.github.io/2damasi/clonarapp/"/>
+        <id>https://Anzonimen.github.io/2damasi/clonarapp/</id>
+
+        <updated>2025-11-26T12:43:12+01:00</updated>
+            <summary></summary>
+        <content></content>
+    </entry>
     <entry>
         <title>Configuración inicial de la Jetson Nano</title>
         <author>

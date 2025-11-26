@@ -11,6 +11,18 @@
     },
     "items": [
         {
+            "id": "https://Anzonimen.github.io/2damasi/clonarapp/",
+            "url": "https://Anzonimen.github.io/2damasi/clonarapp/",
+            "title": "ClonarApp",
+            "author": {
+                "name": "Antonio Garcia Llergo"
+            },
+            "tags": [
+            ],
+            "date_published": "2025-11-26T12:43:12+01:00",
+            "date_modified": "2025-11-26T12:43:12+01:00"
+        },
+        {
             "id": "https://Anzonimen.github.io/2damasi/configuracion-inicial-de-la-jetson-nano/",
             "url": "https://Anzonimen.github.io/2damasi/configuracion-inicial-de-la-jetson-nano/",
             "title": "Configuración inicial de la Jetson Nano",
