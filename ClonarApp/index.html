@@ -1,1 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Pou: Mini App</title>
+    <style>
+        /* --- ESTILOS GENERALES Y RESET --- */
+        :root {
+            --bg-bathroom: #00ffff;
+            --bg-bedroom: #ffff00;
+            --bg-kitchen: #ffb7b2;
+            --bg-lab: #ffb7e6;
+            --bg-game: #92e8a1;
+            
+            --floor-bathroom: #008080;
+            --floor-bedroom: #b3a125;
+            --floor-kitchen: #a55d5d;
+            --floor-lab: #782f40;
+            --floor-game: #458b00;
+            --floor-default: #fff;
 
+            --pou-base-color: #d6a66a;
+            
+            --col-food: #f4a460;
+            --col-health: #ff6b6b;
+            --col-fun: #4ecdc4;
+            --col-energy: #ffd93d;
+        }
+
+        @font-face {
+            font-family: 'CartoonFont';
+            src: local('Impact'), local('Arial Black'), local('sans-serif');
+        }
+
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; touch-action: none; }
+        body { margin: 0; padding: 0; font-family: 'CartoonFont', 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; width: 100vw; background: #333; display: flex; justify-content: center; align-items: center; }
+
+        #app-container {
+            width: 100%; max-width: 480px; height: 100%;
+            background: var(--bg-bathroom);
+            position: relative;
+            display: flex; flex-direction: column;
+            transition: background-color 0.5s ease;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        #flash-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; opacity: 0; pointer-events: none; z-index: 9999;
+            transition: opacity 0.1s ease-out;
+        }
+        #flash-overlay.flash-active { opacity: 0.8; }
+
+        header { display: flex; flex-direction: column; width: 100%; z-index: 20; padding-top: 5px; }
+        .top-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; height: 60px; }
+
+        .coin-widget { position: relative; width: 60px; height: 50px; cursor: pointer; transform: scale(1); transition: transform 0.1s; }
+        .coin-widget:active { transform: scale(0.9); }
+        .coin-circle { width: 40px; height: 40px; background: #ffd700; border: 3px solid #000; border-radius: 50%; position: absolute; top: 0; left: 0; }
+        .coin-plus { position: absolute; top: 0; right: 15px; color: #00e600; font-size: 30px; line-height: 20px; text-shadow: 2px 2px 0 #000; font-weight: 900; z-index: 2; }
+        .coin-text { position: absolute; bottom: 0; left: 10px; font-size: 18px; color: white; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; font-weight: 900; letter-spacing: 1px; }
+
+        .status-panel { display: flex; gap: 8px; }
+        .status-box { width: 40px; height: 40px; border: 3px solid #000; border-radius: 4px; position: relative; background: #fff; overflow: hidden; }
+        .stat-fill { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; transition: height 0.3s ease; z-index: 1; }
+        #fill-food { background: var(--col-food); }
+        #fill-health { background: var(--col-health); }
+        #fill-fun { background: var(--col-fun); }
+        #fill-energy { background: var(--col-energy); }
+        .status-box svg { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 24px; height: 24px; fill: #000; z-index: 2; }
+        .status-box.critical { border-color: red; animation: pulseRed 1s infinite; }
+        
+        .level-widget { width: 45px; height: 40px; background: #fff; border: 3px solid #000; border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%; display: flex; justify-content: center; align-items: center; font-size: 20px; font-weight: bold; cursor: pointer; }
+        .level-widget:active { transform: scale(0.9); }
+
+        .nav-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 15px; height: 60px; }
+        .nav-square { width: 45px; height: 45px; background: #fff; border: 3px solid #000; border-radius: 6px; display: flex; justify-content: center; align-items: center; cursor: pointer; position: relative; }
+        .nav-square:active { transform: scale(0.95); background: #eee; }
+        
+        .icon-cam { width: 24px; height: 18px; border: 2px solid #000; border-radius: 2px; position: relative; }
+        .icon-cam::before { content: ''; position: absolute; top: -4px; left: 4px; width: 8px; height: 4px; background: transparent; border: 2px solid #000; border-bottom: none; }
+        .icon-cam::after { content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 10px; height: 10px; border: 2px solid #000; border-radius: 50%; }
+
+        .arrow-l, .arrow-r { width: 15px; height: 15px; border-left: 4px solid #000; border-bottom: 4px solid #000; }
+        .arrow-l { transform: rotate(45deg); margin-left: 5px; }
+        .arrow-r { transform: rotate(-135deg); margin-right: 5px; }
+
+        .room-title-text { font-family: 'Impact', sans-serif; font-size: 20px; color: #fff; text-transform: capitalize; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; letter-spacing: 1px; margin: 0 5px; text-align: center; flex-grow: 1; }
+        .help-icon { font-size: 35px; color: #fff; font-weight: 900; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; cursor: pointer; background: none; border: none; }
+
+        main { flex: 1; position: relative; overflow: hidden; display: flex; justify-content: center; align-items: center; }
+
+        /* NOMBRE FLOTANTE */
+        #pou-name-tag {
+            position: absolute;
+            top: 15%;
+            width: 100%;
+            text-align: center;
+            font-family: 'CartoonFont', 'Impact', sans-serif;
+            font-size: 24px;
+            color: white;
+            text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        #pou {
+            width: 180px; height: 160px;
+            background-color: var(--pou-base-color);
+            border: 4px solid #000;
+            border-radius: 50% 50% 45% 45% / 60% 60% 35% 35%;
+            position: relative;
+            transition: transform 0.2s, filter 0.3s, background-color 0.3s;
+            transform-origin: bottom center;
+            z-index: 5;
+        }
+        
+        .eyes { display: flex; justify-content: center; gap: 2px; position: absolute; top: 40px; width: 100%; z-index: 3; }
+        .eye { width: 50px; height: 50px; background: #fff; border: 3px solid #000; border-radius: 50%; position: relative; overflow: hidden; }
+        
+        .pupil { 
+            width: 20px; height: 20px; background: #000; border-radius: 50%; 
+            position: absolute; top: 15px; left: 12px;
+        }
+        .mouth { width: 30px; height: 10px; border-bottom: 3px solid #000; border-radius: 50%; position: absolute; bottom: 35px; left: 50%; transform: translateX(-50%); transition: all 0.2s; z-index: 3; }
+        
+        .accessory-layer { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events: none; }
+        #acc-outfit { z-index: 2; }
+        .outfit-overlay { position: absolute; bottom: 5px; left: 50%; transform: translateX(-50%); width: 160px; height: 80px; border-radius: 10% 10% 45% 45% / 10% 10% 35% 35%; opacity: 0.9; }
+        #acc-glasses { z-index: 4; }
+        #acc-hat { z-index: 5; top: -40px; }
+        #acc-mustache { z-index: 3; top: -5px; }
+
+        #pou.sleeping .eye { height: 25px; top: 15px; border-radius: 0; border: none; border-bottom: 4px solid #000; background: var(--pou-base-color); }
+        #pou.sleeping .pupil { display: none; }
+
+        .bubble { position: absolute; background: rgba(255,255,255,0.7); border: 1px solid #fff; border-radius: 50%; animation: floatUp 2s linear forwards; z-index: 10; }
+        @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity: 1; } 100% { transform: translateY(-100px) scale(1.2); opacity: 0; } }
+        .soap-bubble { position: absolute; background: rgba(255, 255, 255, 0.6); border: 1px solid rgba(255, 255, 255, 0.9); border-radius: 50%; z-index: 6; pointer-events: none; box-shadow: inset 1px 1px 3px rgba(255,255,255,0.8); }
+        
+        #bedroom-pillow { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -20%); width: 250px; height: 120px; z-index: 2; display: none; }
+        #bedroom-pillow svg { width: 100%; height: 100%; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); }
+
+        .coin-pop { position: absolute; color: gold; font-weight: bold; font-size: 24px; text-shadow: 1px 1px 0 #000; animation: popUp 1s ease-out forwards; z-index: 20; }
+        @keyframes popUp { 0% { transform: translateY(0); opacity: 1; } 100% { transform: translateY(-50px); opacity: 0; } }
+
+        #dark-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); pointer-events: none; opacity: 0; transition: opacity 0.5s; z-index: 4; }
+        #dark-overlay.active { opacity: 1; }
+
+        #ball { width: 40px; height: 40px; background: red; border: 2px solid #000; border-radius: 50%; position: absolute; bottom: 20px; left: 50px; display: none; cursor: grab; z-index: 8; }
+
+        footer { height: 100px; background: var(--floor-default); border-top: 3px solid #000; display: flex; justify-content: space-around; align-items: flex-end; padding: 0 10px 10px 10px; transition: background 0.3s; position: relative; z-index: 15; }
+        footer.bathroom-floor { background: var(--floor-bathroom); border-top: none; box-shadow: inset 0 10px 10px rgba(0,0,0,0.1); }
+        footer.bedroom-floor { background: var(--floor-bedroom); border-top: none; box-shadow: inset 0 10px 10px rgba(0,0,0,0.1); }
+        footer.kitchen-floor { background: var(--floor-kitchen); border-top: none; box-shadow: inset 0 10px 10px rgba(0,0,0,0.1); }
+        footer.lab-floor { background: var(--floor-lab); border-top: none; box-shadow: inset 0 10px 10px rgba(0,0,0,0.1); }
+        footer.game-floor { background: var(--floor-game); border-top: none; box-shadow: inset 0 10px 10px rgba(0,0,0,0.1); }
+
+        .action-btn { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; background: none; border: none; cursor: pointer; opacity: 1; transition: opacity 0.2s; width: 80px; position: relative; }
+        .action-btn:disabled, .action-btn.disabled { opacity: 0.4; cursor: not-allowed; }
+        .action-btn:active { transform: scale(0.95); }
+        .action-icon { width: 50px; height: 50px; border: 2px solid #000; border-radius: 8px; margin-bottom: 4px; display: flex; justify-content: center; align-items: center; font-size: 24px; background: #eee; }
+        .action-text { font-size: 12px; font-weight: bold; color: #333; }
+        .custom-floor .action-icon { background: transparent !important; border: none !important; width: 70px; height: 70px; overflow: visible; }
+        .custom-floor .action-text { font-family: 'Impact', sans-serif; color: white; font-size: 16px; letter-spacing: 1px; text-transform: capitalize; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 3px 3px 0 rgba(0,0,0,0.3); margin-top: -5px; z-index: 20; white-space: nowrap; }
+
+        #food-selector { display: flex; align-items: center; justify-content: center; gap: 10px; height: 80px; }
+        .arrow-btn { width: 35px; height: 35px; background: #fff; border: 2px solid #000; border-radius: 5px; display: flex; justify-content: center; align-items: center; cursor: pointer; }
+        .arrow-btn:active { background: #eee; }
+        .arrow-icon { width: 10px; height: 10px; border-top: 3px solid #000; border-right: 3px solid #000; }
+        .arrow-left { transform: rotate(-135deg); margin-left: 5px; }
+        .arrow-right { transform: rotate(45deg); margin-right: 5px; }
+        #active-food-display { width: 70px; height: 70px; cursor: pointer; transition: transform 0.1s; }
+        #active-food-display:active { transform: scale(0.9); }
+        .food-label-container { position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 200px; text-align: center; pointer-events: none; }
+
+        .modal { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 100; }
+        
+        /* ESTILOS UNIFICADOS MODALES */
+        #generic-modal .modal-content, 
+        #games-modal .modal-content, 
+        #msg-modal .modal-content, 
+        #confirm-modal .modal-content, 
+        #level-modal .modal-content, 
+        #coins-modal .modal-content { 
+            background: #fdf5e6; 
+            padding: 20px; 
+            border-radius: 15px; 
+            width: 90%; 
+            max-height: 90%; 
+            overflow-y: auto; 
+            text-align: center; 
+            border: 4px solid #000; 
+            position: relative; 
+        }
+
+        .close-icon-btn { position: absolute; top: 10px; right: 10px; width: 35px; height: 35px; background: white; border: 3px solid black; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-family: 'Impact', sans-serif; font-size: 20px; cursor: pointer; z-index: 10; }
+        h2 { font-family: 'CartoonFont', sans-serif; font-size: 32px; text-transform: capitalize; margin-top: 5px; margin-bottom: 20px; }
+
+        #modal-body.shop-category-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px 10px; margin-top: 10px; }
+        .shop-category-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; background: transparent; border: none; }
+        .shop-category-icon { width: 60px; height: 60px; margin-bottom: 5px; }
+        .shop-category-icon svg { width: 100%; height: 100%; overflow: visible; }
+        .shop-category-label { font-family: 'Impact', sans-serif; font-size: 16px; color: white; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000; text-transform: capitalize; }
+
+        #modal-body.shop-product-list { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .shop-product-item { border: 2px solid #ccc; border-radius: 5px; padding: 10px; cursor: pointer; background: white; }
+        .shop-product-item.owned { background-color: #e6ffe6; border-color: #00cc00; }
+        .shop-product-item.equipped { background-color: #ffd700; border-color: #ff9900; }
+
+        .shop-item { border: 2px solid #ccc; border-radius: 5px; padding: 10px; cursor: pointer; }
+        .close-btn { background: #ff4444; color: white; border: none; padding: 5px 15px; margin-top: 15px; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        .hidden { display: none !important; }
+
+        /* Ayuda Transparente (Excepción) */
+        #help-modal .modal-content { background: transparent; border: none; }
+
+        #msg-text, #confirm-text { font-size: 20px; margin-bottom: 20px; color: black; text-align: center; }
+
+        /* Canvas del juego */
+        #game-active-area { display: flex; flex-direction: column; align-items: center; }
+        #game-canvas { background: #eee; border: 2px solid #000; width: 100%; max-width: 300px; height: 300px; cursor: crosshair; touch-action: none; }
+        #game-info { margin-bottom: 5px; font-weight: bold; font-size: 18px; }
+        #game-selection { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        /* ESTILOS MODAL NIVEL */
+        #level-title { font-family: 'CartoonFont', sans-serif; font-size: 36px; margin-bottom: 20px; }
+        .level-info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left; margin-bottom: 20px; }
+        .level-text { 
+            font-family: 'CartoonFont', sans-serif; /* Fuente normal */
+            font-size: 22px; 
+            color: #333; /* Texto oscuro */
+            text-shadow: none; /* Sin borde blanco */
+            margin: 5px 0; 
+        }
+        .level-controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 20px; }
+        .level-btn { background: #ddd; border: 2px solid #000; padding: 5px 10px; font-weight: bold; cursor: pointer; border-radius: 5px; }
+        .level-input { padding: 5px; font-size: 16px; border: 2px solid #000; border-radius: 5px; width: 120px; text-align: center; }
+
+        /* COINS */
+        .coin-list { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+        .coin-item { display: flex; align-items: center; justify-content: space-between; background: transparent; padding: 5px 0; border-bottom: 1px dashed #ccc; }
+        .coin-item-icon { width: 50px; height: 50px; flex-shrink: 0; }
+        .coin-item-icon svg { width: 100%; height: 100%; }
+        .coin-item-info { flex: 1; text-align: left; padding-left: 10px; }
+        .coin-amount { font-family: 'CartoonFont', sans-serif; font-size: 20px; color: #ffd700; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+        .coin-desc { font-size: 12px; font-weight: bold; color: #333; }
+        .coin-buy-btn { background: #00e676; border: 3px solid #000; border-radius: 8px; padding: 8px 15px; cursor: pointer; font-family: 'CartoonFont', sans-serif; font-size: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; min-width: 90px; }
+        .coin-buy-btn:active { transform: scale(0.95); }
+        .twitter-banner { background: white; border: 3px solid black; border-radius: 10px; padding: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+        .twitter-text { text-align: left; font-size: 14px; font-weight: bold; }
+        .twitter-icon { width: 30px; height: 30px; border: 2px solid black; display: flex; justify-content: center; align-items: center; font-weight: bold; font-family: sans-serif; }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <div id="flash-overlay"></div>
+    <div id="dark-overlay"></div>
+
+    <header>
+        <div class="top-row">
+            <div class="coin-widget" onclick="openCoinShop()">
+                <div class="coin-circle"></div>
+                <div class="coin-plus">+</div>
+                <div class="coin-text" id="coin-display">200</div>
+            </div>
+
+            <div class="status-panel">
+                <div class="status-box" id="box-food"><div class="stat-fill" id="fill-food"></div><svg viewBox="0 0 24 24"><path d="M20.5 5.5c-1.5-1.5-3.5-2-5-1.5l-3 3c-1.5-0.5-3.5 0-5 1.5s-2 3.5-1.5 5l-3 3c-0.5 0.5-0.5 1.5 0 2s1.5 0.5 2 0l3-3c1.5 0.5 3.5 0 5-1.5s2-3.5 1.5-5l3-3c0.5-1.5 0-3.5-1.5-5z"/></svg></div>
+                <div class="status-box" id="box-health"><div class="stat-fill" id="fill-health"></div><svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg></div>
+                <div class="status-box" id="box-fun"><div class="stat-fill" id="fill-fun"></div><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="10" r="1.5" fill="white"/><circle cx="15" cy="10" r="1.5" fill="white"/><path d="M9 14s1.5 1.5 3 1.5 3-1.5 3-1.5" fill="none" stroke="white" stroke-width="1.5"/></svg></div>
+                <div class="status-box" id="box-energy"><div class="stat-fill" id="fill-energy"></div><svg viewBox="0 0 24 24"><path d="M7 2v11h3v9l7-12h-4l4-8z"/></svg></div>
+            </div>
+
+            <div class="level-widget" onclick="openLevelModal()">
+                <span id="level-display">1</span>
+            </div>
+        </div>
+
+        <div class="nav-row">
+            <button class="nav-square" aria-label="Cámara" onclick="takeSnapshot()"><div class="icon-cam"></div></button>
+            <button id="prev-room-btn" class="nav-square" aria-label="Sala Anterior"><div class="arrow-l"></div></button>
+            <div class="room-title-text" id="room-name">BAÑO</div>
+            <button id="next-room-btn" class="nav-square" aria-label="Siguiente Sala"><div class="arrow-r"></div></button>
+            <button id="help-btn" class="help-icon" aria-label="Ayuda" onclick="openHelpModal()">?</button>
+        </div>
+    </header>
+
+    <main id="main-area">
+        <div id="pou-name-tag">Pou</div>
+
+        <div id="bedroom-pillow">
+            <svg viewBox="0 0 200 100" preserveAspectRatio="none">
+                <path d="M20,50 Q10,10 50,15 L150,15 Q190,10 180,50 Q190,90 150,85 L50,85 Q10,90 20,50 Z" fill="#fff" stroke="#ccc" stroke-width="3"/>
+                <path d="M30,50 Q25,25 50,25 L150,25 Q175,25 170,50 Q175,75 150,75 L50,75 Q25,75 30,50 Z" fill="none" stroke="#eee" stroke-width="2"/>
+            </svg>
+        </div>
+
+        <div id="pou" role="img" aria-label="Tu mascota Pou">
+            <div id="acc-hat" class="accessory-layer"></div>
+            <div class="eyes">
+                <div class="eye"><div class="pupil"></div></div>
+                <div class="eye"><div class="pupil"></div></div>
+            </div>
+            <div id="acc-glasses" class="accessory-layer"></div>
+            <div class="mouth"></div>
+            <div id="acc-mustache" class="accessory-layer"></div>
+            <div id="acc-outfit" class="accessory-layer">
+                <div class="outfit-overlay" id="pou-outfit"></div>
+            </div>
+        </div>
+        <div id="ball"></div>
+    </main>
+
+    <footer id="footer-controls"></footer>
+
+    <div id="msg-modal" class="modal" style="z-index: 200;">
+        <div class="modal-content">
+            <p id="msg-text"></p>
+            <button class="close-btn" onclick="closeMsgModal()">OK</button>
+        </div>
+    </div>
+
+    <div id="confirm-modal" class="modal" style="z-index: 200;">
+        <div class="modal-content">
+            <p id="confirm-text"></p>
+            <div style="display: flex; justify-content: center; gap: 20px;">
+                <button class="close-btn" style="background: #4CAF50;" id="confirm-yes-btn">SÍ</button>
+                <button class="close-btn" style="background: #f44336;" onclick="closeConfirmModal()">NO</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="generic-modal" class="modal">
+        <div class="modal-content">
+            <div class="close-icon-btn" onclick="closeModal()">X</div>
+            <h2 id="modal-title">Tienda</h2>
+            <div id="modal-body"></div>
+            <button id="back-shop-btn" class="close-btn hidden" onclick="openShopMenu()">Atrás</button>
+        </div>
+    </div>
+
+    <div id="coins-modal" class="modal">
+        <div class="modal-content">
+            <div class="close-icon-btn" onclick="closeModal()">X</div>
+            <h2>Conseguir monedas</h2>
+            <div class="twitter-banner" onclick="buyCoins(500, true)">
+                <div class="twitter-text">¡Siguenos en Twitter/X!<br>¡500 monedas gratis!</div>
+                <div class="twitter-icon">X</div>
+            </div>
+            <div class="coin-list" id="coin-list-container"></div>
+        </div>
+    </div>
+
+    <div id="level-modal" class="modal">
+        <div class="modal-content">
+            <div class="close-icon-btn" onclick="closeModal()">X</div>
+            <h2 id="level-title">Pou !</h2>
+            
+            <div class="level-info-grid">
+                <div class="level-text">Nivel <span id="modal-level-val">1</span></div>
+                <div class="level-text" style="text-align: right;">Tamaño: <span id="modal-size-val">Bebé</span></div>
+                <div class="level-text" style="font-size: 16px;">siguiente nivel: <span id="modal-next-val">0%</span></div>
+                <div class="level-text" style="text-align: right; font-size: 16px;"><span id="modal-adult-val">0%</span> Adulto</div>
+            </div>
+
+            <div class="level-controls" style="margin-bottom: 20px;">
+                <button class="level-btn" onclick="modifyLevel(-1)">-1 Nivel</button>
+                <button class="level-btn" onclick="modifyLevel(1)">+1 Nivel</button>
+            </div>
+
+            <div class="level-controls">
+                <input type="text" id="pou-name-input" class="level-input" placeholder="Nombre" maxlength="10">
+                <button class="level-btn" onclick="savePouName()">Cambiar Nombre</button>
+            </div>
+            
+            <div class="level-controls" style="margin-top: 30px;">
+                <button class="level-btn" onclick="exportData()">Exportar Partida</button>
+                <button class="level-btn" onclick="importData()">Importar Partida</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="games-modal" class="modal">
+        <div class="modal-content">
+            <h2>Sala de Juegos</h2>
+            <div id="game-selection"></div>
+            <div id="game-active-area" class="hidden">
+                <div id="game-info">Puntos: <span id="game-score">0</span></div>
+                <canvas id="game-canvas" width="300" height="300"></canvas>
+                <button class="close-btn" onclick="stopGame()">Salir del Juego</button>
+            </div>
+            <button class="close-btn" onclick="closeModal()" id="games-back-btn">Volver</button>
+        </div>
+    </div>
+
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <div id="help-title">Ayuda</div>
+            <div id="help-text">...</div>
+            <div class="help-controls">
+                <div class="help-ok" onclick="closeModal()">OK</div>
+                <div class="help-nav">
+                    <span class="help-btn" onclick="cycleHelp(-1)">&lt;</span>
+                    <span class="help-btn" onclick="cycleHelp(1)">&gt;</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /* =========================================
+       CONFIGURACIÓN E INICIALIZACIÓN
+       ========================================= */
+    const ROOMS = [{id:'bathroom',name:'Baño',color:'#00ffff'},{id:'bedroom',name:'Dormitorio',color:'#ffff00'},{id:'kitchen',name:'Cocina',color:'#ffb7b2'},{id:'lab',name:'Laboratorio',color:'#ffb7e6'},{id:'playroom',name:'Cuarto de Juegos',color:'#92e8a1'}];
+    const defaultState = { coins:500, level:1, current_exp:0, name:"Pou", currentRoomIndex:0, isSleeping:false, bath_count:0, food_inventory:{"Papitas":3,"Manzana":2,"Hamburguesa":1}, selected_food:"Papitas", potions:2, stats:{food:90,health:90,fun:90,energy:90}, game_stats:{played:0}, isSoaped:false, ball_state:{active:false}, appearance:{skin:'#d6a66a',outfit:'none',eyes:'black',glasses:'none',hat:'none',mustache:'none'}, owned_items:["skin_#d6a66a","outfit_none","eyes_black","glasses_none","hat_none","mustache_none"], twitter_bonus: false };
+    let state=JSON.parse(localStorage.getItem('pou_save_data'))||defaultState;
+    if(!state.stats) state.stats={food:80,health:80,fun:80,energy:80};
+    if(!state.appearance) state.appearance=defaultState.appearance;
+    if(!state.owned_items) state.owned_items=defaultState.owned_items;
+    if(!state.owned_items.includes("skin_#d6a66a")) state.owned_items.push("skin_#d6a66a");
+    if(state.current_exp===undefined) state.current_exp=0;
+    if(!state.name) state.name="Pou";
+
+    let ballInterval=null, statsInterval=null, sleepInterval=null, canShower=false, gameLoopId=null;
+
+    // --- RECURSOS SVG ---
+    const SVG_FRIDGE=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><rect x="20" y="10" width="60" height="85" fill="#c1e1c1" stroke="black" stroke-width="3"/><rect x="25" y="20" width="50" height="25" fill="#e0ffff" stroke="black"/><rect x="25" y="50" width="50" height="40" fill="#e0ffff" stroke="black"/><circle cx="35" cy="35" r="5" fill="red"/><rect x="50" y="30" width="10" height="10" fill="orange"/><path d="M80,10 L95,20 L95,85 L80,95 Z" fill="#c1e1c1" stroke="black" stroke-width="3"/></svg>`;
+    const SVG_FRIES=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><rect x="20" y="20" width="10" height="60" fill="#ffd700" stroke="black" transform="rotate(-10 25 50)"/><rect x="40" y="15" width="10" height="65" fill="#ffd700" stroke="black" transform="rotate(5 45 45)"/><rect x="60" y="25" width="10" height="55" fill="#ffd700" stroke="black" transform="rotate(20 65 50)"/><rect x="30" y="25" width="10" height="60" fill="#ffec8b" stroke="black"/></svg>`;
+    const SVG_APPLE=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><circle cx="50" cy="55" r="35" fill="red" stroke="black" stroke-width="3"/><path d="M50,20 L50,10" stroke="brown" stroke-width="4"/><path d="M50,20 Q60,10 70,20" fill="green" stroke="black"/><circle cx="65" cy="45" r="5" fill="white" opacity="0.5"/></svg>`;
+    const SVG_BURGER=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><path d="M20,40 Q50,10 80,40 Z" fill="orange" stroke="black" stroke-width="3"/><rect x="15" y="40" width="70" height="10" fill="green" stroke="black" rx="5"/><rect x="15" y="50" width="70" height="15" fill="brown" stroke="black" rx="2"/><path d="M20,65 Q50,85 80,65 Z" fill="orange" stroke="black" stroke-width="3"/></svg>`;
+    const SVG_SHELF=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><rect x="20" y="10" width="60" height="85" fill="#ffd700" stroke="black" stroke-width="3"/><rect x="25" y="15" width="50" height="25" fill="#fff" stroke="black"/><rect x="25" y="45" width="50" height="25" fill="#fff" stroke="black"/><rect x="25" y="75" width="50" height="15" fill="#fff" stroke="black"/><path d="M30,35 L35,25 L40,35 Z" fill="blue"/><path d="M50,35 L55,25 L60,35 Z" fill="red"/><path d="M35,65 L40,55 L45,65 Z" fill="green"/><rect x="20" y="10" width="60" height="85" fill="rgba(255,255,255,0.3)" stroke="black" stroke-width="3"/></svg>`;
+    const SVG_POTION_BIG=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><path d="M35,10 L65,10 L75,80 Q75,90 50,90 Q25,90 25,80 L35,10 Z" fill="#cc3333" stroke="black" stroke-width="3"/><path d="M35,10 L65,10 L65,20 L35,20 Z" fill="none" stroke="black" stroke-width="3"/><ellipse cx="50" cy="10" rx="15" ry="3" fill="none" stroke="black" stroke-width="3"/><rect x="40" y="40" width="20" height="6" fill="black"/><rect x="47" y="33" width="6" height="20" fill="black"/></svg>`;
+    const SVG_SHOWER=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><path d="M20,60 Q10,10 50,5 Q90,10 80,60 Z" fill="#FFD700" stroke="black" stroke-width="3"/><ellipse cx="50" cy="60" rx="30" ry="10" fill="#ccc" stroke="black" stroke-width="2"/><circle cx="40" cy="60" r="2" fill="#555"/><circle cx="50" cy="62" r="2" fill="#555"/><circle cx="60" cy="60" r="2" fill="#555"/><path d="M50,5 Q50,-40 -20,-20" fill="none" stroke="#FFD700" stroke-width="12" stroke-linecap="round"/><path d="M50,5 Q50,-40 -20,-20" fill="none" stroke="black" stroke-width="3" style="pointer-events:none;"/></svg>`;
+    const SVG_SHOWER_GREEN=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><path d="M20,60 Q10,10 50,5 Q90,10 80,60 Z" fill="#00e600" stroke="black" stroke-width="3"/><ellipse cx="50" cy="60" rx="30" ry="10" fill="#ccc" stroke="black" stroke-width="2"/><circle cx="40" cy="60" r="2" fill="#555"/><circle cx="50" cy="62" r="2" fill="#555"/><circle cx="60" cy="60" r="2" fill="#555"/><path d="M50,5 Q50,-40 -20,-20" fill="none" stroke="#FFD700" stroke-width="12" stroke-linecap="round"/><path d="M50,5 Q50,-40 -20,-20" fill="none" stroke="black" stroke-width="3" style="pointer-events:none;"/></svg>`;
+    const SVG_SOAP=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><path d="M10,40 L30,20 L90,20 L70,40 Z" fill="#66ccff" stroke="black" stroke-width="3"/><path d="M10,40 L70,40 L70,70 L10,70 Z" fill="#3399ff" stroke="black" stroke-width="3"/><path d="M70,40 L90,20 L90,50 L70,70 Z" fill="#0066cc" stroke="black" stroke-width="3"/><text x="40" y="60" font-family="Arial Black" font-size="18" fill="white" stroke="black" stroke-width="1">SOAP</text></svg>`;
+    const SVG_SHOP=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><rect x="20" y="40" width="60" height="50" fill="white" stroke="black" stroke-width="3"/><rect x="30" y="50" width="40" height="30" fill="#ccf" stroke="black" stroke-width="2"/><path d="M15,40 L85,40 L90,20 L10,20 Z" fill="red" stroke="black" stroke-width="3"/><line x1="30" y1="20" x2="25" y2="40" stroke="white" stroke-width="4"/><line x1="50" y1="20" x2="50" y2="40" stroke="white" stroke-width="4"/><line x1="70" y1="20" x2="75" y2="40" stroke="white" stroke-width="4"/></svg>`;
+    const SVG_CLOSET=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><path d="M20,10 L80,10 L80,90 L20,90 Z" fill="#deb887" stroke="black" stroke-width="3"/><path d="M20,10 L30,0 L90,0 L80,10 Z" fill="#cd853f" stroke="black" stroke-width="3"/><path d="M80,10 L90,0 L90,80 L80,90 Z" fill="#8b4513" stroke="black" stroke-width="3"/><rect x="25" y="20" width="50" height="5" fill="#8b4513"/><rect x="25" y="40" width="50" height="5" fill="#8b4513"/><rect x="25" y="60" width="50" height="5" fill="#8b4513"/><rect x="30" y="32" width="20" height="8" fill="red" stroke="black"/><rect x="30" y="27" width="20" height="5" fill="blue" stroke="black"/><rect x="30" y="52" width="20" height="8" fill="green" stroke="black"/><path d="M20,10 L5,15 L5,95 L20,90 Z" fill="#deb887" stroke="black" stroke-width="3"/></svg>`;
+    const SVG_LAMP=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><ellipse cx="50" cy="75" rx="25" ry="15" fill="blue" stroke="black" stroke-width="3"/><ellipse cx="50" cy="70" rx="20" ry="5" fill="#4169e1"/><path d="M30,55 L70,55 L80,20 L20,20 Z" fill="#ffd700" stroke="black" stroke-width="3"/><ellipse cx="50" cy="55" rx="15" ry="5" fill="#ffec8b" opacity="0.5"/></svg>`;
+    const SVG_CONTROLLER=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><defs><linearGradient id="rainbowGrad" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:red" /><stop offset="20%" style="stop-color:orange" /><stop offset="40%" style="stop-color:yellow" /><stop offset="60%" style="stop-color:green" /><stop offset="80%" style="stop-color:blue" /><stop offset="100%" style="stop-color:violet" /></linearGradient></defs><path d="M20,30 L80,30 Q95,30 95,50 L95,70 Q95,85 80,85 L70,85 Q60,85 60,70 L40,70 Q40,85 30,85 L20,85 Q5,85 5,70 L5,50 Q5,30 20,30 Z" fill="url(#rainbowGrad)" stroke="black" stroke-width="3"/><circle cx="80" cy="45" r="4" fill="transparent" stroke="black" stroke-width="2"/><circle cx="80" cy="65" r="4" fill="transparent" stroke="black" stroke-width="2"/><circle cx="25" cy="45" r="4" fill="transparent" stroke="black" stroke-width="2"/><circle cx="25" cy="65" r="4" fill="transparent" stroke="black" stroke-width="2"/><circle cx="35" cy="70" r="6" fill="transparent" stroke="black" stroke-width="2"/><circle cx="65" cy="70" r="6" fill="transparent" stroke="black" stroke-width="2"/></svg>`;
+    const SVG_BALL_ICON=`<svg viewBox="0 0 100 100" style="width:100%;height:100%"><circle cx="50" cy="50" r="30" fill="white" stroke="black" stroke-width="3"/><path d="M50,20 A30,30 0 0,1 50,80" fill="rgba(0,0,0,0.05)"/></svg>`;
+    const SVG_COIN_SINGLE = `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="#ffd700" stroke="black" stroke-width="3"/><text x="50" y="65" font-family="Arial" font-weight="bold" font-size="40" text-anchor="middle" fill="#e6ac00">P</text></svg>`;
+    const SVG_COIN_PILE_SMALL = `<svg viewBox="0 0 100 100"><circle cx="30" cy="60" r="30" fill="#ffd700" stroke="black" stroke-width="3"/><circle cx="70" cy="60" r="30" fill="#ffd700" stroke="black" stroke-width="3"/><circle cx="50" cy="40" r="30" fill="#ffd700" stroke="black" stroke-width="3"/><text x="50" y="55" font-family="Arial" font-weight="bold" font-size="30" text-anchor="middle" fill="#e6ac00">P</text></svg>`;
+    const SVG_COIN_PILE_MEDIUM = `<svg viewBox="0 0 100 100"><circle cx="30" cy="70" r="25" fill="#ffd700" stroke="black" stroke-width="2"/><circle cx="70" cy="70" r="25" fill="#ffd700" stroke="black" stroke-width="2"/><circle cx="50" cy="50" r="25" fill="#ffd700" stroke="black" stroke-width="2"/><circle cx="50" cy="30" r="25" fill="#ffd700" stroke="black" stroke-width="2"/><text x="50" y="40" font-family="Arial" font-weight="bold" font-size="25" text-anchor="middle" fill="#e6ac00">P</text></svg>`;
+    const SVG_COIN_PILE_LARGE = `<svg viewBox="0 0 100 100"><circle cx="25" cy="75" r="20" fill="#ffd700" stroke="black"/><circle cx="50" cy="75" r="20" fill="#ffd700" stroke="black"/><circle cx="75" cy="75" r="20" fill="#ffd700" stroke="black"/><circle cx="35" cy="55" r="20" fill="#ffd700" stroke="black"/><circle cx="65" cy="55" r="20" fill="#ffd700" stroke="black"/><circle cx="50" cy="35" r="20" fill="#ffd700" stroke="black"/><text x="50" y="42" font-family="Arial" font-weight="bold" font-size="20" text-anchor="middle" fill="#e6ac00">P</text></svg>`;
+    const SVG_CAT_SKIN = `<svg viewBox="0 0 100 100"><path d="M50,10 Q90,50 90,80 Q90,95 70,95 L30,95 Q10,95 10,80 Q10,50 50,10" fill="url(#rainbowGrad)" stroke="black" stroke-width="3"/></svg>`;
+    const SVG_CAT_SUIT = `<svg viewBox="0 0 100 100"><path d="M20,90 L20,40 Q50,20 80,40 L80,90 Z" fill="#800080" stroke="black" stroke-width="3"/><path d="M50,40 L50,90" stroke="black"/><path d="M50,40 L40,50 M50,40 L60,50" stroke="white" stroke-width="2"/></svg>`;
+    const SVG_CAT_EYES = `<svg viewBox="0 0 100 100"><circle cx="30" cy="50" r="15" fill="white" stroke="black" stroke-width="2"/><circle cx="70" cy="50" r="15" fill="white" stroke="black" stroke-width="2"/><circle cx="30" cy="50" r="5" fill="#00ff00"/><circle cx="70" cy="50" r="5" fill="#00bbff"/></svg>`;
+    const SVG_CAT_GLASSES = `<svg viewBox="0 0 100 100"><circle cx="30" cy="50" r="15" fill="none" stroke="blue" stroke-width="3"/><circle cx="70" cy="50" r="15" fill="none" stroke="blue" stroke-width="3"/><line x1="45" y1="50" x2="55" y2="50" stroke="blue" stroke-width="3"/></svg>`;
+    const SVG_CAT_HAT = `<svg viewBox="0 0 100 100"><path d="M20,60 L80,60 L70,30 L30,30 Z" fill="#purple" stroke="black" stroke-width="2"/><line x1="10" y1="60" x2="90" y2="60" stroke="black" stroke-width="3" stroke-linecap="round"/><path d="M70,40 L75,50" stroke="orange" stroke-width="3"/></svg>`;
+    const SVG_CAT_MUSTACHE = `<svg viewBox="0 0 100 100"><path d="M50,60 Q30,40 10,60 Q30,80 50,60 Q70,80 90,60 Q70,40 50,60 Z" fill="brown" stroke="black" stroke-width="2"/></svg>`;
+    const ACC_GLASSES_SUN = `<svg viewBox="0 0 100 100" style="width:100%;height:100%"><circle cx="35" cy="40" r="14" fill="black" stroke="white" stroke-width="1"/><circle cx="65" cy="40" r="14" fill="black" stroke="white" stroke-width="1"/><line x1="49" y1="40" x2="51" y2="40" stroke="black" stroke-width="2"/></svg>`;
+    const ACC_GLASSES_NERD = `<svg viewBox="0 0 100 100" style="width:100%;height:100%"><circle cx="35" cy="40" r="15" fill="none" stroke="black" stroke-width="4"/><circle cx="65" cy="40" r="15" fill="none" stroke="black" stroke-width="4"/><line x1="50" y1="40" x2="50" y2="40" stroke="black" stroke-width="4"/><line x1="20" y1="40" x2="10" y2="35" stroke="black" stroke-width="2"/><line x1="80" y1="40" x2="90" y2="35" stroke="black" stroke-width="2"/></svg>`;
+    const ACC_HAT_CAP = `<svg viewBox="0 0 100 100" style="width:100%;height:100%"><path d="M30,15 Q50,0 70,15 L70,30 L30,30 Z" fill="red" stroke="black" stroke-width="2"/><path d="M30,30 Q50,20 90,35" fill="none" stroke="red" stroke-width="6"/><path d="M30,30 Q50,20 90,35" fill="none" stroke="black" stroke-width="2"/></svg>`;
+    const ACC_HAT_TOP = `<svg viewBox="0 0 100 100" style="width:100%;height:100%"><rect x="35" y="0" width="30" height="35" fill="black" stroke="gray"/><line x1="25" y1="35" x2="75" y2="35" stroke="black" stroke-width="4"/></svg>`;
+    const ACC_HAT_CROWN = `<svg viewBox="0 0 100 100" style="width:100%;height:100%"><path d="M30,35 L30,15 L40,25 L50,10 L60,25 L70,15 L70,35 Z" fill="gold" stroke="orange" stroke-width="2"/></svg>`;
+    const ACC_MUSTACHE_CLASSIC = `<svg viewBox="0 0 100 100" style="width:100%;height:100%"><path d="M50,75 Q35,65 25,75 Q35,85 50,75 Q65,85 75,75 Q65,65 50,75 Z" fill="black"/></svg>`;
+    const ACC_MUSTACHE_BEARD = `<svg viewBox="0 0 100 100" style="width:100%;height:100%"><path d="M35,80 Q50,95 65,80 Z" fill="brown" stroke="black"/></svg>`;
+    const SVG_WALLPAPER = `<svg viewBox="0 0 100 100"><path d="M30,30 L70,30 L70,60 L30,60 Z" fill="#90EE90" stroke="black" stroke-width="2"/><path d="M25,30 L75,30" stroke="black" stroke-width="4"/><path d="M25,30 L25,70 L50,85 L50,95" fill="none" stroke="#aaa" stroke-width="5" stroke-linecap="round"/><path d="M50,95 L50,98" stroke="black" stroke-width="5" stroke-linecap="round"/></svg>`;
+    const SVG_POU_COLOR = `<svg viewBox="0 0 100 100"><path d="M50,10 Q90,50 90,80 Q90,95 70,95 L30,95 Q10,95 10,80 Q10,50 50,10" fill="url(#rainbowGrad)" stroke="black" stroke-width="3"/><path d="M70,20 L85,35" stroke="white" stroke-width="5" stroke-linecap="round"/></svg>`;
+    const SVG_DOOR = `<svg viewBox="0 0 100 100"><path d="M30,20 L70,20 Q80,20 80,30 L80,90 L20,90 L20,30 Q20,20 30,20" fill="red" stroke="black" stroke-width="3"/><rect x="25" y="30" width="50" height="20" fill="#aaccff" stroke="black" stroke-width="2"/></svg>`;
+    const SVG_BEDROOM_ICON = `<svg viewBox="0 0 100 100"><ellipse cx="70" cy="70" rx="15" ry="10" fill="red" stroke="black" stroke-width="2"/><path d="M60,60 L80,60 L85,40 L55,40 Z" fill="#ffd700" stroke="black" stroke-width="2"/><path d="M10,60 Q5,50 20,50 L50,50 Q65,50 60,60 Q65,70 50,70 L20,70 Q5,70 10,60" fill="#00ff00" stroke="black" stroke-width="2"/></svg>`;
+
+    // --- FUNCIONES GLOBALIZADAS (HOISTED MANUALLY) ---
+
+    window.getFoodSVG = function(n){ if(n==='Papitas')return SVG_FRIES; if(n==='Manzana')return SVG_APPLE; if(n==='Hamburguesa')return SVG_BURGER; return `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="brown" stroke="black"/></svg>`; };
+    window.getAccessorySVG = function(t,v){ if(v==='none')return ''; if(t==='glasses'){ if(v==='sun')return ACC_GLASSES_SUN; if(v==='nerd')return ACC_GLASSES_NERD; } if(t==='hat'){ if(v==='cap')return ACC_HAT_CAP; if(v==='top')return ACC_HAT_TOP; if(v==='crown')return ACC_HAT_CROWN; } if(t==='mustache'){ if(v==='classic')return ACC_MUSTACHE_CLASSIC; if(v==='beard')return ACC_MUSTACHE_BEARD; } return ''; };
+    
+    window.createActionButton = function(id, icon, label, handler) { const btn = document.createElement('button'); btn.className = 'action-btn'; btn.innerHTML = `<div class="action-icon">${icon}</div><span class="action-text">${label}</span>`; btn.onclick = handler; btn.id = `btn-${id}`; return btn; };
+
+    window.startBallPhysics = function() {
+        const ball = document.getElementById('ball'); const mainArea = document.getElementById('main-area');
+        let pos = { x: 100, y: 100 }, vel = { x: 0, y: 0 };
+        const gravity = 0.8, friction = 0.98, bounce = -0.7;
+        let isDragging = false, lastMouse = { x: 0, y: 0 }, throwVel = { x: 0, y: 0 };
+        clearInterval(ballInterval);
+        ballInterval = setInterval(() => {
+            if (isDragging) return;
+            vel.y += gravity; vel.x *= friction; vel.y *= friction;
+            pos.x += vel.x; pos.y += vel.y;
+            const bounds = mainArea.getBoundingClientRect(), ballSize = 40;
+            const floorLimit = bounds.height - ballSize;
+            if (pos.y > floorLimit) { pos.y = floorLimit; vel.y *= bounce; if(Math.abs(vel.y) < gravity * 2) vel.y = 0; } else if (pos.y < 0) { pos.y = 0; vel.y *= bounce; }
+            const rightLimit = bounds.width - ballSize;
+            if (pos.x > rightLimit) { pos.x = rightLimit; vel.x *= bounce; } else if (pos.x < 0) { pos.x = 0; vel.x *= bounce; }
+            ball.style.left = pos.x + 'px'; ball.style.top = pos.y + 'px';
+        }, 16);
+        const startDrag = (cx, cy) => { isDragging = true; vel = { x: 0, y: 0 }; lastMouse = { x: cx, y: cy }; throwVel = { x: 0, y: 0 }; };
+        const moveDrag = (cx, cy) => { if (!isDragging) return; throwVel.x = cx - lastMouse.x; throwVel.y = cy - lastMouse.y; lastMouse = { x: cx, y: cy }; const rect = mainArea.getBoundingClientRect(); pos.x = cx - rect.left - 20; pos.y = cy - rect.top - 20; ball.style.left = pos.x + 'px'; ball.style.top = pos.y + 'px'; };
+        const endDrag = () => { if (!isDragging) return; isDragging = false; vel.x = throwVel.x * 1.2; vel.y = throwVel.y * 1.2; vel.x = Math.max(-30, Math.min(30, vel.x)); vel.y = Math.max(-30, Math.min(30, vel.y)); updateStat('fun', 2); };
+        ball.onmousedown = (e) => startDrag(e.clientX, e.clientY); ball.ontouchstart = (e) => startDrag(e.touches[0].clientX, e.touches[0].clientY);
+        document.onmousemove = (e) => moveDrag(e.clientX, e.clientY); document.ontouchmove = (e) => moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+        document.onmouseup = endDrag; document.ontouchend = endDrag;
+    };
+
+    window.openGames = function() { document.getElementById('games-modal').style.display='flex'; };
+    
+    window.toggleBall = function() { 
+        const b = document.getElementById('ball');
+        if(b.style.display === 'block') { b.style.display = 'none'; clearInterval(ballInterval); document.onmousemove = null; document.onmouseup = null; document.ontouchmove = null; document.ontouchend = null; }
+        else { b.style.display = 'block'; startBallPhysics(); }
+    };
+    
+    window.openShopMenu = function() {
+        const modal = document.getElementById('generic-modal');
+        const body = document.getElementById('modal-body');
+        document.getElementById('modal-title').textContent = "Tienda";
+        document.getElementById('back-shop-btn').classList.add('hidden');
+        body.className = "shop-category-grid"; body.innerHTML = '';
+        const categories = [ { name: "Comida", icon: SVG_BURGER, action: () => openSubShop('food') }, { name: "Papel tapiz", icon: SVG_WALLPAPER, action: () => showMessage("WIP") }, { name: "Pou", icon: SVG_POU_COLOR, action: () => openCloset() }, { name: "Pociones", icon: SVG_POTION_BIG, action: () => openSubShop('potions') }, { name: "Jabones", icon: SVG_SOAP, action: () => openSubShop('soap') } ];
+        categories.forEach(cat => { const item = document.createElement('button'); item.className = 'shop-category-item'; item.innerHTML = `<div class="shop-category-icon">${cat.icon}</div><div class="shop-category-label">${cat.name}</div>`; item.onclick = cat.action; body.appendChild(item); });
+        modal.style.display = 'flex';
+    };
+    
+    window.useSoap = function() { if(state.isSleeping) return showMessage("Zzz..."); state.isSoaped = true; applySoapBubbles(); canShower = true; document.getElementById('btn-shower').disabled = false; addExperience(10); saveState(); };
+    window.useShower = function() { if(!state.isSoaped) return; state.isSoaped = false; state.bath_count++; state.coins+=50; updateStat('fun', 10); canShower = false; document.getElementById('btn-shower').disabled = true; document.querySelectorAll('.soap-bubble').forEach(b => { b.style.opacity = '0'; b.style.transform = 'scale(1.5)'; setTimeout(() => b.remove(), 500); }); document.getElementById('pou').style.filter = 'brightness(1.5)'; setTimeout(()=>document.getElementById('pou').style.filter='',300); showFloatingText(document.getElementById('pou'), "+50"); addExperience(10); saveState(); };
+    window.openCloset = function() { const modal = document.getElementById('generic-modal'); const body = document.getElementById('modal-body'); document.getElementById('modal-title').textContent = "Armario"; document.getElementById('back-shop-btn').classList.add('hidden'); body.className = "shop-category-grid"; body.innerHTML = ''; const categories = [ { name: "Piel", icon: SVG_CAT_SKIN, action: () => openClosetSubMenu('skin') }, { name: "Trajes", icon: SVG_CAT_SUIT, action: () => openClosetSubMenu('outfit') }, { name: "Ojos", icon: SVG_CAT_EYES, action: () => openClosetSubMenu('eyes') }, { name: "Gafas", icon: SVG_CAT_GLASSES, action: () => openClosetSubMenu('glasses') }, { name: "Sombreros", icon: SVG_CAT_HAT, action: () => openClosetSubMenu('hat') }, { name: "Bigotes", icon: SVG_CAT_MUSTACHE, action: () => openClosetSubMenu('mustache') } ]; categories.forEach(cat => { const item = document.createElement('button'); item.className = 'shop-category-item'; item.innerHTML = `<div class="shop-category-icon">${cat.icon}</div><div class="shop-category-label">${cat.name}</div>`; item.onclick = cat.action; body.appendChild(item); }); modal.style.display = 'flex'; };
+    window.toggleSleep = function() { state.isSleeping = !state.isSleeping; if(state.isSleeping) { sleepInterval = setInterval(() => { updateStat('energy', 5); if(state.stats.energy >= 100) { toggleSleep(); showMessage("Descansado!"); } }, 500); } else clearInterval(sleepInterval); saveState(); renderRoom(); };
+    window.openFridge = function() { const items = Object.keys(state.food_inventory).map(k => ({name:`${k} (x${state.food_inventory[k]})`, type:'select_food', val:k})); openGenericModal("Nevera", items); };
+    window.eatFood = function() { if(state.isSleeping) return; const f = state.selected_food; if(state.stats.food>=100) return showMessage("Lleno!"); if(!state.food_inventory[f] || state.food_inventory[f]<=0) return showMessage("Falta comida"); state.food_inventory[f]--; updateStat('food', 25); updateStat('health', 5); addExperience(10); document.getElementById('pou').style.transform=`scale(${0.5 + (state.level/100*0.5) + 0.1})`; setTimeout(() => updateStatUI(), 200); renderRoom(); saveState(); };
+    window.openShelf = function() { showMessage(`Pociones: ${state.potions}\nSalud: ${Math.round(state.stats.health)}%`); };
+    window.usePotion = function() { if(state.potions>0) { state.potions--; updateStat('health',100); updateStat('energy',20); addExperience(10); saveState(); } else showMessage("No hay pociones"); };
+
+    window.getRoomActions = function(roomId) {
+        switch(roomId) {
+            case 'bathroom': return [ { id: 'shower', icon: SVG_SHOWER, label: 'Ducha', handler: useShower, disabled: !state.isSoaped }, { id: 'soap', icon: SVG_SOAP, label: 'Jabón', handler: useSoap }, { id: 'shop', icon: SVG_SHOP, label: 'Tienda', handler: () => openShopMenu() } ];
+            case 'bedroom': return [ { id: 'closet', icon: SVG_CLOSET, label: 'Armario', handler: openCloset }, { id: 'lamp', icon: SVG_LAMP, label: 'Lámpara', handler: toggleSleep }, { id: 'shop', icon: SVG_SHOP, label: 'Tienda', handler: () => openShopMenu() } ];
+            case 'lab': return [ { id: 'shelf', icon: SVG_SHELF, label: `Estante`, handler: openShelf }, { id: 'potion', icon: SVG_POTION_BIG, label: `Poción de salud x${state.potions}`, handler: usePotion }, { id: 'shop', icon: SVG_SHOP, label: 'Tienda', handler: () => openShopMenu() } ];
+            case 'playroom': return [ { id: 'games', icon: SVG_CONTROLLER, label: 'Juegos', handler: openGames }, { id: 'ball', icon: SVG_BALL_ICON, label: 'Pelota', handler: toggleBall }, { id: 'shop', icon: SVG_SHOP, label: 'Tienda', handler: () => openShopMenu() } ];
+            default: return [];
+        }
+    };
+    
+    window.addExperience = function(amount) {
+        state.current_exp += amount;
+        if (state.current_exp >= 100) {
+            if (state.level < 100) {
+                state.level++;
+                state.current_exp = 0; 
+                showMessage(`¡HAS SUBIDO AL NIVEL ${state.level}!`);
+            } else { state.current_exp = 100; }
+        }
+        saveState();
+    };
+
+    window.modifyLevel = function(amount) {
+        let newLevel = state.level + amount;
+        if (newLevel < 1) newLevel = 1;
+        if (newLevel > 100) newLevel = 100;
+        state.level = newLevel;
+        saveState();
+        document.getElementById('modal-level-val').innerText = state.level;
+        const adultPercent = Math.min(100, Math.round((state.level / 100) * 100));
+        document.getElementById('modal-adult-val').innerText = adultPercent + "%";
+        let sizeLabel = "Bebé";
+        if (state.level > 30) sizeLabel = "Niño";
+        if (state.level > 70) sizeLabel = "Adulto";
+        document.getElementById('modal-size-val').innerText = sizeLabel;
+        updateStatUI();
+    };
+
+    window.updateStatUI = function() {
+        let isSad = false;
+        ['food','health','fun','energy'].forEach(s => {
+            const el = document.getElementById('fill-'+s);
+            if(el) el.style.height = state.stats[s] + '%';
+            if(state.stats[s] < 30) isSad = true;
+            document.getElementById('box-'+s).classList.toggle('critical', state.stats[s] < 20);
+        });
+        document.getElementById('coin-display').textContent = state.coins;
+        document.getElementById('level-display').textContent = state.level;
+        
+        const pouEl = document.getElementById('pou');
+        document.documentElement.style.setProperty('--pou-base-color', state.appearance.skin);
+        document.getElementById('pou-outfit').style.backgroundColor = state.appearance.outfit === 'none' ? 'transparent' : state.appearance.outfit;
+        document.querySelectorAll('.pupil').forEach(p => p.style.backgroundColor = state.appearance.eyes);
+        document.getElementById('acc-glasses').innerHTML = getAccessorySVG('glasses', state.appearance.glasses);
+        document.getElementById('acc-hat').innerHTML = getAccessorySVG('hat', state.appearance.hat);
+        document.getElementById('acc-mustache').innerHTML = getAccessorySVG('mustache', state.appearance.mustache);
+
+        // FIX: Evitar reset del nombre mientras se edita
+        if (document.activeElement !== document.getElementById('pou-name-input')) {
+            document.getElementById('pou-name-tag').innerText = state.name || "Pou";
+            document.getElementById('level-title').innerText = state.name + " !";
+            document.getElementById('pou-name-input').value = state.name;
+        }
+
+        const mouth = document.querySelector('.mouth');
+        if(isSad){ mouth.style.borderBottom='none'; mouth.style.borderTop='3px solid #000'; mouth.style.borderRadius='50% 50% 0 0'; mouth.style.height='12px'; mouth.style.bottom='32px'; }
+        else { mouth.style.borderBottom='3px solid #000'; mouth.style.borderTop='none'; mouth.style.borderRadius='50%'; mouth.style.height='10px'; mouth.style.bottom='35px'; }
+
+        if(state.isSleeping) { pouEl.classList.add('sleeping'); document.getElementById('dark-overlay').classList.add('active'); }
+        else { pouEl.classList.remove('sleeping'); document.getElementById('dark-overlay').classList.remove('active'); }
+        pouEl.style.opacity = state.stats.health < 30 ? '0.6' : '1';
+        
+        const foodLabel = document.getElementById('food-label-text');
+        if(foodLabel && state.currentRoomIndex === 2) { const c = state.food_inventory[state.selected_food] || 0; foodLabel.textContent = `${state.selected_food} x${c}`; }
+        const potionBtn = document.getElementById('btn-potion');
+        if(potionBtn && state.currentRoomIndex === 3) { const l = potionBtn.querySelector('.action-text'); if(l) l.textContent = `Poción de salud x${state.potions}`; }
+    };
+
+    window.renderRoom = function() {
+        const room = ROOMS[state.currentRoomIndex];
+        document.getElementById('app-container').style.background = room.color;
+        document.getElementById('room-name').textContent = room.name;
+        const ball = document.getElementById('ball');
+        if (ball) ball.style.display = 'none'; 
+        if(ballInterval) clearInterval(ballInterval);
+        
+        const footer = document.getElementById('footer-controls');
+        footer.className = ''; footer.innerHTML = '';
+        if (room.id === 'bathroom') footer.classList.add('bathroom-floor', 'custom-floor'); 
+        else if (room.id === 'bedroom') footer.classList.add('bedroom-floor', 'custom-floor');
+        else if (room.id === 'kitchen') footer.classList.add('kitchen-floor', 'custom-floor');
+        else if (room.id === 'lab') footer.classList.add('lab-floor', 'custom-floor');
+        else if (room.id === 'playroom') footer.classList.add('game-floor', 'custom-floor');
+        
+        document.getElementById('bedroom-pillow').style.display = (room.id === 'bedroom') ? 'block' : 'none';
+
+        if (room.id === 'kitchen') {
+            const count = state.food_inventory[state.selected_food] || 0;
+            const fridgeBtn = createActionButton('fridge', SVG_FRIDGE, 'Nevera', openFridge);
+            footer.appendChild(fridgeBtn);
+            const centerDiv = document.createElement('div'); centerDiv.id = 'food-selector';
+            const leftBtn = document.createElement('div'); leftBtn.className = 'arrow-btn'; leftBtn.innerHTML = '<div class="arrow-icon arrow-left"></div>'; leftBtn.onclick = () => cycleFood(-1);
+            const foodDiv = document.createElement('div'); foodDiv.id = 'active-food-display'; foodDiv.innerHTML = getFoodSVG(state.selected_food); foodDiv.onclick = eatFood;
+            const rightBtn = document.createElement('div'); rightBtn.className = 'arrow-btn'; rightBtn.innerHTML = '<div class="arrow-icon arrow-right"></div>'; rightBtn.onclick = () => cycleFood(1);
+            centerDiv.appendChild(leftBtn); centerDiv.appendChild(foodDiv); centerDiv.appendChild(rightBtn);
+            const labelContainer = document.createElement('div'); labelContainer.className = 'food-label-container';
+            labelContainer.innerHTML = `<span class="action-text" id="food-label-text" style="font-size:14px;">${state.selected_food} x${count}</span>`;
+            const centerWrapper = document.createElement('div'); centerWrapper.style.display = 'flex'; centerWrapper.style.flexDirection = 'column'; centerWrapper.style.alignItems = 'center'; centerWrapper.style.justifyContent = 'flex-end'; centerWrapper.style.position = 'relative';
+            centerWrapper.appendChild(centerDiv); centerWrapper.appendChild(labelContainer);
+            footer.appendChild(centerWrapper);
+            const shopBtn = createActionButton('shop', SVG_SHOP, 'Tienda', () => openShopMenu());
+            footer.appendChild(shopBtn);
+        } else if (room.id === 'lab') {
+            const shelfBtn = createActionButton('shelf', SVG_SHELF, 'Estante', openShelf);
+            footer.appendChild(shelfBtn);
+            const potionBtn = createActionButton('potion', SVG_POTION_BIG, `Poción de salud x${state.potions}`, usePotion);
+            potionBtn.querySelector('.action-icon').style.width = '80px'; potionBtn.querySelector('.action-icon').style.height = '80px'; potionBtn.style.width = '120px';
+            footer.appendChild(potionBtn);
+            const shopBtn = createActionButton('shop', SVG_SHOP, 'Tienda', () => openShopMenu());
+            footer.appendChild(shopBtn);
+        } else {
+            const actions = getRoomActions(room.id);
+            actions.forEach(action => {
+                const btn = createActionButton(action.id, action.icon, action.label, action.handler);
+                if(action.disabled) btn.disabled = true;
+                footer.appendChild(btn);
+            });
+        }
+        if(state.isSoaped && room.id === 'bathroom') {
+            applySoapBubbles(); canShower = true;
+            setTimeout(() => { const sBtn = document.getElementById('btn-shower'); if(sBtn) sBtn.disabled = false; }, 0);
+        } else {
+            document.querySelectorAll('.soap-bubble').forEach(b => b.remove());
+        }
+    };
+
+    window.startStatsLoop = function() { if(statsInterval) clearInterval(statsInterval); statsInterval = setInterval(() => { if(state.isSleeping) return; ['food','fun'].forEach(k => updateStat(k, -1)); updateStat('energy', -0.5); if(state.stats.food < 10) updateStat('health', -0.5); saveState(); }, 3000); };
+    window.updateStat = function(key, amount) { state.stats[key] = Math.max(0, Math.min(100, state.stats[key] + amount)); updateStatUI(); };
+    window.saveState = function() { localStorage.setItem('pou_save_data', JSON.stringify(state)); updateStatUI(); };
+    window.changeRoom = function(dir) { state.currentRoomIndex = (state.currentRoomIndex + dir + ROOMS.length) % ROOMS.length; renderRoom(); };
+    
+    window.takeSnapshot = function() {
+        const flash = document.getElementById('flash-overlay');
+        flash.classList.add('flash-active');
+        setTimeout(() => flash.classList.remove('flash-active'), 100);
+        setTimeout(() => showFloatingText(document.getElementById('pou'), "¡Foto!"), 200);
+    };
+
+    window.applySoapBubbles = function() { const existing = document.querySelectorAll('.soap-bubble'); if(existing.length > 20) return; for(let i=0; i<8; i++){ const b = document.createElement('div'); b.className='soap-bubble'; b.style.left = (10 + Math.random() * 70) + '%'; b.style.top = (20 + Math.random() * 60) + '%'; b.style.width = (15 + Math.random() * 20) + 'px'; b.style.height = b.style.width; document.getElementById('pou').appendChild(b); } };
+    window.cycleFood = function(dir) { const foods = Object.keys(state.food_inventory); let idx = foods.indexOf(state.selected_food); if(idx === -1) idx = 0; idx = (idx + dir + foods.length) % foods.length; state.selected_food = foods[idx]; saveState(); renderRoom(); };
+    
+    window.openSubShop = function(type) {
+        const body = document.getElementById('modal-body');
+        document.getElementById('back-shop-btn').classList.remove('hidden'); document.getElementById('back-shop-btn').onclick = openShopMenu;
+        document.getElementById('modal-title').textContent = type.charAt(0).toUpperCase() + type.slice(1);
+        body.className = "shop-product-list"; body.innerHTML = '';
+        let items = [];
+        if(type==='food') items = [{name:"Papitas",cost:20,type:'food',val:1},{name:"Manzana",cost:15,type:'food',val:1},{name:"Hamburguesa",cost:50,type:'food',val:1}];
+        else if(type==='potions') items = [{name:"Poción Salud",cost:50,type:'potion',val:1}];
+        else if(type==='soap') items = [{name:"Jabón Premium",cost:50, type:'misc'}];
+        items.forEach(i => { const d = document.createElement('div'); d.className='shop-product-item'; d.innerHTML = `<strong>${i.name}</strong><br>💰 ${i.cost}`; d.onclick = () => handleBuy(i); body.appendChild(d); });
+    };
+
+    window.openClosetSubMenu = function(category) {
+        const body = document.getElementById('modal-body');
+        document.getElementById('back-shop-btn').classList.remove('hidden'); document.getElementById('back-shop-btn').onclick = openCloset;
+        const titles = { skin: "Color de Piel", outfit: "Trajes", eyes: "Color de Ojos", glasses: "Gafas", hat: "Sombreros", mustache: "Bigotes" };
+        document.getElementById('modal-title').textContent = titles[category];
+        body.className = "shop-product-list"; body.innerHTML = '';
+        
+        let items = [];
+        if(category === 'skin') items = [{name: "Original", val: "#d6a66a", price: 0}, {name: "Alien", val: "#76ff03", price: 50}, {name: "Rosa", val: "#ff80ab", price: 50}, {name: "Azul", val: "#40c4ff", price: 50}];
+        else if (category === 'outfit') items = [{name: "Ninguno", val: "none", price: 0}, {name: "Cam. Azul", val: "#2979ff", price: 30}, {name: "Cam. Roja", val: "#ff1744", price: 30}, {name: "Elegante", val: "#333", price: 80}];
+        else if (category === 'eyes') items = [{name: "Negro", val: "black", price: 0}, {name: "Azul", val: "blue", price: 20}, {name: "Verde", val: "green", price: 20}, {name: "Rojo", val: "red", price: 20}];
+        else if (category === 'glasses') items = [{name: "Ninguna", val: "none", price: 0}, {name: "Sol", val: "sun", price: 40}, {name: "Nerd", val: "nerd", price: 40}];
+        else if (category === 'hat') items = [{name: "Ninguno", val: "none", price: 0}, {name: "Gorra", val: "cap", price: 45}, {name: "Copa", val: "top", price: 60}, {name: "Corona", val: "crown", price: 100}];
+        else if (category === 'mustache') items = [{name: "Ninguno", val: "none", price: 0}, {name: "Clásico", val: "classic", price: 35}, {name: "Barba", val: "beard", price: 40}];
+
+        items.forEach(i => {
+            const itemId = `${category}_${i.val}`;
+            const isOwned = state.owned_items.includes(itemId);
+            const isEquipped = state.appearance[category] === i.val;
+            
+            const div = document.createElement('div');
+            div.className = 'shop-product-item';
+            if(isOwned) div.classList.add('owned');
+            if(isEquipped) div.classList.add('equipped');
+            
+            let btnText = isEquipped ? "¡Puesto!" : (isOwned ? "Usar" : `💰 ${i.price}`);
+            if (i.price === 0 && !isOwned) { 
+                state.owned_items.push(itemId); 
+                btnText = "Usar"; 
+            }
+
+            div.innerHTML = `<strong>${i.name}</strong><br>${btnText}`;
+            div.onclick = () => {
+                if(isEquipped) {
+                    showMessage("Ya lo llevas puesto.");
+                    return;
+                }
+                
+                if(isOwned) {
+                    state.appearance[category] = i.val;
+                    saveState();
+                    openClosetSubMenu(category); 
+                    showMessage("¡Equipado!");
+                } else {
+                    if(state.coins >= i.price) {
+                        showConfirm(`¿Comprar ${i.name}?`, () => {
+                            state.coins -= i.price;
+                            state.owned_items.push(itemId);
+                            state.appearance[category] = i.val; 
+                            saveState();
+                            openClosetSubMenu(category);
+                            showMessage("¡Comprado!");
+                        });
+                    } else {
+                        showMessage("No tienes suficientes monedas.");
+                    }
+                }
+            };
+            body.appendChild(div);
+        });
+    };
+
+    window.openGenericModal = function(title, items) { document.getElementById('modal-title').textContent = title; document.getElementById('back-shop-btn').classList.add('hidden'); const body = document.getElementById('modal-body'); body.className = "shop-product-list"; body.innerHTML=''; items.forEach(i => { const d = document.createElement('div'); d.className='shop-product-item'; d.innerHTML = `<strong>${i.name}</strong><br>Seleccionar`; d.onclick = () => handleBuy(i); body.appendChild(d); }); document.getElementById('generic-modal').style.display='flex'; };
+    window.handleBuy = function(item) {
+        if(item.type==='food') { if(state.coins>=item.cost) { state.coins-=item.cost; state.food_inventory[item.name]=(state.food_inventory[item.name]||0)+1; renderRoom(); showMessage("Comprado!"); } }
+        else if(item.type==='select_food') { state.selected_food=item.val; closeModal(); renderRoom(); }
+        else if(item.type==='potion') { if(state.coins>=item.cost) { state.coins-=item.cost; state.potions++; renderRoom(); showMessage("Comprada!"); } }
+        saveState();
+    };
+    window.closeModal = function() { document.querySelectorAll('.modal').forEach(m=>m.style.display='none'); };
+    window.showFloatingText = function(el,txt) { const d = document.createElement('div'); d.className='coin-pop'; d.innerText=txt; d.style.left='50%'; d.style.top='50%'; el.appendChild(d); setTimeout(()=>d.remove(),1000); };
+    window.showMessage = function(text) { document.getElementById('msg-text').innerText = text; document.getElementById('msg-modal').style.display = 'flex'; };
+    window.closeMsgModal = function() { document.getElementById('msg-modal').style.display = 'none'; };
+    let _pendingCallback = null;
+    window.showConfirm = function(text, cb) { document.getElementById('confirm-text').innerText = text; document.getElementById('confirm-modal').style.display = 'flex'; _pendingCallback = cb; };
+    window.closeConfirmModal = function() { document.getElementById('confirm-modal').style.display = 'none'; _pendingCallback = null; };
+    document.getElementById('confirm-yes-btn').onclick = () => { if (_pendingCallback) _pendingCallback(); closeConfirmModal(); };
+    window.openCoinShop = function() {
+        const modal = document.getElementById('coins-modal'); const container = document.getElementById('coin-list-container'); container.innerHTML = '';
+        const coinOptions = [ { amount: 20, label: 'No Ads!', icon: SVG_COIN_SINGLE }, { amount: 60, label: '¡16 % de descuento!', icon: SVG_COIN_PILE_SMALL }, { amount: 150, label: '¡33 % de descuento!', icon: SVG_COIN_PILE_MEDIUM }, { amount: 500, label: '¡60 % de descuento!', icon: SVG_COIN_PILE_LARGE } ];
+        coinOptions.forEach(opt => { const item = document.createElement('div'); item.className = 'coin-item'; item.innerHTML = `<div class="coin-item-icon">${opt.icon}</div><div class="coin-item-info"><div class="coin-amount">${opt.amount} monedas</div><div class="coin-desc">${opt.label}</div></div><button class="coin-buy-btn" onclick="buyCoins(${opt.amount})">COMPRAR</button>`; container.appendChild(item); });
+        modal.style.display = 'flex';
+    };
+    window.buyCoins = function(amount, isBonus = false) { if (isBonus) { if (state.twitter_bonus) { showMessage("¡Ya reclamaste este bono!"); return; } state.twitter_bonus = true; } state.coins += amount; saveState(); showMessage(`¡Has recibido ${amount} monedas!`); closeModal(); };
+
+    window.openLevelModal = function() {
+        const modal = document.getElementById('level-modal');
+        document.getElementById('level-title').innerText = state.name + " !";
+        document.getElementById('modal-level-val').innerText = state.level;
+        document.getElementById('modal-next-val').innerText = state.current_exp + "%";
+        const adultPercent = Math.min(100, Math.round((state.level / 100) * 100));
+        document.getElementById('modal-adult-val').innerText = adultPercent + "%";
+        let sizeLabel = "Bebé"; if (state.level > 30) sizeLabel = "Niño"; if (state.level > 70) sizeLabel = "Adulto";
+        document.getElementById('modal-size-val').innerText = sizeLabel;
+        document.getElementById('pou-name-input').value = state.name;
+        modal.style.display = 'flex';
+    };
+    window.savePouName = function() { const newName = document.getElementById('pou-name-input').value; if (newName.trim() !== "") { state.name = newName; saveState(); openLevelModal(); showMessage("Nombre guardado!"); } };
+    window.exportData = function() { const data = JSON.stringify(state); prompt("Copia este código para guardar tu partida:", data); };
+    window.importData = function() { const data = prompt("Pega aquí el código de tu partida:"); if (data) { try { const parsed = JSON.parse(data); if (parsed && parsed.coins !== undefined) { state = parsed; saveState(); location.reload(); } else { showMessage("Código inválido."); } } catch (e) { showMessage("Error al importar."); } } };
+
+    window.getMousePos = function(canvas, evt) { const rect = canvas.getBoundingClientRect(); const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height; const clientX = evt.touches ? evt.touches[0].clientX : evt.clientX; const clientY = evt.touches ? evt.touches[0].clientY : evt.clientY; return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY }; };
+
+    window.startMiniGame = function(type) {
+        document.getElementById('game-selection').classList.add('hidden'); document.getElementById('game-active-area').classList.remove('hidden'); document.getElementById('games-back-btn').classList.add('hidden');
+        const canvas = document.getElementById('game-canvas'); const ctx = canvas.getContext('2d');
+        let gameScore = 0; document.getElementById('game-score').innerText = "0";
+        let loop;
+
+        if (type === 'avoid') {
+             let playerX = 150; let obstacles = []; const speed = 4;
+             const moveHandler = (e) => { const pos = getMousePos(canvas, e); playerX = Math.max(15, Math.min(285, pos.x)); };
+             canvas.addEventListener('mousemove', moveHandler); canvas.addEventListener('touchmove', moveHandler);
+             loop = setInterval(() => {
+                 ctx.clearRect(0,0,300,300); ctx.fillStyle = 'blue'; ctx.fillRect(playerX - 15, 270, 30, 30);
+                 if(Math.random() < 0.08) obstacles.push({x: Math.random()*270, y: 0}); ctx.fillStyle = 'red';
+                 for(let i=0; i<obstacles.length; i++) {
+                     let o = obstacles[i]; o.y += speed; ctx.fillRect(o.x, o.y, 30, 30);
+                     if(o.y > 240 && o.y < 300 && o.x > playerX - 30 && o.x < playerX + 15) { clearInterval(loop); canvas.removeEventListener('mousemove', moveHandler); canvas.removeEventListener('touchmove', moveHandler); endGame(gameScore); return; }
+                 }
+                 gameScore++; document.getElementById('game-score').innerText = Math.floor(gameScore/10);
+             }, 30);
+             window.gameLoopId = loop;
+        } 
+        else if (type === 'clicker') {
+             let target = {x: 150, y: 150, r: 20}; let timeLeft = 200;
+             const clickHandler = (e) => {
+                 const pos = getMousePos(canvas, e); const dist = Math.hypot(pos.x - target.x, pos.y - target.y);
+                 if(dist < target.r + 10) { gameScore++; document.getElementById('game-score').innerText = gameScore; target.x = 30 + Math.random()*240; target.y = 30 + Math.random()*240; timeLeft = Math.min(timeLeft + 20, 200); }
+             };
+             canvas.addEventListener('mousedown', clickHandler); canvas.addEventListener('touchstart', clickHandler);
+             loop = setInterval(() => {
+                 ctx.clearRect(0,0,300,300); ctx.fillStyle = 'red'; ctx.fillRect(0, 0, (timeLeft/200)*300, 10); ctx.beginPath(); ctx.arc(target.x, target.y, target.r, 0, Math.PI*2); ctx.fillStyle='orange'; ctx.fill();
+                 timeLeft--; if(timeLeft <= 0) { clearInterval(loop); canvas.removeEventListener('mousedown', clickHandler); canvas.removeEventListener('touchstart', clickHandler); endGame(gameScore); }
+             }, 30);
+             window.gameLoopId = loop;
+        }
+        else if (type === 'food_drop') {
+            let playerX = 150; let items = [];
+            const moveHandler = (e) => { const pos = getMousePos(canvas, e); playerX = pos.x; };
+            canvas.addEventListener('mousemove', moveHandler); canvas.addEventListener('touchmove', moveHandler);
+            loop = setInterval(() => {
+                ctx.clearRect(0,0,300,300); ctx.fillStyle = '#d6a66a'; ctx.beginPath(); ctx.arc(playerX, 280, 25, 0, Math.PI*2); ctx.fill(); ctx.fillStyle = 'black'; ctx.beginPath(); ctx.arc(playerX, 275, 10, 0, Math.PI*2); ctx.fill(); 
+                if(Math.random()<0.06) items.push({x:Math.random()*280, y:0, type: Math.random()>0.3 ? 'good' : 'bad'});
+                for(let i=0; i<items.length; i++){
+                    let it = items[i]; it.y+=4; ctx.fillStyle = it.type==='good'?'gold':'#5D4037'; ctx.beginPath(); ctx.arc(it.x, it.y, 12, 0, Math.PI*2); ctx.fill();
+                    if(it.y > 260 && Math.abs(it.x - playerX) < 35) {
+                        if(it.type === 'good') { gameScore++; items.splice(i,1); i--; } else { clearInterval(loop); canvas.removeEventListener('mousemove', moveHandler); canvas.removeEventListener('touchmove', moveHandler); endGame(gameScore); return; }
+                    }
+                }
+                document.getElementById('game-score').innerText = gameScore;
+            }, 30);
+            window.gameLoopId = loop;
+        }
+        else if (type === 'sky_jump') {
+            let py = 200, vy = 0, px = 150; let plats = [{x:130,y:280}, {x:50,y:200}, {x:200,y:120}, {x:100,y:50}];
+            const moveHandler = (e) => { const pos = getMousePos(canvas, e); px = Math.max(10, Math.min(290, pos.x)); };
+            canvas.addEventListener('mousemove', moveHandler); canvas.addEventListener('touchmove', moveHandler);
+            loop = setInterval(() => {
+                ctx.clearRect(0,0,300,300); vy += 0.5; py += vy;
+                if(py > 300) { clearInterval(loop); canvas.removeEventListener('mousemove', moveHandler); canvas.removeEventListener('touchmove', moveHandler); endGame(gameScore); return; }
+                ctx.fillStyle = '#4CAF50'; plats.forEach(p => {
+                    ctx.fillRect(p.x, p.y, 50, 10);
+                    if(vy > 0 && py > p.y-20 && py < p.y+10 && px > p.x-10 && px < p.x+60) { vy = -12; }
+                    if (py < 150) p.y += (150 - py);
+                    if(p.y > 300) { p.y = 0; p.x = Math.random()*240; gameScore++; }
+                });
+                if(py < 150) py = 150; ctx.fillStyle = '#d6a66a'; ctx.beginPath(); ctx.arc(px, py, 15, 0, Math.PI*2); ctx.fill();
+                document.getElementById('game-score').innerText = gameScore;
+            }, 30);
+            window.gameLoopId = loop;
+        }
+        else if (type === 'drive') {
+            let cx = 150; let cars = [];
+            const moveHandler = (e) => { const pos = getMousePos(canvas, e); cx = Math.max(75, Math.min(225, pos.x)); };
+            canvas.addEventListener('mousemove', moveHandler); canvas.addEventListener('touchmove', moveHandler);
+            loop = setInterval(() => {
+                ctx.clearRect(0,0,300,300); ctx.fillStyle = '#4CAF50'; ctx.fillRect(0,0,50,300); ctx.fillRect(250,0,50,300); ctx.fillStyle = '#555'; ctx.fillRect(50,0,200,300);
+                ctx.fillStyle = 'white'; for(let i=0; i<300; i+=40) ctx.fillRect(148, (i + gameScore*5)%300, 4, 20);
+                ctx.fillStyle = 'blue'; ctx.fillRect(cx-15, 240, 30, 50);
+                if(Math.random()<0.03) cars.push({x: 60 + Math.random()*150, y: -60}); ctx.fillStyle = 'red';
+                for(let i=0;i<cars.length;i++){
+                    let c = cars[i]; c.y += 8; ctx.fillRect(c.x, c.y, 30, 50);
+                    if(c.y > 190 && c.y < 290 && Math.abs(c.x - (cx-15)) < 30) { clearInterval(loop); canvas.removeEventListener('mousemove', moveHandler); canvas.removeEventListener('touchmove', moveHandler); endGame(gameScore); return; }
+                    if(c.y > 300) { cars.splice(i,1); i--; gameScore++; }
+                }
+                document.getElementById('game-score').innerText = gameScore;
+            }, 30);
+            window.gameLoopId = loop;
+        }
+        else if (type === 'memory') {
+            let seq = [], userSeq = []; let showing = false;
+            const rects = [{id:'red', x:10, y:10, w:135, h:135, c:'#ff5252'}, {id:'blue', x:155, y:10, w:135, h:135, c:'#448aff'}, {id:'green', x:10, y:155, w:135, h:135, c:'#69f0ae'}, {id:'yellow', x:155, y:155, w:135, h:135, c:'#ffff00'}];
+            const colors = ['red','blue','green','yellow'];
+            const drawBoard = (hl) => { ctx.clearRect(0,0,300,300); rects.forEach(r => { ctx.fillStyle = r.c; ctx.globalAlpha = (hl === r.id) ? 1 : 0.4; ctx.fillRect(r.x, r.y, r.w, r.h); ctx.strokeRect(r.x, r.y, r.w, r.h); }); ctx.globalAlpha = 1; };
+            const playSeq = (idx) => { if(idx >= seq.length) { showing = false; document.getElementById('game-score').innerText = "¡Tu turno!"; return; } showing = true; document.getElementById('game-score').innerText = "Memoriza..."; drawBoard(seq[idx]); setTimeout(() => { drawBoard(null); setTimeout(() => playSeq(idx+1), 300); }, 600); };
+            const nextRound = () => { userSeq = []; seq.push(colors[Math.floor(Math.random()*4)]); setTimeout(() => playSeq(0), 1000); };
+            const clickHandler = (e) => {
+                if(showing) return; const pos = getMousePos(canvas, e); let clicked = null;
+                rects.forEach(r => { if(pos.x > r.x && pos.x < r.x+r.w && pos.y > r.y && pos.y < r.y+r.h) clicked = r.id; });
+                if(clicked) {
+                    drawBoard(clicked); setTimeout(()=>drawBoard(null), 150);
+                    if(clicked === seq[userSeq.length]) { userSeq.push(clicked); if(userSeq.length === seq.length) { gameScore++; document.getElementById('game-score').innerText = "¡Bien!"; nextRound(); } } 
+                    else { canvas.removeEventListener('mousedown', clickHandler); canvas.removeEventListener('touchstart', clickHandler); endGame(gameScore); }
+                }
+            };
+            canvas.addEventListener('mousedown', clickHandler); canvas.addEventListener('touchstart', clickHandler);
+            drawBoard(null); nextRound();
+            window.gameLoopId = { close: () => { canvas.removeEventListener('mousedown', clickHandler); canvas.removeEventListener('touchstart', clickHandler); }};
+        }
+    };
+    
+    window.stopGame = function() { 
+        if(window.gameLoopId && window.gameLoopId.close) { window.gameLoopId.close(); window.gameLoopId = null; } 
+        else if(window.gameLoopId) { clearInterval(window.gameLoopId); window.gameLoopId = null; }
+        const oldCanvas = document.getElementById('game-canvas'); const newCanvas = oldCanvas.cloneNode(true); oldCanvas.parentNode.replaceChild(newCanvas, oldCanvas);
+        document.getElementById('game-selection').classList.remove('hidden'); document.getElementById('game-active-area').classList.add('hidden'); document.getElementById('games-back-btn').classList.remove('hidden'); 
+    };
+    window.endGame = function(score) { stopGame(); showMessage(`¡Juego terminado!\nPuntos: ${score}\nMonedas ganadas: ${score}`); state.coins += score; addExperience(score); updateStat('fun', 20); saveState(); };
+
+    document.getElementById('prev-room-btn').onclick = () => changeRoom(-1);
+    document.getElementById('next-room-btn').onclick = () => changeRoom(1);
+    renderRoom(); updateStatUI(); startStatsLoop();
+
+    document.addEventListener('mousemove', (e) => { if (state.isSleeping) return; const eyes = document.querySelectorAll('.eye'); eyes.forEach(eye => { const pupil = eye.querySelector('.pupil'); const eyeRect = eye.getBoundingClientRect(); const eyeCenterX = eyeRect.left + eyeRect.width / 2; const eyeCenterY = eyeRect.top + eyeRect.height / 2; const dx = e.clientX - eyeCenterX; const dy = e.clientY - eyeCenterY; const angle = Math.atan2(dy, dx); const maxRadius = 10; const distance = Math.min(Math.hypot(dx, dy), maxRadius); const moveX = Math.cos(angle) * distance; const moveY = Math.sin(angle) * distance; pupil.style.transform = `translate(${moveX - 3}px, ${moveY}px)`; }); });
+    
+    // INIT GAMES UI
+    const gamesList = [ {id:'avoid', name:'Esquiva'}, {id:'clicker', name:'Clic Rápido'}, {id:'food_drop', name:'Lluvia'}, {id:'sky_jump', name:'Saltos'}, {id:'drive', name:'Conducir'}, {id:'memory', name:'Memoria'} ];
+    const gContainer = document.getElementById('game-selection');
+    gamesList.forEach(g => { const b = document.createElement('button'); b.className='shop-item'; b.innerText=g.name; b.onclick = () => window.startMiniGame(g.id); gContainer.appendChild(b); });
+
+</script>
+</body>
+</html>
