@@ -3,7 +3,7 @@
     <title>Principal</title>
     <link href="https://Anzonimen.github.io/2damasi/feed.xml" rel="self" />
     <link href="https://Anzonimen.github.io/2damasi" />
-    <updated>2025-12-29T14:33:11+01:00</updated>
+    <updated>2025-12-29T14:39:29+01:00</updated>
     <author>
         <name>Antonio Garcia Llergo</name>
     </author>
@@ -27,7 +27,7 @@
             <![CDATA[
                 <p>A la hora de realizar este trabajo, lo primero que se me vino a la mente fue crear un juego similar a los desarrollados por Quantic Dream, videojuegos en los que las decisiones y acciones del jugador tienen una repercusión directa en el desarrollo de la historia. El juego en el que me he basado como principal referencia ha sido Detroit: Become Human (muy buen juego por cierto).</p>
 <p>Para ello, quise crear un <em data-start="72" data-end="80">prompt</em> a la altura de lo que estaba buscando. En primer lugar, le pedí a Gemini que lo creara basándose en los elementos y características que quería incluir.</p>
-<p>---------------------------------------------------------------------------------------------------------------------</p>
+<p>-----------------------------------------------------------------------------------</p>
 <p class="query-text-line ng-star-inserted">Actúa como un **Lead Game Developer**, un **Director de Arte** y un **Novelista de Ciencia Ficción Senior**.</p>
 <p class="query-text-line ng-star-inserted">Tu objetivo es desarrollar una **Novela Gráfica Interactiva Web (AAA)** completa en un único archivo HTML (`index.html`), inspirada en la estética y narrativa de *Detroit: Become Human*.</p>
 <p class="query-text-line ng-star-inserted">**⚠️ INSTRUCCIONES CRÍTICAS DE VOLUMEN Y VISUALES (LEER PRIMERO):**</p>
@@ -78,7 +78,7 @@
 <p class="query-text-line ng-star-inserted"> </p>
 <p class="query-text-line ng-star-inserted">**ENTREGABLE:**</p>
 <p class="query-text-line ng-star-inserted">Genera el código `index.html` completo. Comienza con el CSS/JS y luego desarrolla la base de datos JSON con la máxima longitud y riqueza visual posibles.</p>
-<p>---------------------------------------------------------------------------------------------------------------------</p>
+<p>-----------------------------------------------------------------------------------</p>
 <p>Mi objetivo era crear una novela gráfica interactiva con una narrativa profunda y ramificada. Quería que las decisiones del jugador tuvieran un peso real, afectando tanto a la historia como al destino del protagonista. </p>
 <p>Como el proceso ha sido muy largo y ha habido muchos intentos intermedios, no he podido llevar un registro cronológico. Por ello, me centraré en los aspectos en los que he trabajado.</p>
 <p data-start="90" data-end="290">En primer lugar, el código generó una historia que, a mi parecer, estaba muy bien construida y se ajustaba a lo que buscaba. Sin embargo, presentaba varios agujeros de guion que fue necesario revisar.</p>
