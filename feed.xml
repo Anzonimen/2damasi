@@ -3,7 +3,7 @@
     <title>Principal</title>
     <link href="https://Anzonimen.github.io/2damasi/feed.xml" rel="self" />
     <link href="https://Anzonimen.github.io/2damasi" />
-    <updated>2025-12-29T14:23:43+01:00</updated>
+    <updated>2025-12-29T14:33:11+01:00</updated>
     <author>
         <name>Antonio Garcia Llergo</name>
     </author>
@@ -109,7 +109,7 @@
 <p data-path-to-node="12">Esta función se ejecuta cada vez que haces clic en un botón. Es el director de orquesta.</p>
 <figure class="post__image"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/13/11.jpg" alt="" width="585" height="438" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/13/responsive/11-xs.jpg 300w ,https://Anzonimen.github.io/2damasi/media/posts/13/responsive/11-sm.jpg 480w ,https://Anzonimen.github.io/2damasi/media/posts/13/responsive/11-md.jpg 768w ,https://Anzonimen.github.io/2damasi/media/posts/13/responsive/11-lg.jpg 1024w"></figure>
 <p data-path-to-node="12">El Renderizador de Gráficos: getSceneArt(sceneData)</p>
-<p data-path-to-node="12">En lugar de cargar imágenes pesadas (<code data-path-to-node="17" data-index-in-node="37">.jpg</code>), este código <strong data-path-to-node="17" data-index-in-node="56">dibuja</strong> la escena usando SVG (gráficos vectoriales) en tiempo real.</p>
+<p data-path-to-node="12">En lugar de cargar imágenes pesadas (.jpg), este código dibuja la escena usando SVG (gráficos vectoriales) en tiempo real.</p>
 <figure class="post__image"><img loading="lazy"  src="https://Anzonimen.github.io/2damasi/media/posts/13/12.jpg" alt="" width="615" height="354" sizes="(max-width: 1024px) 100vw, 1024px" srcset="https://Anzonimen.github.io/2damasi/media/posts/13/responsive/12-xs.jpg 300w ,https://Anzonimen.github.io/2damasi/media/posts/13/responsive/12-sm.jpg 480w ,https://Anzonimen.github.io/2damasi/media/posts/13/responsive/12-md.jpg 768w ,https://Anzonimen.github.io/2damasi/media/posts/13/responsive/12-lg.jpg 1024w"></figure>
 <p data-path-to-node="21">Los Minijuegos (El Loop de Animación)</p>
 <p data-path-to-node="22">El código usa requestAnimationFrame para crear juegos de habilidad dentro del navegador.</p>
