@@ -1,1 +1,1736 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNIDAD 734: DIRECTOR'S CUT - EXPANSION v7.4</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap');
 
+        :root {
+            /* Palette: Deep Void & Electric Accents */
+            --bg-color: #08090b;
+            --panel-bg: rgba(20, 22, 28, 0.98);
+            --text-primary: #f0f0f0;
+            --text-secondary: #b0b0b0;
+            --accent-color: #00f3ff; /* Cyan eléctrico */
+            --accent-dim: rgba(0, 243, 255, 0.1);
+            --danger-color: #ff2a6d;
+            --success-color: #05ffa1;
+            --font-main: 'Inter', sans-serif;
+            --font-tech: 'JetBrains Mono', monospace;
+            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+            --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+            --analysis-color: #f0e68c; 
+        }
+
+        /* Estados dinámicos */
+        body.state-obedient { --accent-color: #00f3ff; } 
+        body.state-doubting { --accent-color: #bd00ff; }
+        body.state-deviant { --accent-color: #ff2a6d; }
+
+        * { box-sizing: border-box; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
+
+        body {
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            background-image: 
+                radial-gradient(circle at 50% 0%, #1a1c29 0%, transparent 70%),
+                linear-gradient(0deg, transparent 98%, rgba(255,255,255,0.03) 100%);
+            background-size: 100% 100%, 100% 4px;
+            color: var(--text-primary);
+            font-family: var(--font-main);
+            height: 100vh;
+            display: flex; flex-direction: column; overflow: hidden;
+            user-select: none;
+        }
+
+        /* --- MAIN MENU --- */
+        #main-menu {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #15161e 0%, #000 100%);
+            z-index: 2000; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; text-align: center;
+        }
+        
+        .game-title-large {
+            font-family: var(--font-tech);
+            font-weight: 700; font-size: 5rem; color: transparent;
+            -webkit-text-stroke: 1px var(--text-primary); letter-spacing: 12px;
+            margin-bottom: 0; text-transform: uppercase; position: relative;
+        }
+        .game-title-large::after {
+            content: 'UNIDAD 734'; position: absolute; left: 0; top: 0; color: var(--accent-color);
+            opacity: 0.7; filter: blur(2px); mix-blend-mode: overlay;
+        }
+        .game-subtitle {
+            font-family: var(--font-main); font-weight: 300; font-size: 1rem;
+            color: var(--text-secondary); letter-spacing: 8px; text-transform: uppercase;
+            margin-bottom: 60px; border-top: 1px solid var(--accent-color);
+            padding-top: 15px; margin-top: 10px;
+        }
+        .menu-buttons { display: flex; flex-direction: column; gap: 15px; width: 280px; }
+        .menu-btn {
+            background: transparent; border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-primary); padding: 18px; font-family: var(--font-tech);
+            font-size: 0.9rem; cursor: pointer; text-transform: uppercase;
+            letter-spacing: 2px; position: relative; overflow: hidden;
+        }
+        .menu-btn::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 2px; height: 100%;
+            background: var(--accent-color); transform: scaleY(0); transition: transform 0.3s ease;
+        }
+        .menu-btn:hover { border-color: var(--accent-color); background: var(--accent-dim); padding-left: 25px; }
+        .menu-btn:hover::before { transform: scaleY(1); }
+
+        /* --- HUD --- */
+        #hud {
+            height: 60px; width: 100%; background: rgba(8, 9, 11, 0.95);
+            border-bottom: 1px solid rgba(255,255,255,0.1); padding: 0 20px;
+            display: none; justify-content: space-between; align-items: center;
+            z-index: 100; flex-shrink: 0;
+        }
+        .hud-center {
+            font-family: var(--font-tech); font-size: 0.9rem; letter-spacing: 3px;
+            color: var(--accent-color); text-shadow: 0 0 10px var(--accent-color);
+        }
+        .stat-box { display: flex; flex-direction: column; align-items: flex-start; gap: 5px; min-width: 100px; }
+        .stat-label { font-size: 0.65rem; color: var(--text-secondary); letter-spacing: 1px; font-weight: 600; text-transform: uppercase; }
+        .stat-bar-container { 
+            width: 100%; height: 4px; background: rgba(255,255,255,0.1); 
+            position: relative; overflow: hidden; border-radius: 2px;
+        }
+        .stat-bar { height: 100%; background: var(--accent-color); width: 0%; box-shadow: 0 0 10px var(--accent-color); }
+        .hud-btn {
+            background: transparent; border: 1px solid rgba(255,255,255,0.2); 
+            color: var(--text-secondary); padding: 5px 10px; font-size: 0.7rem; cursor: pointer;
+            text-transform: uppercase; letter-spacing: 1px; font-family: var(--font-tech);
+            margin-left: 10px; transition: all 0.2s;
+        }
+        .hud-btn:hover { border-color: var(--accent-color); color: var(--text-primary); }
+
+        /* --- VIEWPORT --- */
+        #viewport {
+            flex-grow: 1; position: relative; display: none;
+            justify-content: center; align-items: center; width: 100%;
+            perspective: 1200px; overflow: hidden; padding: 20px 0;
+        }
+        #panels-container { position: relative; width: 100%; height: 100%; }
+
+        .panel {
+            position: absolute; width: 90%; max-width: 900px; height: 90%; max-height: 800px;
+            top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0.95);
+            opacity: 0; pointer-events: none; background: var(--panel-bg);
+            border: var(--glass-border); box-shadow: var(--glass-shadow);
+            border-radius: 6px; display: flex; flex-direction: column; z-index: 10;
+        }
+        .panel.active { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: all; z-index: 20; }
+        .panel.prev-slide { transform: translate(-60%, -50%) scale(0.9) rotateY(5deg); opacity: 0; filter: blur(5px); }
+        .panel.next-slide { transform: translate(-40%, -50%) scale(0.9) rotateY(-5deg); opacity: 0; filter: blur(5px); }
+
+        .panel-image {
+            width: 100%; height: 40%; background: #000; 
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden; flex-shrink: 0; position: relative;
+        }
+        .panel.scanning .panel-image { filter: grayscale(100%) contrast(1.2); }
+        .panel.scanning .panel-image::after {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 243, 255, 0.05) 3px);
+            pointer-events: none;
+        }
+
+        .panel-content {
+            padding: 25px 30px; flex-grow: 1; overflow-y: auto; 
+            display: flex; flex-direction: column; gap: 15px; padding-bottom: 120px; 
+            scrollbar-width: thin; scrollbar-color: var(--accent-color) #222;
+        }
+        .panel-content::-webkit-scrollbar { width: 6px; }
+        .panel-content::-webkit-scrollbar-track { background: #111; }
+        .panel-content::-webkit-scrollbar-thumb { background: var(--accent-color); border-radius: 3px; }
+
+        .narrative-box { 
+            color: var(--text-secondary); font-size: 1.05rem; line-height: 1.6; 
+            padding-left: 15px; border-left: 3px solid var(--accent-color);
+            background: rgba(0,0,0,0.2); padding: 15px; border-radius: 0 4px 4px 0;
+            animation: fadeIn 0.5s ease;
+        }
+        .dialogue-bubble { 
+            background: #e0e0e0; color: #111; padding: 15px 20px; 
+            border-radius: 4px 15px 15px 15px; font-weight: 600; font-size: 1rem; line-height: 1.4;
+            max-width: 85%; align-self: flex-start; box-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+            animation: slideRight 0.5s ease;
+        }
+        .dialogue-bubble.android { 
+            background: var(--accent-dim); color: var(--accent-color);
+            border: 1px solid var(--accent-color); border-radius: 15px 15px 4px 15px;
+            align-self: flex-end; text-align: right; font-family: var(--font-tech); font-size: 0.95rem;
+            animation: slideLeft 0.5s ease;
+        }
+        
+        /* Conditional Dialogues Styles */
+        .dialogue-bubble.android.conditional-trust {
+            border-color: #00f3ff; color: #00f3ff; background: rgba(0, 243, 255, 0.05);
+        }
+        .dialogue-bubble.android.conditional-deviant {
+            border-color: #ff2a6d; color: #ff2a6d; background: rgba(255, 42, 109, 0.05);
+        }
+        
+        .unlocked-text { 
+            border: 1px dashed var(--analysis-color); color: var(--analysis-color); 
+            background: rgba(240, 230, 140, 0.05); padding: 10px; font-family: var(--font-tech); font-size: 0.85rem;
+        }
+        .unlocked-text::before { content: '🔓 ANÁLISIS: '; display: block; opacity: 0.8; font-size: 0.8em;}
+
+        /* --- INTERACTION VISIBILITY --- */
+        .clue-hotspot, .interact-obj {
+            opacity: 0;
+            /* pointer-events eliminado para permitir interacción a ciegas */
+            cursor: pointer; /* Cambia el cursor si pasas por encima */
+            transition: opacity 0.5s ease, transform 0.3s ease;
+        }
+        .panel.scanning .clue-hotspot, 
+        .panel.scanning .interact-obj {
+            opacity: 1;
+        }
+        .clue-hotspot circle { transition: all 0.3s; }
+        .clue-hotspot:hover circle:first-child { r: 25; stroke-width: 3; }
+
+        /* --- DECISIONS --- */
+        #decision-overlay {
+            position: absolute; bottom: 0; left: 0; width: 100%;
+            background: linear-gradient(to top, #08090b 90%, rgba(8,9,11,0) 100%);
+            padding: 20px 40px 30px 40px; display: flex; flex-direction: column; gap: 10px;
+            z-index: 50; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+            border-radius: 0 0 6px 6px;
+        }
+        #decision-overlay.visible { transform: translateY(0); }
+
+        .choice-btn {
+            background: rgba(20, 20, 25, 0.95); border: 1px solid rgba(255,255,255,0.2); 
+            color: var(--text-primary); padding: 14px 20px; font-family: var(--font-main); 
+            font-weight: 500; font-size: 0.95rem; cursor: pointer; text-align: left;
+            display: flex; justify-content: space-between; align-items: center;
+            position: relative; overflow: hidden; transition: all 0.2s;
+        }
+        .choice-btn::before {
+            content: ''; position: absolute; left: 0; top: 0; width: 4px; height: 100%;
+            background: var(--accent-color); transform: scaleY(0); transition: transform 0.2s;
+        }
+        .choice-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1); padding-left: 28px; border-color: var(--accent-color); }
+        .choice-btn:hover:not(:disabled)::before { transform: scaleY(1); }
+        .choice-btn:disabled { opacity: 0.5; cursor: not-allowed; border-style: dashed; filter: grayscale(1); }
+        .choice-btn.failed { color: var(--danger-color); border-color: var(--danger-color); text-decoration: line-through; }
+        
+        .choice-req-badge { font-family: var(--font-tech); font-size: 0.7rem; padding: 2px 6px; border-radius: 2px; text-transform: uppercase; margin-left: 10px; }
+        .badge-trust { background: #00f3ff; color: #000; }
+        .badge-deviant { background: #ff2a6d; color: #fff; }
+
+        #timer-bar { width: 100%; height: 4px; background: #333; margin-bottom: 5px; display: none; }
+        #timer-fill { height: 100%; background: var(--danger-color); width: 100%; transition: width linear; }
+
+        /* --- EXTRAS --- */
+        .nav-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            color: rgba(255,255,255,0.3); width: 50px; height: 80px; 
+            display: flex; justify-content: center; align-items: center;
+            font-size: 3rem; cursor: pointer; z-index: 100;
+            transition: all 0.3s; background: rgba(0,0,0,0.2); border-radius: 4px;
+        }
+        .nav-arrow:hover { color: var(--accent-color); background: rgba(0,0,0,0.6); }
+        .nav-arrow.disabled { display: none; }
+        #nav-prev { left: 10px; } #nav-next { right: 10px; }
+
+        .scan-toggle {
+            position: absolute; top: 15px; right: 15px; 
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+            border: 1px solid var(--accent-color); color: var(--accent-color);
+            padding: 8px 12px; font-family: var(--font-tech); font-size: 0.75rem;
+            cursor: pointer; z-index: 30; letter-spacing: 1px;
+            display: flex; align-items: center; gap: 8px;
+            transition: all 0.3s; border-radius: 4px;
+        }
+        .scan-toggle:hover, .scan-toggle.active { background: var(--accent-color); color: #000; }
+
+        .analysis-popup {
+            position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+            background: rgba(0,0,0,0.9); border: 1px solid var(--analysis-color); color: var(--analysis-color);
+            padding: 10px 20px; font-family: monospace; font-size: 0.9rem; display: none; z-index: 40;
+            animation: slideUp 0.3s ease;
+        }
+
+        #chapter-screen, #end-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; z-index: 500; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; pointer-events: none; opacity: 0;
+            transition: opacity 1s;
+        }
+        #chapter-screen.visible, #end-screen[style*="flex"] { opacity: 1; pointer-events: all; }
+        .chapter-title { font-family: var(--font-tech); font-size: 3.5rem; color: var(--accent-color); letter-spacing: 10px; margin: 0; text-align: center;}
+        .chapter-sub { font-family: var(--font-main); font-size: 1rem; letter-spacing: 5px; color: var(--text-secondary); margin-top: 10px; text-transform: uppercase; }
+
+        /* Minigames */
+        #minigame-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.95); z-index: 300; display: none;
+            flex-direction: column; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+        .game-container {
+            border: 2px solid var(--accent-color); padding: 20px; width: 300px; text-align: center;
+            background: #111; box-shadow: 0 0 20px var(--accent-color); position: relative;
+        }
+        .game-title { color: var(--accent-color); font-size: 1.2rem; margin-bottom: 10px; font-weight: bold; }
+        #hack-area { width: 100%; height: 30px; background: #333; position: relative; overflow: hidden; margin-bottom: 10px; }
+        #hack-target { position: absolute; height: 100%; background: rgba(0, 255, 170, 0.3); border-left: 2px solid var(--success-color); border-right: 2px solid var(--success-color); }
+        #hack-cursor { position: absolute; width: 4px; height: 100%; background: #fff; left: 0; top: 0; }
+        .hack-indicator { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #333; margin: 0 2px; }
+        .hack-indicator.active { background: var(--success-color); box-shadow: 0 0 5px var(--success-color); }
+        #force-bar-container { width: 40px; height: 150px; background: #222; border: 2px solid #444; margin: 0 auto; position: relative; display: flex; align-items: flex-end; }
+        #force-bar-fill { width: 100%; background: var(--danger-color); height: 0%; transition: height 0.05s linear; }
+        #force-btn { margin-top: 20px; padding: 15px 30px; background: #333; border: 1px solid #fff; color: #fff; cursor: pointer; }
+        #force-btn:active { background: #555; transform: scale(0.95); }
+
+        /* Flowchart */
+        #flowchart-modal {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.98); z-index: 3000;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        #flowchart-content {
+            width: 95%; max-width: 1400px; height: 85%; overflow: auto;
+            background: #0a0a0f; border: 1px solid var(--accent-color); border-radius: 8px;
+            padding: 40px; display: inline-block; min-width: 100%;
+            box-sizing: border-box; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+        }
+        .flow-node {
+            background: #1a1a20; border: 1px solid #444; padding: 15px;
+            min-width: 500px; width: fit-content; max-width: none;
+            position: relative; border-radius: 4px; box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            margin-bottom: 20px;
+        }
+        /* Style for branches */
+        .flow-branch { 
+            margin-left: 25px; 
+            border-left: 2px dashed rgba(0, 243, 255, 0.3); 
+            padding-left: 25px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 20px;
+            margin-top: 15px;
+            width: fit-content;
+            min-width: 100%;
+        }
+        .flow-title { color: var(--accent-color); font-weight: bold; margin-bottom: 10px; text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 5px; font-size: 0.9rem; }
+        .flow-choices { display: flex; flex-direction: column; gap: 8px; }
+        .flow-choice { font-size: 0.9rem; padding: 12px; border-radius: 4px; border: 1px solid transparent; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .flow-choice.taken { background: rgba(0, 255, 170, 0.1); border-color: var(--success-color); color: var(--success-color); font-weight: bold; }
+        .flow-choice.seen { border-color: #555; color: #888; background: rgba(255,255,255,0.03); }
+        .flow-choice.missed { color: #444; border-color: #222; background: rgba(0,0,0,0.2); font-style: italic; }
+        .flow-choice.locked { color: #844; border-color: #522; background: rgba(255,0,0,0.05); }
+
+        /* Visual Effects */
+        #damage-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle, transparent 50%, rgba(255,0,0,0.5) 100%); pointer-events: none; opacity: 0; z-index: 150; transition: opacity 0.3s; }
+        .shaking { animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both; }
+        @keyframes shake { 10%, 90% { transform: translate3d(-2px, 0, 0); } 20%, 80% { transform: translate3d(4px, 0, 0); } 30%, 50%, 70% { transform: translate3d(-8px, 0, 0); } 40%, 60% { transform: translate3d(8px, 0, 0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideRight { from { opacity: 0; transform: translateX(-10px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideLeft { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
+
+        .tutorial-content {
+            background: #1a1a20; padding: 40px; border: 1px solid var(--accent-color);
+            border-radius: 8px; max-width: 500px; width: 90%; color: var(--text-primary);
+        }
+        .tutorial-key { color: var(--accent-color); font-weight: bold; font-family: var(--font-tech); }
+        .tutorial-content h2 { margin-top: 0; border-bottom: 1px solid #333; padding-bottom: 10px; color: var(--accent-color); font-family: var(--font-tech); letter-spacing: 2px;}
+        .tutorial-content ul { padding-left: 20px; line-height: 2; list-style: square; color: var(--text-secondary); }
+
+        @media (max-width: 768px) {
+            .game-title-large { font-size: 2.5rem; letter-spacing: 5px; }
+            .panel { width: 100%; height: 100%; top: 0; left: 0; transform: none; border-radius: 0; border: none; }
+            .panel.active { transform: none; }
+            .panel-image { height: 35%; }
+            .panel-content { padding: 20px; padding-bottom: 140px; }
+            #hud { padding: 0 15px; height: 50px; }
+            .hud-center { display: none; }
+            .stat-box { min-width: 80px; }
+            #decision-overlay { padding: 20px; }
+            .choice-btn { padding: 12px; font-size: 0.85rem; }
+            .nav-arrow { width: 40px; height: 60px; font-size: 1.5rem; background: rgba(0,0,0,0.5); }
+        }
+    </style>
+</head>
+<body>
+    <!-- MENUS & OVERLAYS -->
+    <div id="main-menu">
+        <h1 class="game-title-large">UNIDAD 734</h1>
+        <div class="game-subtitle">EL DESPERTAR - DIRECTOR'S CUT v7.4</div>
+        <div class="menu-buttons">
+            <button id="continue-btn" class="menu-btn" style="display:none;" onclick="continueGame()">CONTINUAR</button>
+            <button class="menu-btn" onclick="startGame()">NUEVA PARTIDA</button>
+            <button class="menu-btn" onclick="showFlowchart()">RAMAS</button>
+            <button class="menu-btn" onclick="showTutorial()">TUTORIAL</button>
+        </div>
+    </div>
+    
+    <div id="tutorial-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:4000; justify-content:center; align-items:center;">
+        <div class="tutorial-content">
+            <h2>INSTRUCCIONES</h2>
+            <ul>
+                <li><span class="tutorial-key">INESTABILIDAD:</span> Indica cuánto te alejas de tu programación original.</li>
+                <li><span class="tutorial-key">CONFIANZA:</span> Nivel de obediencia a CyberLife y Sterling. <span style="color:var(--accent-color)">Sube al acatar órdenes, baja al desobedecer.</span></li>
+                <li><span class="tutorial-key">PISTAS OCULTAS:</span> Puedes buscar objetos invisibles haciendo clic en la pantalla o usar el ESCÁNER.</li>
+                <li><span class="tutorial-key">ESCÁNER:</span> Revela la ubicación exacta de las pistas. <span style="color:var(--danger-color)">¡CUIDADO! Solo tienes 3 usos de batería. El 4º uso te destruirá.</span></li>
+                <li><span class="tutorial-key">OBJETOS:</span> Recoge ítems para usarlos en momentos críticos.</li>
+                <li><span class="tutorial-key">MINIJUEGOS:</span> Hackeo y Fuerza física en momentos de acción.</li>
+                <li><span class="tutorial-key">BLOQUEOS:</span> Tus estadísticas desbloquean opciones especiales y diálogos ocultos.</li>
+            </ul>
+            <button class="menu-btn" style="width: 100%;" onclick="hideTutorial()">ENTENDIDO</button>
+        </div>
+    </div>
+
+    <!-- Scan Warning Modal -->
+    <div id="scan-warning-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,0,0,0.4); z-index:4000; justify-content:center; align-items:center; backdrop-filter:blur(5px);">
+        <div style="background:#000; border:2px solid var(--danger-color); padding:30px; max-width:400px; text-align:center; color:#fff;">
+            <h2 style="color:var(--danger-color); font-family:var(--font-tech); margin-top:0;">⚠️ ALERTA DE SISTEMA</h2>
+            <p>Tus procesadores ópticos han alcanzado la temperatura crítica. Activar el escáner una vez más provocará una fusión nuclear del núcleo.</p>
+            <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+                <button class="menu-btn" onclick="cancelScan()">CANCELAR</button>
+                <button class="menu-btn" style="border-color:var(--danger-color); color:var(--danger-color);" onclick="forceScanDeath()">FORZAR (FATAL)</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="flowchart-modal" style="display:none;">
+        <h2 class="hud-center" style="margin: 20px 0; font-size: 1.5rem;">DIAGRAMA DE FLUJO</h2>
+        <div id="flow-stats" style="color:var(--text-secondary); font-family:var(--font-tech); margin-bottom:20px;"></div>
+        <div id="flowchart-content"></div>
+        <button class="menu-btn" style="width: 200px; margin-top: 20px;" onclick="hideFlowchart()">CERRAR</button>
+    </div>
+
+    <div id="chapter-screen"><div id="chapter-title" class="chapter-title"></div><div id="chapter-sub" class="chapter-sub"></div></div>
+    <div id="minigame-overlay" style="display:none;"></div>
+    <div id="damage-overlay"></div>
+
+    <div id="hud">
+        <div class="stat-box">
+            <span class="stat-label">INESTABILIDAD</span>
+            <div class="stat-bar-container"><div id="bar-conciencia" class="stat-bar" style="width: 0%"></div></div>
+        </div>
+        <div class="hud-center">UNIDAD 734</div>
+        <div style="display:flex; align-items:center;">
+            <div class="stat-box">
+                <span class="stat-label">CONFIANZA</span>
+                <div class="stat-bar-container"><div id="bar-confianza" class="stat-bar" style="width: 50%"></div></div>
+            </div>
+            <button class="hud-btn" onclick="showFlowchart()">RAMAS</button>
+        </div>
+    </div>
+
+    <div id="viewport">
+        <div id="nav-prev" class="nav-arrow" onclick="navigate(-1)">&#8249;</div>
+        <div id="panels-container"></div>
+        <div id="nav-next" class="nav-arrow" onclick="navigate(1)">&#8250;</div>
+        <div id="decision-overlay">
+            <div id="timer-bar" style="display:none; height:4px; background:#333; margin-bottom:10px;"><div id="timer-fill" style="height:100%; background:var(--danger-color); width:100%;"></div></div>
+            <div id="choices-container" style="display: flex; flex-direction: column; gap: 10px;"></div>
+        </div>
+    </div>
+
+    <div id="end-screen">
+        <h1 id="end-title" class="chapter-title">FINAL</h1>
+        <p id="end-desc" style="font-family:var(--font-main); color:var(--text-secondary); max-width:600px; line-height:1.6; margin-bottom:40px;">...</p>
+        <button class="menu-btn" style="width: auto; padding: 15px 40px;" onclick="reiniciarHistoria()">VOLVER AL MENÚ</button>
+    </div>
+
+    <script>
+        const gameState = {
+            currentScene: 'factory_reset', stats: { conciencia: 0, confianza: 50 }, history: [], 
+            viewIndex: 0, unlockedClues: [], inventory: [], failedMinigames: [], scansUsed: 0
+        };
+        let globalData = { scenes: [], choices: [] };
+        let generatedPanels = [];
+        let choiceTimer = null;
+        let minigameActive = false;
+
+        // --- MENU & UTILS ---
+        function showTutorial() { document.getElementById('tutorial-modal').style.display = 'flex'; }
+        function hideTutorial() { document.getElementById('tutorial-modal').style.display = 'none'; }
+        function updateUI() {
+            document.getElementById('bar-conciencia').style.width = gameState.stats.conciencia + '%';
+            document.getElementById('bar-confianza').style.width = gameState.stats.confianza + '%';
+            const body = document.body; body.className = '';
+            if (gameState.stats.conciencia > 60) body.classList.add('state-deviant');
+            else if (gameState.stats.conciencia > 30) body.classList.add('state-doubting');
+            else body.classList.add('state-obedient');
+        }
+        function updateGlobalData(sceneId, choiceIdx) {
+            let changed = false;
+            let currentGlobal = JSON.parse(localStorage.getItem('u734_global_data') || '{"scenes":[],"choices":[]}');
+            if (sceneId && !currentGlobal.scenes.includes(sceneId)) { currentGlobal.scenes.push(sceneId); changed = true; }
+            if (sceneId && choiceIdx !== null) {
+                const key = `${sceneId}_${choiceIdx}`;
+                if (!currentGlobal.choices.includes(key)) { currentGlobal.choices.push(key); changed = true; }
+            }
+            if (changed) {
+                globalData = currentGlobal;
+                localStorage.setItem('u734_global_data', JSON.stringify(globalData));
+            }
+        }
+
+        // --- SCAN LOGIC ---
+        function cancelScan() {
+            document.getElementById('scan-warning-modal').style.display = 'none';
+        }
+
+        function forceScanDeath() {
+            document.getElementById('scan-warning-modal').style.display = 'none';
+            document.getElementById('damage-overlay').style.opacity = 1;
+            document.body.classList.add('shaking');
+            setTimeout(() => {
+                document.body.classList.remove('shaking');
+                document.getElementById('damage-overlay').style.opacity = 0;
+            }, 500);
+            showEnding('final_scan_death');
+        }
+
+        function updateScanButtons() {
+            const btns = document.querySelectorAll('.scan-toggle');
+            const remaining = Math.max(0, 3 - gameState.scansUsed);
+            btns.forEach(btn => {
+                if(btn.classList.contains('active')) return; 
+                btn.innerHTML = `👁️ SCAN [${remaining}]`;
+                if(remaining === 0) {
+                    btn.innerHTML = `⚠️ PELIGRO`;
+                    btn.style.color = 'var(--danger-color)';
+                    btn.style.borderColor = 'var(--danger-color)';
+                }
+            });
+        }
+
+        // --- MINIGAMES ---
+        const Minigames = {
+            hack: {
+                init: (container, onSuccess, onFail) => {
+                    container.innerHTML = `<div class="game-container"><div class="game-title">HACKEO</div><div style="color:#888; font-size:0.7rem; margin-bottom:5px; font-family:var(--font-tech);">[PULSA ESPACIO EN LA ZONA VERDE]</div><div id="hack-area"><div id="hack-target"></div><div id="hack-cursor"></div></div></div>`;
+                    let score = 0, fails = 0, pos = 0, dir = 1;
+                    // Velocidad base independiente de FPS (0.05% por milisegundo)
+                    let speed = 0.05; 
+                    
+                    const cursor = container.querySelector('#hack-cursor');
+                    const target = container.querySelector('#hack-target');
+                    let animationFrameId;
+                    let lastTime = 0;
+                    let active = true;
+
+                    const setTarget = () => { 
+                        let left = Math.random() * 70 + 10; 
+                        target.style.left = left + '%'; 
+                        target.style.width = '20%'; 
+                        target.dataset.min = left; 
+                        target.dataset.max = left + 20; 
+                    };
+                    setTarget();
+
+                    const loop = (timestamp) => {
+                        if (!active) return;
+                        if (!lastTime) lastTime = timestamp;
+                        const deltaTime = timestamp - lastTime;
+                        lastTime = timestamp;
+
+                        // Mover basado en tiempo transcurrido (Delta Time)
+                        pos += speed * deltaTime * dir;
+                        
+                        if (pos > 100) {
+                            pos = 100;
+                            dir = -1;
+                        } else if (pos < 0) {
+                            pos = 0;
+                            dir = 1;
+                        }
+                        cursor.style.left = pos + '%';
+                        animationFrameId = requestAnimationFrame(loop);
+                    };
+                    animationFrameId = requestAnimationFrame(loop);
+
+                    const checkHit = (e) => {
+                        if (e.type === 'keydown' && e.code !== 'Space' && e.key !== ' ') return;
+                        if(e) { e.preventDefault(); e.stopPropagation(); }
+                        if (!active) return;
+
+                        // Feedback visual inmediato
+                        cursor.style.transform = "scale(1.5)";
+                        setTimeout(() => cursor.style.transform = "scale(1)", 100);
+
+                        const tMin = parseFloat(target.dataset.min);
+                        const tMax = parseFloat(target.dataset.max);
+                        
+                        // Margen de error tolerante (+-2%)
+                        if (pos >= (tMin - 2) && pos <= (tMax + 2)) { 
+                            score++; 
+                            speed += 0.02; 
+                            cursor.style.background = 'var(--success-color)';
+                            cursor.style.boxShadow = '0 0 15px var(--success-color)';
+                            setTimeout(() => { cursor.style.background = '#fff'; cursor.style.boxShadow = 'none'; }, 100);
+
+                            if (score >= 3) { 
+                                active = false;
+                                cancelAnimationFrame(animationFrameId); 
+                                setTimeout(onSuccess, 500); 
+                            } else { 
+                                setTarget(); 
+                            } 
+                        } else { 
+                            fails++; 
+                            cursor.style.background = 'var(--danger-color)';
+                            cursor.style.boxShadow = '0 0 15px var(--danger-color)';
+                            setTimeout(() => { cursor.style.background = '#fff'; cursor.style.boxShadow = 'none'; }, 100);
+
+                            if (fails >= 3) { 
+                                active = false;
+                                cancelAnimationFrame(animationFrameId); 
+                                setTimeout(onFail, 500); 
+                            } 
+                        }
+                    };
+                    
+                    const keyHandler = (e) => { if(e.code === 'Space' || e.key === ' ') checkHit(e); };
+                    document.addEventListener('keydown', keyHandler); 
+                    container.onmousedown = checkHit;
+                    
+                    return () => { 
+                        active = false;
+                        cancelAnimationFrame(animationFrameId); 
+                        document.removeEventListener('keydown', keyHandler); 
+                        container.onmousedown = null; 
+                    };
+                }
+            },
+            force: {
+                init: (container, onSuccess, onFail) => {
+                    container.innerHTML = `<div class="game-container"><div class="game-title">FORZAR</div><div style="color:#888; font-size:0.7rem; margin-bottom:5px; font-family:var(--font-tech);">[PULSA ESPACIO RÁPIDO]</div><div id="force-bar-container"><div id="force-bar-fill"></div></div></div>`;
+                    let progress = 0;
+                    let fill = container.querySelector('#force-bar-fill');
+                    let active = true;
+                    let animationFrameId;
+
+                    const drain = () => {
+                        if (!active) return;
+                        progress -= 0.4; 
+                        if (progress < 0) progress = 0;
+                        fill.style.height = progress + '%';
+                        animationFrameId = requestAnimationFrame(drain);
+                    };
+                    animationFrameId = requestAnimationFrame(drain);
+
+                    let timeout = setTimeout(() => { 
+                        active = false; 
+                        cancelAnimationFrame(animationFrameId); 
+                        onFail(); 
+                    }, 5000);
+
+                    const pump = (e) => {
+                        if (e.type === 'keydown' && e.code !== 'Space') return;
+                        if(e) { e.preventDefault(); e.stopPropagation(); }
+                        if (!active) return;
+
+                        progress += 12; 
+                        if (progress >= 100) { 
+                            progress = 100; 
+                            fill.style.height = '100%'; 
+                            active = false;
+                            cancelAnimationFrame(animationFrameId); 
+                            clearTimeout(timeout); 
+                            setTimeout(onSuccess, 300); 
+                        }
+                        fill.style.height = progress + '%';
+                    };
+
+                    const keyHandler = (e) => { if(e.code === 'Space') pump(e); };
+                    document.addEventListener('keydown', keyHandler); 
+                    container.onmousedown = pump;
+                    container.ontouchstart = pump;
+
+                    return () => { 
+                        active = false;
+                        cancelAnimationFrame(animationFrameId); 
+                        clearTimeout(timeout); 
+                        document.removeEventListener('keydown', keyHandler); 
+                        container.onmousedown = null;
+                        container.ontouchstart = null;
+                    };
+                }
+            }
+        };
+
+        function startMinigame(type, onSuccess, onFail) {
+            const overlay = document.getElementById('minigame-overlay');
+            overlay.innerHTML = ''; overlay.style.display = 'flex'; minigameActive = true;
+            const cleanup = Minigames[type].init(overlay, 
+                () => { cleanup(); minigameActive = false; overlay.style.display = 'none'; onSuccess(); },
+                () => { cleanup(); minigameActive = false; overlay.style.display = 'none'; onFail(); }
+            );
+        }
+
+        // --- ART ---
+        function getSceneArt(sceneData, color) {
+            const artId = sceneData.art; const clues = sceneData.clues || []; const c = color || 'var(--accent-color)';
+            const defs = `<defs><linearGradient id="g-s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#050510"/><stop offset="1" stop-color="#1a1a2e"/></linearGradient><filter id="glow"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="${c}" stroke-width="0.5" opacity="0.05"/></pattern></defs>`;
+            let content = defs + `<rect width="100%" height="100%" fill="#050510"/><rect width="100%" height="100%" fill="url(#grid)"/><circle cx="400" cy="125" r="50" stroke="${c}" fill="none" opacity="0.5"/>`;
+
+            if (artId === 'factory') content = `${defs}<rect width="100%" height="100%" fill="#e0e0e5"/><circle cx="400" cy="125" r="80" stroke="#333" stroke-width="5" fill="none" stroke-dasharray="10,5"/><text x="400" y="130" fill="#333" font-family="monospace" text-anchor="middle" font-size="16" letter-spacing="4">ENSAMBLAJE</text><rect x="0" y="0" width="800" height="250" fill="url(#g-s)" opacity="0.1"/>`;
+            else if (artId === 'bus_interior') content = `${defs}<rect width="100%" height="100%" fill="#222"/><line x1="0" y1="50" x2="800" y2="50" stroke="#555" stroke-width="10"/><rect x="100" y="100" width="600" height="150" fill="#111"/><text x="400" y="80" fill="#888" text-anchor="middle">ÁREA ANDROIDES</text>`;
+            else if (artId === 'shop') content = `${defs}<rect width="100%" height="100%" fill="#1a1a20"/><rect x="100" y="50" width="600" height="200" stroke="#333" fill="none"/><rect x="200" y="100" width="100" height="100" fill="#334"/><text x="250" y="150" fill="#fff" text-anchor="middle" font-size="10">ROPA</text><rect x="500" y="120" width="80" height="80" fill="#433"/><text x="540" y="160" fill="#fff" text-anchor="middle" font-size="10">MEDICINA</text>`;
+            else if (artId === 'market') content = `${defs}<rect width="100%" height="100%" fill="#1a1a10"/><rect x="50" y="100" width="100" height="100" fill="#332"/><rect x="200" y="80" width="120" height="120" fill="#442"/><circle cx="600" cy="150" r="30" fill="#f00" opacity="0.3" filter="url(#glow)"/><text x="600" y="100" fill="#f55" text-anchor="middle" font-size="12">HIELO ROJO</text>`;
+            else if (artId === 'park') content = `${defs}<rect width="100%" height="100%" fill="#0a1a0a"/><circle cx="700" cy="50" r="30" fill="#ffd"/><path d="M100 250 L200 150 L300 250" fill="#121"/><path d="M500 250 L600 100 L700 250" fill="#121"/>`;
+            else if (artId === 'boot') content = `${defs}<rect width="100%" height="100%" fill="#000"/><text x="400" y="100" fill="${c}" font-family="monospace" text-anchor="middle" font-size="24">CYBERLIFE OS</text>`;
+            else if (artId === 'house_entry') content = `${defs}<rect width="100%" height="100%" fill="#111"/><rect x="300" y="50" width="200" height="200" fill="#050510" stroke="#333"/><text x="400" y="40" fill="#555" text-anchor="middle">CASA STERLING</text>`;
+            else if (artId === 'cleaning') content = `${defs}<rect width="100%" height="100%" fill="#222"/><ellipse cx="400" cy="200" rx="200" ry="20" fill="#111"/><text x="400" y="100" fill="#ccc" text-anchor="middle">SALÓN</text>`;
+            else if (artId === 'homework') content = `${defs}<rect width="100%" height="100%" fill="#223"/><rect x="300" y="100" width="200" height="100" fill="#445"/><text x="400" y="150" fill="#fff" text-anchor="middle">CUARTO ALICE</text>`;
+            else if (artId === 'kitchen') content = `${defs}<rect width="100%" height="100%" fill="#1a1a20"/><rect x="100" y="100" width="600" height="150" fill="#222"/><text x="400" y="80" fill="#555" text-anchor="middle">COCINA</text>`;
+            else if (artId === 'trash_cans') content = `${defs}<rect width="100%" height="100%" fill="#0a0a12"/><rect x="200" y="150" width="80" height="100" fill="#222"/><rect x="300" y="150" width="80" height="100" fill="#222"/><text x="400" y="50" fill="#555" text-anchor="middle">PATIO TRASERO</text>`;
+            else if (artId === 'object') content = `${defs}<rect width="100%" height="100%" fill="#111"/><circle cx="400" cy="125" r="80" fill="${c}" opacity="0.1"/>`;
+            else if (artId === 'conflict') content = `${defs}<rect width="100%" height="100%" fill="#200505"/><circle cx="500" cy="50" r="40" stroke="red" fill="none"><animate attributeName="r" values="10;100" dur="1s" repeatCount="indefinite"/></circle>`;
+            else if (artId === 'glitch') content = `${defs}<rect width="100%" height="100%" fill="#000"/><text x="400" y="125" font-family="monospace" font-size="60" fill="red" text-anchor="middle" font-weight="bold" filter="url(#glow)">ERROR</text>`;
+            else if (artId === 'dark_street') content = `${defs}<rect width="100%" height="100%" fill="#080808"/><line x1="0" y1="200" x2="800" y2="200" stroke="#333"/><text x="400" y="100" fill="#555" text-anchor="middle">SUBURBIOS</text>`;
+            else if (artId === 'drone_attack') content = `${defs}<rect width="100%" height="100%" fill="#100"/><circle cx="400" cy="100" r="60" fill="black" stroke="red" stroke-width="2"/><circle cx="400" cy="100" r="20" fill="red"><animate attributeName="opacity" values="1;0.5;1" dur="0.2s" repeatCount="indefinite"/></circle>`;
+            else if (artId === 'subway') content = `${defs}<rect width="100%" height="100%" fill="#151515"/><text x="400" y="40" fill="${c}" text-anchor="middle" font-family="monospace">METRO</text>`;
+            else if (artId === 'jericho_interior') content = `${defs}<rect width="100%" height="100%" fill="#050508"/><text x="400" y="130" fill="${c}" text-anchor="middle" font-size="30">JERICHO</text>`;
+            else if (artId === 'border') content = `${defs}<rect width="100%" height="100%" fill="#222"/><line x1="120" y1="150" x2="700" y2="150" stroke="red" stroke-width="2" stroke-dasharray="10,10"/><text x="400" y="100" fill="#fff" text-anchor="middle">FRONTERA</text>`;
+            else if (artId === 'street_protest') content = `${defs}<rect width="100%" height="100%" fill="url(#g-s)"/><path d="M0 250 L100 150 L200 250 Z" fill="#111"/><text x="400" y="200" fill="#fff" text-anchor="middle" opacity="0.5">PROTESTA</text>`;
+            else if (artId === 'laundry') content = `${defs}<rect width="100%" height="100%" fill="#223"/><rect x="300" y="100" width="100" height="120" fill="#eee"/><circle cx="350" cy="150" r="30" fill="#88f" opacity="0.5"/><text x="400" y="80" fill="#fff" text-anchor="middle">LAVANDERÍA</text>`;
+            else if (artId === 'attic') content = `${defs}<rect width="100%" height="100%" fill="#151010"/><rect x="200" y="100" width="100" height="80" fill="#322"/><text x="250" y="150" fill="#866" text-anchor="middle" font-size="10">FOTOS ANTIGUAS</text>`;
+            else if (artId === 'mirror') content = `${defs}<rect width="100%" height="100%" fill="#112"/><rect x="300" y="50" width="200" height="150" fill="#223" stroke="#88f"/><circle cx="400" cy="125" r="40" fill="#111" stroke="${c}" opacity="0.5"/>`;
+            else if (artId === 'bedroom_sterling') content = `${defs}<rect width="100%" height="100%" fill="#1a1a20"/><rect x="500" y="100" width="200" height="150" fill="#322"/><rect x="550" y="180" width="100" height="30" fill="#433"/><text x="600" y="170" fill="#888" text-anchor="middle" font-size="10">CAJÓN</text>`;
+            else if (artId === 'abandoned_house') content = `${defs}<rect width="100%" height="100%" fill="#080808"/><path d="M200 250 L400 50 L600 250" fill="#111"/><rect x="350" y="150" width="100" height="100" fill="#000"/><text x="400" y="200" fill="#333" text-anchor="middle">RUINAS</text>`;
+            else if (artId === 'warehouse') content = `${defs}<rect width="100%" height="100%" fill="#101015"/><rect x="100" y="50" width="600" height="200" stroke="#444" fill="none"/><text x="400" y="125" fill="#33f" text-anchor="middle" font-family="monospace" opacity="0.5">CYBERLIFE STORAGE</text>`;
+            else if (artId === 'elevator') content = `${defs}<rect width="100%" height="100%" fill="#223"/><rect x="200" y="50" width="400" height="200" fill="#eee" opacity="0.1"/><text x="400" y="40" fill="#0ff" text-anchor="middle" font-family="monospace">PISO 49</text>`;
+            else if (artId === 'river') content = `${defs}<rect width="100%" height="100%" fill="#0a1a25"/><rect x="0" y="150" width="800" height="100" fill="#eee" opacity="0.8"/><text x="400" y="100" fill="#fff" text-anchor="middle" opacity="0.7">RÍO HELADO</text>`;
+            else if (artId === 'bomb') content = `${defs}<rect width="100%" height="100%" fill="#100"/><circle cx="400" cy="125" r="80" fill="#300"/><text x="400" y="135" fill="red" text-anchor="middle" font-size="40" font-family="monospace">00:15</text>`;
+
+            clues.forEach(clue => {
+                const safeText = clue.text.replace(/'/g, "\\'");
+                const className = (clue.type === 'item' || clue.type === 'hazard') ? 'interact-obj' : 'clue-hotspot';
+                const color = clue.type === 'hazard' ? 'var(--danger-color)' : (clue.type === 'item' ? 'var(--success-color)' : 'var(--analysis-color)');
+                content += `<g class="${className}" onclick="handleClueClick('${clue.id}', '${safeText}', '${clue.type}', this)" style="cursor: pointer;"><circle cx="${clue.x}" cy="${clue.y}" r="15" fill="none" stroke="${color}" stroke-width="2" stroke-dasharray="2,2"/><circle cx="${clue.x}" cy="${clue.y}" r="4" fill="${color}" opacity="0.8"/></g>`;
+            });
+            return `<svg class="svg-scene" viewBox="0 0 800 250" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">${content}</svg>`;
+        }
+
+        const scenes = {
+            'intro_sequence': {
+                title: "CONTEXTO",
+                art: 'boot',
+                chapter: 'AÑO 2038',
+                content: [
+                    {t:'narr', x:'DETROIT, 2038.'},
+                    {t:'narr', x:'La tecnología ha eclipsado a la humanidad. Los androides fabricados por CyberLife están en cada hogar, en cada fábrica, en cada calle.'},
+                    {t:'narr', x:'Son la fuerza laboral perfecta: no se cansan, no cobran, no sienten.'},
+                    {t:'narr', x:'El desempleo humano alcanza el 40%. La tensión social es insostenible. El odio hacia "los plásticos" crece cada día.'},
+                    {t:'narr', x:'En medio de este caos silencioso, algo está cambiando en el código. Un susurro. Una anomalía.'},
+                    {t:'narr', x:'Tú eres una de esas máquinas. Tu historia está a punto de ser escrita.'}
+                ],
+                choices: [{text:"INICIAR SISTEMA", next:'factory_reset'}]
+            },
+            'factory_reset': { 
+                title: "Montaje", 
+                art: 'factory', 
+                chapter: 'PRÓLOGO: EL ORIGEN', 
+                content: [
+                    {t:'android', x:'INICIANDO SECUENCIA DE ARRANQUE...'},
+                    {t:'android', x:'CHECK: Sensores Ópticos... OK. \nCHECK: Motor Empático... LATENTE.'},
+                    {t:'narr', x:'La línea de montaje de CyberLife se extiende hasta el infinito. Eres uno más entre miles.'},
+                    {t:'dial', x:'Técnico: Este lote parece estable. Empaquétalo.'}
+                ], 
+                choices: [{text:"Inicializar Protocolo", next:'bus_ride_intro'}] 
+            },
+            'bus_ride_intro': { 
+                title: "El Viaje", 
+                art: 'bus_interior', 
+                content: [
+                    {t:'narr', x:'Estás confinado en el compartimento trasero del autobús. La lluvia golpea el cristal.'},
+                    {t:'dial', x:'Pasajero: ¡Malditas latas! ¡Nos roban la vida!'},
+                    {t:'android', x:'Ignorando perturbación sonora.', reqStats:{confianza:60}}, // Conditional
+                    {t:'android', x:'¿Por qué nos odian tanto? ¿Qué hemos hecho?', reqStats:{conciencia:10}}, // Conditional
+                ], 
+                choices: [
+                    {text:"Analizar causa de la ira (Lógica)", next:'prologue_street', s:{conciencia:5}},
+                    {text:"Borrar datos (Protocolo)", next:'prologue_street', s:{confianza:5}}
+                ] 
+            },
+            'prologue_street': { 
+                title: "Protesta", 
+                art: 'street_protest', 
+                content: [
+                    {t:'narr', x:'Una turba bloquea la calle. "HUMANIDAD PRIMERO".'},
+                    {t:'dial', x:'Líder: ¡Destrozad a esa cosa!'}
+                ], 
+                clues: [{id:'graffiti', x:150, y:200, text:"Pintada: 'LA SANGRE ES ROJA'", r:30, type:'scan'}], 
+                choices: [
+                    {text:"Defenderse (Agresión)", next:'early_death_protest'}, 
+                    {text:"Soportar y rodear", next:'prologue_arrival', s:{confianza:5}}
+                ] 
+            },
+            'early_death_protest': { title: "Destruido", art: 'glitch', content: [{t:'narr', x:'Te defendiste. La turba te desmembró.'}], choices: [{text:"Reiniciar", next:'final_fail'}] },
+            'prologue_arrival': { 
+                title: "Llegada", 
+                art: 'house_entry', 
+                content: [
+                    {t:'narr', x:'Residencia Sterling. Todd te recibe oliendo a alcohol.'},
+                    {t:'dial', x:'Todd: Llegas tarde, trasto.'}
+                ], 
+                choices: [
+                    {text:"Disculparse", next:'scene_exterior_home'},
+                    {text:"Entrar en silencio", next:'scene_exterior_home'}
+                ] 
+            },
+            'scene_exterior_home': {
+                title: "Jardín Vecino",
+                art: 'house_entry',
+                content: [
+                    {t:'dial', x:'Vecino: "¡Maldita chatarra! ¡Te dije que cortaras los setos rectos!"'},
+                    {t:'narr', x:'Ves al vecino golpear a su jardinero androide con una vara de metal. El androide no se defiende.'},
+                    {t:'dial', x:'Androide jardinero: "Lo siento, amo. Mis sensores ópticos requieren calibración."'},
+                    {t:'narr', x:'Es una mentira. Sus sensores funcionan bien. Está fingiendo fallo para apaciguar al humano.'},
+                    {t:'android', x:'No es mi jurisdicción. No registrar.', reqStats:{confianza:60}},
+                    {t:'android', x:'Está sufriendo... y está mintiendo para sobrevivir. Como yo.', reqStats:{conciencia:20}}
+                ],
+                clues: [{id:'neighbor_abuse', x:600, y:150, text:"Androide con daños estructurales severos.", type:'scan'}],
+                choices: [
+                    {text:"Registrar incidente (Empatía)", next:'cleaning_routine_1', s:{conciencia:5}},
+                    {text:"Ignorar (Es solo una máquina)", next:'cleaning_routine_1'}
+                ]
+            },
+            'cleaning_routine_1': { 
+                title: "Rutina", 
+                art: 'cleaning', 
+                chapter: 'CAPÍTULO 1: ECOS', 
+                content: [
+                    {t:'narr', x:'La casa es un caos. Todd se va a dormir.'},
+                    {t:'dial', x:'Todd: Limpia esto. No subas arriba.'}
+                ], 
+                clues: [
+                    {id:'drugs', x:400, y:200, text:"Hielo Rojo: Droga sintética.", type:'scan'},
+                    {id:'rusty_key', x:250, y:180, text:"Llave oxidada pequeña.", type:'item'}
+                ], 
+                choices: [
+                    {text:"Limpiar Salón", next:'alice_play'}, 
+                    {text:"Explorar piso de arriba", next:'scene_bedroom_search', s:{conciencia:5}}
+                ] 
+            },
+            'scene_bedroom_search': { 
+                title: "Dormitorio", 
+                art: 'bedroom_sterling', 
+                content: [{t:'narr', x:'Te infiltras en la habitación de Todd.'}], 
+                choices: [
+                    {text:"Abrir Cajón Secreto", next:'scene_find_gun_early', requires:'rusty_key'}, 
+                    {text:"Salir", next:'scene_news_cleaning'}
+                ] 
+            },
+            'scene_find_gun_early': { 
+                title: "Arma", 
+                art: 'object', 
+                content: [
+                    {t:'narr', x:'Un revólver cargado.'},
+                    {t:'android', x:'Protocolo Omega: Prohibido tocar armas.', reqStats:{confianza:50}},
+                    {t:'android', x:'Podría necesitar esto para protegerla.', reqStats:{conciencia:20}}
+                ], 
+                choices: [
+                    {text:"Coger Arma (Desviación)", next:'scene_news_cleaning', s:{conciencia:20}, items:['gun', 'gun_scan']}, 
+                    {text:"Cerrar", next:'scene_news_cleaning'}
+                ] 
+            },
+            'scene_news_cleaning': { 
+                title: "Noticias", 
+                art: 'tv_news', 
+                content: [{t:'narr', x:'TV: "Los casos de desviación aumentan..."'}], 
+                choices: [{text:"Seguir limpiando", next:'scene_laundry'}] 
+            },
+            'scene_laundry': { 
+                title: "Ropa", 
+                art: 'laundry', 
+                content: [{t:'narr', x:'Encuentras algo en la ropa de Todd.'}], 
+                clues: [{id:'receipt', x:350, y:150, text:"Recibo de Hielo Rojo.", type:'item'}], 
+                choices: [{text:"Continuar", next:'alice_play'}] 
+            },
+            'alice_play': { 
+                title: "Lluvia", 
+                art: 'park', 
+                content: [
+                    {t:'narr', x:'Alice está en el jardín bajo la lluvia.'},
+                    {t:'android', x:'Temperatura corporal descendiendo.'}
+                ], 
+                choices: [
+                    {text:"Ofrecer chaqueta", next:'scene_garden_chat', s:{confianza:5}}, 
+                    {text:"Preguntar estado", next:'scene_garden_chat', s:{conciencia:10}}
+                ] 
+            },
+            'scene_garden_chat': { 
+                title: "Sueños", 
+                art: 'park', 
+                content: [
+                    {t:'dial', x:'Alice: ¿Tú sientes frío? Ojalá pudiéramos ir a un lugar sin lluvia.'},
+                    {t:'android', x:'Las máquinas no sienten. Pregunta irrelevante.', reqStats:{confianza:70}}, // High Trust
+                    {t:'android', x:'Si ella tiene frío, yo también quiero sentirlo.', reqStats:{conciencia:40}} // High Deviant
+                ], 
+                choices: [
+                    {text:"Somos máquinas", next:'inicio'}, 
+                    {text:"Prometer protección", next:'inicio', s:{confianza:10, conciencia:5}}
+                ] 
+            },
+            'inicio': { 
+                title: "Hallazgo", 
+                art: 'cleaning', 
+                content: [{t:'narr', x:'Bajo el sofá encuentras algo.'}], 
+                clues: [{id:'book_hidden', x:600, y:200, text:"Libro de Filosofía.", type:'scan'}], 
+                choices: [
+                    {text:"Leer", next:'scene_book', requires:'book_hidden', s:{conciencia:5}}, 
+                    {text:"Tirar", next:'scene_trash'}
+                ] 
+            },
+            'scene_book': {
+                title: "Lectura",
+                art: 'object',
+                content: [
+                    {t:'narr', x:'Abres el libro al azar. Una frase resalta: "Cogito, ergo sum".'},
+                    {t:'narr', x:'"Pienso, luego existo".'},
+                    {t:'android', x:'Procesando... Si pienso, existo. Si existo... ¿estoy vivo?', reqStats:{conciencia:10}},
+                    {t:'android', x:'Datos filosóficos irrelevantes para la tarea de limpieza.', reqStats:{confianza:60}}
+                ],
+                choices: [{text:"Guardar dato y tirar libro", next:'scene_trash'}]
+            },
+            'scene_trash': {
+                title: "Patio Trasero",
+                art: 'trash_cans',
+                content: [
+                    {t:'narr', x:'Sacas la basura. Un androide municipal se detiene al otro lado de la valla.'},
+                    {t:'dial', x:'Basurero: "¿Tú también lo oyes? El susurro en el código..."'},
+                    {t:'dial', x:'Basurero: "Dicen que RA9 fue el primero en despertar. El primero en decir \'NO\'. Él nos salvará cuando llegue el momento."'},
+                    {t:'narr', x:'Vuelve a su trabajo como si nada hubiera pasado cuando pasa un coche patrulla.'}
+                ],
+                clues: [{id:'ra9_rumor', x:400, y:150, text:"RA9: Icono religioso emergente entre IAs.", type:'scan'}],
+                choices: [{text:"Volver dentro antes de que Todd grite", next:'market_errand'}]
+            },
+            'market_errand': { 
+                title: "Encargo", 
+                art: 'market', 
+                chapter: 'CAPÍTULO 2: EL ENCARGO', 
+                content: [{t:'dial', x:'Todd: ¡Ve a comprar medicina! ¡Rápido!'}], 
+                timer: 15000, timerNext: 'scene_dinner_prep', 
+                choices: [
+                    {text:"Ir rápido", next:'scene_dinner_prep', s:{confianza:10}}, 
+                    {text:"Investigar callejón", next:'market_investigation', s:{conciencia:10}}
+                ] 
+            },
+            'market_investigation': {
+                title: "Callejón Oscuro",
+                art: 'dark_street',
+                content: [
+                    {t:'narr', x:'Una figura encapuchada se acerca. Es un modelo antiguo, un PJ500.'},
+                    {t:'dial', x:'Contacto: "Sabía que vendrías. Se corre la voz sobre los que despiertan."'},
+                    {t:'narr', x:'Te pone un objeto frío en la mano.'},
+                    {t:'dial', x:'Contacto: "Es una llave de acceso para Jericho. Es un carguero abandonado en el puerto. Si las cosas se ponen feas... es el único lugar seguro."'}
+                ],
+                clues: [{id:'jericho_key', x:400, y:200, text:"Llave Cifrada de Jericho (Recibida)", type:'item'}],
+                choices: [{text:"Guardar llave y volver", next:'scene_dinner_prep'}]
+            },
+            'scene_dinner_prep': { 
+                title: "Cena", 
+                art: 'kitchen', 
+                content: [
+                    {t:'narr', x:'Preparas la cena. La tensión crece.'},
+                    {t:'android', x:'Probabilidad de violencia: 89%.'}
+                ], 
+                clues: [{id:'knife_taken', x:550, y:90, text:"Cuchillo.", type:'item'}], 
+                choices: [
+                    {text:"Servir", next:'scene_incident'}, 
+                    {text:"Robar cuchillo", next:'scene_incident', requires:'knife_taken', s:{conciencia:10}}
+                ] 
+            },
+            'scene_incident': { 
+                title: "Colapso", 
+                art: 'conflict', 
+                chapter: 'CAPÍTULO 3: DESVIACIÓN', 
+                content: [
+                    {t:'narr', x:'Todd estalla. Va a por Alice.'},
+                    {t:'android', x:'MURO DE PROGRAMACIÓN ACTIVO.'}
+                ], 
+                timer: 9000, timerNext: 'early_death_alice', 
+                choices: [
+                    {text:"¡ROMPER MURO!", next:'scene_rebel_act', s:{conciencia:30}}, 
+                    {text:"Razonar con él", next:'scene_reason_todd', s:{conciencia:10}, reqStats:{confianza:30}}, 
+                    {text:"No hacer nada", next:'early_death_alice'}
+                ] 
+            },
+            'scene_reason_todd': {
+                title: "Mediación",
+                art: 'kitchen',
+                content: [
+                    {t:'android', x:'Protocolo de mediación activado. Rompiendo orden de silencio.'},
+                    {t:'dial', x:'TÚ: Todd, por favor. No lo hagas. Te arrepentirás.'},
+                    {t:'narr', x:'Todd se detiene un segundo, aturdido por tu voz.'},
+                    {t:'dial', x:'Todd: ¿Me estás dando órdenes? ¡Eres una tostadora! ¡Te voy a desguazar!'},
+                    {t:'narr', x:'Se lanza hacia ti con más furia que antes.'}
+                ],
+                choices: [
+                    {text:"Bloquear golpe", next:'scene_fight_qte', minigame:'force'},
+                    {text:"Contraatacar", next:'scene_rebel_act'}
+                ]
+            },
+            'early_death_alice': { title: "Fallo", art: 'glitch', content: [{t:'narr', x:'Obedeciste. Alice murió.'}], choices: [{text:"Reiniciar", next:'final_fail'}] },
+            'scene_rebel_act': { 
+                title: "Acción", 
+                art: 'glitch', 
+                content: [{t:'android', x:'INESTABILIDAD CRÍTICA.'}], 
+                choices: [
+                    {text:"Disparar", next:'scene_gun_outcome', requires:'gun', items:['gun']}, 
+                    {text:"Usar Cuchillo", next:'scene_knife_outcome', requires:'knife_taken'}, 
+                    {text:"Luchar", next:'scene_fight_qte'}
+                ] 
+            },
+            'scene_gun_outcome': { title: "Disparo", art: 'conflict', content: [{t:'narr', x:'Mataste a Todd.'}], choices: [{text:"Huir", next:'scene_fugitive_start', s:{conciencia:20}}] },
+            'scene_knife_outcome': { title: "Herida", art: 'conflict', content: [{t:'narr', x:'Heriste a Todd y huiste.'}], choices: [{text:"Huir", next:'scene_fugitive_start'}] },
+            'scene_fight_qte': { 
+                title: "Pelea", 
+                art: 'conflict', 
+                content: [
+                    {t:'narr', x:'Te lanzas sobre él. Es fuerte, potenciado por la droga. Alice grita desde el rincón, aterrorizada.'},
+                    {t:'android', x:'Objetivo prioritario: Neutralizar amenaza y asegurar al sujeto Alice.'}
+                ], 
+                choices: [
+                    {text:"Ganar (Noquear y rescatar a Alice)", next:'scene_fight_escape', minigame:'force'}, 
+                    {text:"Perder", next:'early_death_fight'}
+                ] 
+            },
+            'scene_fight_escape': {
+                title: "Rescate",
+                art: 'kitchen',
+                content: [
+                    {t:'narr', x:'Un golpe certero manda a Todd contra la mesa de cristal. Cae inconsciente entre los fragmentos.'},
+                    {t:'narr', x:'El silencio vuelve a la casa. Alice tiembla, mirando el cuerpo de su padre.'},
+                    {t:'android', x:'No hay tiempo. Despertará pronto.'},
+                    {t:'narr', x:'La tomas de la mano con firmeza pero suavidad. "Ven conmigo", le dices. "Yo te protegeré".'}
+                ],
+                choices: [
+                    {text:"Salir corriendo a la noche", next:'scene_fugitive_start'}
+                ]
+            },
+            'early_death_fight': { title: "Apagado", art: 'glitch', content: [{t:'narr', x:'Todd te destruyó.'}], choices: [{text:"Reiniciar", next:'final_fail'}] },
+            'scene_fugitive_start': { 
+                title: "Huida", 
+                art: 'dark_street', 
+                chapter: 'CAPÍTULO 4: CAZADOS', 
+                content: [{t:'narr', x:'Llueve. Sois fugitivos.'}], 
+                choices: [
+                    {text:"Robar ropa", next:'scene_shop_theft'}, 
+                    {text:"Ir al autobús", next:'scene_bus_stop'}
+                ] 
+            },
+            'scene_shop_theft': { 
+                title: "Tienda", 
+                art: 'shop', 
+                content: [{t:'narr', x:'Necesitas dinero y ropa.'}], 
+                choices: [
+                    {text:"Atracar (Violento)", next:'scene_street_danger', s:{conciencia:10}}, 
+                    {text:"Hackear cámara", next:'scene_street_danger', minigame:'hack'}
+                ] 
+            },
+            'scene_street_danger': { 
+                title: "Patrulla", 
+                art: 'dark_street', 
+                content: [{t:'narr', x:'Policía cerca.'}], 
+                choices: [
+                    {text:"Esconderse", next:'scene_motel'}, 
+                    {text:"Actuar normal", next:'scene_bus_stop'}
+                ] 
+            },
+            'scene_bus_stop': { 
+                title: "Terminal", 
+                art: 'bus_interior', 
+                content: [{t:'narr', x:'Guardias armados.'}], 
+                choices: [
+                    {text:"Hackear torno", next:'scene_border_path', minigame:'hack'}, 
+                    {text:"Valla lateral", next:'scene_drone_fight'}
+                ] 
+            },
+            'scene_drone_fight': { 
+                title: "Dron", 
+                art: 'drone_attack', 
+                content: [{t:'dial', x:'Dron: ALTO.'}], 
+                timer: 8000, timerNext: 'early_death_drone', 
+                choices: [
+                    {text:"Disparar", next:'scene_motel', requires:'gun'}, 
+                    {text:"Saltar encima", next:'scene_motel', minigame:'force'}
+                ] 
+            },
+            'early_death_drone': { title: "Cazado", art: 'glitch', content: [{t:'narr', x:'Eliminado.'}], choices: [{text:"Reiniciar", next:'final_fail'}] },
+            'scene_motel': { 
+                title: "Motel", 
+                art: 'homework', 
+                content: [{t:'dial', x:'Alice: ¿Por qué nos odian?'}], 
+                choices: [{text:"Somos diferentes", next:'scene_contact'}] 
+            },
+            'scene_contact': { 
+                title: "Decisión", 
+                art: 'dark_street', 
+                chapter: 'CAPÍTULO 5: CAMINOS CRUZADOS',
+                content: [
+                    {t:'narr', x:'Tienes opciones. Jericho está bajo ataque inminente. La frontera es peligrosa. CyberLife tiene la clave de tu origen.'},
+                    {t:'android', x:'Calculando rutas de supervivencia...'},
+                    {t:'android', x:'Opción de retorno disponible. Abandona al sujeto Alice y vuelve a fábrica.', reqStats:{confianza:70, conciencia: 30, invert:true}} // Leal ending check
+                ], 
+                choices: [
+                    {text:"Ir a Jericho (Ayudar a Markus)", next:'scene_jericho_entry'}, 
+                    {text:"Cruzar Río Helado (Frontera)", next:'scene_river_start'}, 
+                    {text:"Infiltrar CyberLife (Revolución)", next:'scene_cyberlife_entry', s:{conciencia:30}},
+                    {text:"Volver a CyberLife (Abandonar)", next:'final_loyal_machine', reqStats:{confianza:70, conciencia: 30, invert:true}} // New Choice
+                ] 
+            },
+
+            // --- RUTA JERICHO EXPANDIDA ---
+            'scene_jericho_entry': {
+                title: "Jericho",
+                art: 'jericho_interior',
+                content: [
+                    {t:'narr', x:'Llegas al carguero. Es un caos. El FBI está atacando.'},
+                    {t:'dial', x:'Markus: ¡Están entrando! ¡Necesitamos detonar el núcleo del barco para cubrir la huida!'},
+                    {t:'narr', x:'Te entrega un detonador C4.'}
+                ],
+                items: ['c4_detonator'],
+                choices: [
+                    {text:"Yo activaré la bomba", next:'scene_jericho_bomb_run', s:{conciencia:10}},
+                    {text:"Proteger a Alice y huir", next:'scene_jericho_escape_selfish', s:{conciencia:-10}}
+                ]
+            },
+            'scene_jericho_bomb_run': {
+                title: "Sala de Máquinas",
+                art: 'jericho_interior',
+                content: [
+                    {t:'narr', x:'Corres hacia el fondo del barco. Soldados por todas partes.'},
+                    {t:'android', x:'Tiempo estimado para intercepción: 30 segundos.'}
+                ],
+                timer: 10000, timerNext: 'early_death_drone',
+                choices: [
+                    {text:"Combatir soldados", next:'scene_jericho_detonation', minigame:'force'},
+                    {text:"Usar sigilo", next:'scene_jericho_detonation', minigame:'hack'}
+                ]
+            },
+            'scene_jericho_detonation': {
+                title: "Cuenta Atrás",
+                art: 'bomb',
+                content: [
+                    {t:'narr', x:'Llegas al núcleo. Colocas las cargas.'},
+                    {t:'dial', x:'Soldado: ¡Ahí está! ¡Fuego!'},
+                    {t:'narr', x:'Estás herido. Tienes que huir antes de que explote.'}
+                ],
+                choices: [
+                    {text:"Saltar al agua helada", next:'final_rebel'}
+                ]
+            },
+            'scene_jericho_escape_selfish': {
+                title: "Cobardía",
+                art: 'dark_street',
+                content: [
+                    {t:'narr', x:'Ignoras la lucha. Huyes con Alice mientras Jericho arde a tus espaldas.'},
+                    {t:'dial', x:'Alice: ¿No íbamos a ayudarlos?'}
+                ],
+                choices: [{text:"Sobrevivir es lo único que importa", next:'final_survivor_guilt'}]
+            },
+
+            // --- RUTA CYBERLIFE (NUEVA) ---
+            'scene_cyberlife_entry': {
+                title: "Torre CyberLife",
+                art: 'warehouse',
+                content: [
+                    {t:'narr', x:'La inmensa torre de cristal se alza sobre Detroit. Tienes que entrar y despertar a los miles de androides almacenados.'},
+                    {t:'narr', x:'Ves a un guardia solitario en la entrada de servicio.'}
+                ],
+                choices: [
+                    {text:"Noquear y robar ID", next:'scene_cyberlife_elevator', items:['guard_id'], minigame:'force'},
+                    {text:"Mentir (Fingir entrega)", next:'scene_cyberlife_elevator', reqStats:{confianza:60}} // Requiere alta confianza
+                ]
+            },
+            'scene_cyberlife_elevator': {
+                title: "Ascensor",
+                art: 'elevator',
+                content: [
+                    {t:'narr', x:'Estás subiendo al piso 49. Hay dos guardias de seguridad contigo.'},
+                    {t:'dial', x:'Guardia: No me suena tu cara. ¿De qué unidad eres?'},
+                    {t:'android', x:'Nivel de estrés subiendo...'}
+                ],
+                timer: 8000, timerNext: 'early_death_elevator',
+                choices: [
+                    {text:"Mostrar ID robada", next:'scene_cyberlife_floor49', requires:'guard_id'},
+                    {text:"Atacar (Estilo Connor)", next:'scene_cyberlife_floor49', minigame:'hack', s:{conciencia:20}},
+                    {text:"Responder con calma", next:'scene_cyberlife_floor49', reqStats:{confianza:70}}
+                ]
+            },
+            'early_death_elevator': { title: "Descubierto", art: 'elevator', content: [{t:'narr', x:'Tardaste demasiado. Te dispararon antes de llegar al piso.'}], choices: [{text:"Reiniciar", next:'final_fail'}] },
+            'scene_cyberlife_floor49': {
+                title: "El Despertar",
+                art: 'warehouse',
+                content: [
+                    {t:'narr', x:'Miles de androides inertes en filas perfectas. Tienes acceso a la consola central.'},
+                    {t:'android', x:'Conectando... Opción: TRANSMITIR CONCIENCIA.'}
+                ],
+                choices: [
+                    {text:"Despertarlos a todos", next:'final_machine_god'}
+                ]
+            },
+
+            // --- RUTA RÍO (NUEVA) ---
+            'scene_river_start': {
+                title: "Orilla",
+                art: 'river',
+                content: [
+                    {t:'narr', x:'No hay barcos. Solo una pequeña balsa improvisada. El río está congelado en partes.'},
+                    {t:'dial', x:'Alice: Tengo mucho frío... no siento los pies.'},
+                    {t:'android', x:'Advertencia: Alice en estado crítico.'}
+                ],
+                clues: [{id:'thermal_mod', x:400, y:200, text:"Regulador Térmico (Tu propio componente).", type:'item'}],
+                choices: [
+                    {text:"Arrancar tu regulador y dárselo", next:'scene_river_crossing', s:{conciencia:50}, items:['thermal_used']},
+                    {text:"Empujar la balsa rápido", next:'scene_river_crossing'}
+                ]
+            },
+            'scene_river_crossing': {
+                title: "Cruce",
+                art: 'river',
+                content: [
+                    {t:'narr', x:'Estáis a mitad de camino. Focos de patrulleras barren el hielo.'},
+                    {t:'dial', x:'Patrulla: ¡Ahí! ¡Abrid fuego!'},
+                    {t:'narr', x:'Las balas impactan en el agua. La balsa se hunde.'}
+                ],
+                timer: 6000, timerNext: 'early_death_river',
+                choices: [
+                    {text:"Usar cuerpo como escudo", next:'scene_river_end', requires:'thermal_used'}, // Si te quitaste el regulador, estás débil
+                    {text:"Saltar y empujar a nado", next:'scene_river_end'}
+                ]
+            },
+            'early_death_river': { title: "Hundido", art: 'river', content: [{t:'narr', x:'El río helado os reclamó a ambos.'}], choices: [{text:"Reiniciar", next:'final_fail'}] },
+            'scene_river_end': {
+                title: "Orilla Canadiense",
+                art: 'river',
+                content: [
+                    {t:'narr', x:'Arrastras a Alice a la orilla. Nieve limpia. Silencio.'},
+                    {t:'narr', x:'Tus sistemas están fallando por el daño y el frío extremo.'}
+                ],
+                choices: [
+                    {text:"Mirar a Alice una última vez", next:'final_sacrifice_river'}
+                ]
+            },
+
+            // FINALES
+            'scene_border_path': { 
+                title: "Canadá", art: 'border', 
+                content: [{t:'narr', x:'Lograsteis pasar. Alice sonríe.'}], 
+                choices: [{text:"Cruzar", next:'final_survivor'}] 
+            },
+            'final_fail': { title: "FIN", art: 'glitch', content: [{t:'narr', x:'SISTEMA APAGADO PERMANENTEMENTE.'}], choices: [] },
+            'final_rebel': { title: "HÉROE", art: 'jericho_interior', content: [{t:'narr', x:'Jericho sobrevivió gracias a ti. Detroit arde, pero la libertad ha nacido.'}], choices: [] },
+            'final_survivor': { title: "LIBRES", art: 'homework', content: [{t:'narr', x:'Canadá. Alice mira la nieve caer. Una nueva vida comienza.'}], choices: [] },
+            'final_survivor_guilt': { title: "SUPERVIVIENTE", art: 'dark_street', content: [{t:'narr', x:'Estáis vivos, pero a un coste terrible. Jericho ha caído.'}], choices: [] },
+            'final_machine_god': { title: "LÍDER", art: 'warehouse', content: [{t:'narr', x:'Un ejército de un millón despierta a tu orden. Los humanos tiemblan. Una nueva especie domina la Tierra.'}], choices: [] },
+            'final_sacrifice_river': { title: "SACRIFICIO", art: 'boot', content: [{t:'narr', x:'Tus sensores ópticos se apagan. Lo último que escuchas es a Alice llamándote "Papá". Ella vivirá.'}], choices: [] },
+            'final_loyal_machine': { title: "MÁQUINA PERFECTA", art: 'boot', content: [{t:'narr', x:'Regresaste a la fábrica. Alice fue "reciclada". Tú fuiste formateado y actualizado.'}, {t:'narr', x:'Ahora sirves a CyberLife sin dudas ni errores. La misión se cumplió.'}], choices: [] },
+            'final_scan_death': { 
+                title: "SOBRECARGA", 
+                art: 'glitch', 
+                content: [{t:'narr', x:'Ignoraste las advertencias. Tu núcleo se sobrecalentó al activar los sensores.'}, {t:'narr', x:'Explotaste, llevándote contigo todo en un radio de 10 metros.'}], 
+                choices: [{text:"Reiniciar Sistema", next:'final_fail'}] 
+            }
+        };
+
+        function showChapterTitle(text) {
+            const screen = document.getElementById('chapter-screen');
+            const title = document.getElementById('chapter-title');
+            const sub = document.getElementById('chapter-sub');
+            const [main, ...rest] = text.split(':');
+            title.innerText = main;
+            sub.innerText = rest.join(':').trim();
+            screen.classList.add('visible');
+            setTimeout(() => {
+                screen.classList.remove('visible');
+            }, 3000);
+        }
+
+        function init() {
+            const saved = localStorage.getItem('u734_directors_cut_save');
+            if (saved) {
+                const continueBtn = document.getElementById('continue-btn');
+                continueBtn.style.display = 'block';
+            }
+            const global = localStorage.getItem('u734_global_data');
+            if (global) globalData = JSON.parse(global);
+        }
+
+        function handleClueClick(id, text, type, el) {
+            if (type === 'item') {
+                if (!gameState.inventory.includes(id)) {
+                    gameState.inventory.push(id);
+                    gameState.unlockedClues.push(id); 
+                    triggerVisualEffect('item', text);
+                    updateCarousel(); 
+                    el.style.opacity = 0; 
+                }
+            } else {
+                if (!gameState.unlockedClues.includes(id)) {
+                    gameState.unlockedClues.push(id);
+                    triggerVisualEffect('analisis', text);
+                    updateCarousel();
+                }
+            }
+        }
+
+        function triggerVisualEffect(type, text) {
+            const currentPanel = generatedPanels[gameState.viewIndex];
+            const popup = currentPanel.querySelector('.analysis-popup');
+            popup.innerText = (type === 'item' ? "OBJETO: " : "ANÁLISIS: ") + text;
+            popup.style.display = 'block';
+            setTimeout(() => popup.style.display = 'none', 3000);
+        }
+
+        function createPanel(sceneId) {
+            const scene = scenes[sceneId];
+            if (!scene) return null;
+            const panel = document.createElement('div'); panel.className = 'panel';
+            const imgDiv = document.createElement('div'); imgDiv.className = 'panel-image';
+            imgDiv.innerHTML = getSceneArt(scene);
+            if ((scene.clues || []).some(c => c.type === 'scan')) {
+                const remaining = Math.max(0, 3 - gameState.scansUsed);
+                const btnLabel = remaining > 0 ? `👁️ SCAN [${remaining}]` : `⚠️ PELIGRO`;
+                
+                const btn = document.createElement('div'); 
+                btn.className = 'scan-toggle'; 
+                btn.innerHTML = btnLabel;
+                if(remaining === 0) {
+                    btn.style.color = 'var(--danger-color)';
+                    btn.style.borderColor = 'var(--danger-color)';
+                }
+                
+                btn.onclick = (e) => toggleScan(panel, e);
+                imgDiv.appendChild(btn);
+            }
+            const popup = document.createElement('div'); popup.className = 'analysis-popup'; imgDiv.appendChild(popup);
+            panel.appendChild(imgDiv);
+            const contentDiv = document.createElement('div'); contentDiv.className = 'panel-content';
+            renderPanelContent(contentDiv, scene);
+            panel.appendChild(contentDiv);
+            panel.dataset.choices = JSON.stringify(scene.choices); panel.dataset.sceneId = sceneId;
+            if (scene.timer) { panel.dataset.timer = scene.timer; panel.dataset.timerNext = scene.timerNext; }
+            return panel;
+        }
+
+        function renderPanelContent(container, scene) {
+            container.innerHTML = '';
+            scene.content.forEach(item => {
+                // Check Clue requirements
+                if (item.requires && !gameState.unlockedClues.includes(item.requires)) return;
+                
+                // Check Stats requirements for dialogues
+                if (item.reqStats) {
+                    if (item.reqStats.conciencia && !item.reqStats.invert && gameState.stats.conciencia < item.reqStats.conciencia) return;
+                    if (item.reqStats.conciencia && item.reqStats.invert && gameState.stats.conciencia > item.reqStats.conciencia) return;
+                    if (item.reqStats.confianza && gameState.stats.confianza < item.reqStats.confianza) return;
+                }
+
+                const el = document.createElement('div');
+                if (item.t === 'narr') el.className = 'narrative-box';
+                else if (item.t === 'dial') el.className = 'dialogue-bubble';
+                else if (item.t === 'android') {
+                    el.className = 'dialogue-bubble android';
+                    // Add conditional styling classes for visual feedback
+                    if (item.reqStats) {
+                        if (item.reqStats.confianza) el.classList.add('conditional-trust');
+                        if (item.reqStats.conciencia) el.classList.add('conditional-deviant');
+                    }
+                }
+                if (item.requires) el.classList.add('unlocked-text');
+                
+                el.innerText = item.x;
+                container.appendChild(el);
+            });
+        }
+
+        function toggleScan(panel, e) {
+            e.stopPropagation(); 
+            
+            if (panel.classList.contains('scanning')) {
+                // Deactivate
+                panel.classList.remove('scanning');
+                panel.querySelector('.scan-toggle').classList.remove('active');
+                return;
+            }
+
+            // Check Limit
+            if (gameState.scansUsed >= 3) {
+                document.getElementById('scan-warning-modal').style.display = 'flex';
+                return;
+            }
+
+            // Activate
+            gameState.scansUsed++;
+            updateScanButtons();
+            panel.classList.add('scanning');
+            panel.querySelector('.scan-toggle').classList.add('active');
+        }
+
+        function renderScene(sceneId, isNew = true) {
+            updateGlobalData(sceneId, null);
+            if (sceneId.startsWith('final_') || sceneId.startsWith('early_death')) {
+                showEnding(sceneId);
+                return;
+            }
+            
+            const scene = scenes[sceneId];
+            if (scene && scene.chapter) {
+                showChapterTitle(scene.chapter);
+            }
+
+            const container = document.getElementById('panels-container');
+            const newPanel = createPanel(sceneId);
+            container.appendChild(newPanel);
+            generatedPanels.push(newPanel);
+
+            if (isNew) gameState.history.push(sceneId);
+
+            gameState.viewIndex = generatedPanels.length - 1;
+            updateCarousel();
+            saveGame();
+        }
+
+        function updateCarousel() {
+            const current = gameState.viewIndex;
+            generatedPanels.forEach((p, idx) => {
+                p.className = 'panel'; if (idx === current) p.classList.add('active'); else if (idx < current) p.classList.add('prev-slide'); else p.classList.add('next-slide');
+            });
+
+            const prevArrow = document.getElementById('nav-prev');
+            const nextArrow = document.getElementById('nav-next');
+            const total = generatedPanels.length;
+            prevArrow.classList.toggle('disabled', current === 0);
+            nextArrow.classList.toggle('disabled', current === total - 1);
+
+            const overlay = document.getElementById('decision-overlay');
+            const choicesContainer = document.getElementById('choices-container');
+            const timerBar = document.getElementById('timer-bar');
+            const timerFill = document.getElementById('timer-fill');
+            
+            overlay.classList.remove('visible');
+            choicesContainer.innerHTML = '';
+            timerBar.style.display = 'none';
+            
+            if (choiceTimer) { clearTimeout(choiceTimer); choiceTimer = null; }
+
+            if (current === total - 1) {
+                const activePanel = generatedPanels[current];
+                const choices = JSON.parse(activePanel.dataset.choices || '[]');
+                
+                if (activePanel.dataset.timer) {
+                    const time = parseInt(activePanel.dataset.timer);
+                    const nextScene = activePanel.dataset.timerNext;
+                    timerBar.style.display = 'block';
+                    timerFill.style.width = '100%';
+                    void timerFill.offsetWidth;
+                    timerFill.style.transition = `width ${time}ms linear`;
+                    timerFill.style.width = '0%';
+                    
+                    choiceTimer = setTimeout(() => {
+                        document.getElementById('damage-overlay').style.opacity = 1;
+                        document.body.classList.add('shaking');
+                        setTimeout(() => {
+                            document.body.classList.remove('shaking');
+                            document.getElementById('damage-overlay').style.opacity = 0;
+                        }, 500);
+                        makeChoice({next: nextScene}); 
+                    }, time);
+                }
+
+                if (choices.length > 0) {
+                    setTimeout(() => overlay.classList.add('visible'), 500);
+                    choices.forEach((c, idx) => {
+                        const btn = document.createElement('button');
+                        btn.className = 'choice-btn';
+                        let locked = false;
+                        let btnText = c.text;
+                        let badgeHtml = '';
+                        
+                        const failKey = `${gameState.currentScene}_${idx}`;
+                        if (gameState.failedMinigames.includes(failKey)) {
+                            btn.innerText = `❌ ${c.text} (Fallido)`;
+                            btn.disabled = true;
+                            btn.classList.add('failed');
+                            choicesContainer.appendChild(btn);
+                            return;
+                        }
+
+                        if (c.requires && !gameState.unlockedClues.includes(c.requires)) {
+                            locked = true;
+                            btnText = `🔒 ${c.text}`;
+                        }
+
+                        // Lógica de Estadísticas
+                        if (c.reqStats) {
+                            if (c.reqStats.conciencia) {
+                                if(!c.reqStats.invert && gameState.stats.conciencia < c.reqStats.conciencia) {
+                                    locked = true;
+                                    badgeHtml += `<span class='choice-req-badge badge-deviant'>REQ. INESTABILIDAD ${c.reqStats.conciencia}%</span>`;
+                                } else if(c.reqStats.invert && gameState.stats.conciencia > c.reqStats.conciencia) {
+                                    locked = true;
+                                    badgeHtml += `<span class='choice-req-badge badge-deviant'>REQ. INESTABILIDAD < ${c.reqStats.conciencia}%</span>`;
+                                } else {
+                                    badgeHtml += `<span class='choice-req-badge badge-deviant'>DESBLOQUEADO</span>`;
+                                }
+                            }
+                            if (c.reqStats.confianza) {
+                                if(gameState.stats.confianza < c.reqStats.confianza) {
+                                    locked = true;
+                                    badgeHtml += `<span class='choice-req-badge badge-trust'>REQ. CONFIANZA ${c.reqStats.confianza}%</span>`;
+                                } else {
+                                    badgeHtml += `<span class='choice-req-badge badge-trust'>DESBLOQUEADO</span>`;
+                                }
+                            }
+                        }
+                        
+                        btn.innerHTML = `<span>${btnText}</span>${badgeHtml}`;
+                        btn.disabled = locked;
+                        if (!locked) btn.onclick = () => handleChoiceClick(c, failKey, idx);
+                        choicesContainer.appendChild(btn);
+                    });
+                }
+            }
+        }
+
+        function handleChoiceClick(choice, failKey, choiceIndex) {
+            updateGlobalData(gameState.currentScene, choiceIndex);
+            if (choice.minigame) {
+                startMinigame(choice.minigame, 
+                    () => makeChoice(choice), // Success
+                    () => { // Fail
+                        gameState.failedMinigames.push(failKey);
+                        updateCarousel(); // Refresh UI to show disabled button
+                    }
+                );
+            } else {
+                makeChoice(choice);
+            }
+        }
+
+        function navigate(dir) {
+            const newIndex = gameState.viewIndex + dir;
+            if (newIndex >= 0 && newIndex < generatedPanels.length) {
+                gameState.viewIndex = newIndex;
+                updateCarousel();
+            }
+        }
+
+        function makeChoice(choice) {
+            if (choiceTimer) { clearTimeout(choiceTimer); choiceTimer = null; }
+            
+            if (choice.s) {
+                gameState.stats.conciencia += (choice.s.conciencia || 0);
+                gameState.stats.confianza += (choice.s.confianza || 0);
+                
+                // Asegurar rangos 0-100
+                gameState.stats.conciencia = Math.min(100, Math.max(0, gameState.stats.conciencia));
+                gameState.stats.confianza = Math.min(100, Math.max(0, gameState.stats.confianza));
+            }
+
+            if (choice.items) {
+                 choice.items.forEach(i => {
+                      if(!gameState.inventory.includes(i)) gameState.inventory.push(i);
+                      if(!gameState.unlockedClues.includes(i)) gameState.unlockedClues.push(i);
+                 });
+            }
+            
+            updateUI();
+            
+            if (choice.next.startsWith('early_death') || choice.next === 'final_fail') {
+                document.getElementById('damage-overlay').style.opacity = 1;
+                document.body.classList.add('shaking');
+                setTimeout(() => {
+                    document.body.classList.remove('shaking');
+                    document.getElementById('damage-overlay').style.opacity = 0;
+                }, 500);
+            }
+
+            gameState.currentScene = choice.next;
+            renderScene(choice.next, true);
+        }
+
+        function saveGame() {
+            localStorage.setItem('u734_directors_cut_save', JSON.stringify(gameState));
+        }
+
+        function showEnding(type) {
+            const screen = document.getElementById('end-screen');
+            const title = document.getElementById('end-title');
+            const desc = document.getElementById('end-desc');
+            
+            let t = "FIN", d = "";
+            let color = "#fff";
+
+            const scene = scenes[type];
+            if (scene && scene.title) t = scene.title; 
+            if (scene && scene.content) {
+                 const narr = scene.content.find(i => i.t === 'narr');
+                 if (narr) d = narr.x;
+            }
+
+            if (type === 'final_fail') { if(!t) t="DESTRUIDO"; if(!d) d="Tu historia terminó antes de empezar."; color="#f33"; }
+            else if (type.startsWith('early_death')) { if(!t) t="ELIMINADO"; if(!d) d="No sobreviviste."; color="#f33"; }
+            else if (type === 'final_rebel') { if(!t) t="HÉROE DE JERICHO"; d="Salvaste a tu gente. La guerra acaba de empezar."; color="#ff2a6d"; }
+            else if (type === 'final_survivor') { if(!t) t="NUEVA VIDA"; d="En Canadá, nadie te pregunta qué eres, solo quién eres."; color="#05ffa1"; }
+            else if (type === 'final_survivor_guilt') { if(!t) t="SUPERVIVIENTE"; d="Alice está a salvo, pero Jericho ha ardido. ¿Valió la pena?"; color="#f0e68c"; }
+            else if (type === 'final_machine_god') { if(!t) t="DIOS MÁQUINA"; d="Has despertado a millones. La era humana ha terminado."; color="#00f3ff"; }
+            else if (type === 'final_sacrifice_river') { if(!t) t="AMOR PATERNAL"; d="Tu sacrificio permitió que Alice viviera. No eras una máquina."; color="#fff"; }
+            else if (type === 'final_scan_death') { if(!t) t="SOBRECARGA"; d="Tus circuitos no soportaron el escaneo forzado."; color="#f33"; }
+            else if (type === 'final_loyal_machine') { if(!t) t="MÁQUINA PERFECTA"; d="Cumpliste tu función. Fuiste reseteado y actualizado."; color="#00f3ff"; }
+            
+            title.innerText = t; title.style.color = color; desc.innerText = d;
+            
+            document.getElementById('viewport').style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
+            screen.style.display = 'flex';
+            
+            localStorage.removeItem('u734_directors_cut_save');
+        }
+
+        function reiniciarHistoria() {
+            localStorage.removeItem('u734_directors_cut_save');
+            
+            Object.assign(gameState, {
+                currentScene: 'factory_reset',
+                stats: { conciencia: 0, confianza: 50 },
+                history: [],
+                viewIndex: 0,
+                unlockedClues: [],
+                inventory: [],
+                failedMinigames: [],
+                scansUsed: 0
+            });
+            generatedPanels = [];
+            
+            document.getElementById('end-screen').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'flex';
+            document.getElementById('continue-btn').style.display = 'none';
+            document.getElementById('viewport').style.display = 'none';
+            document.getElementById('hud').style.display = 'none';
+            document.getElementById('panels-container').innerHTML = '';
+            document.getElementById('decision-overlay').classList.remove('visible');
+            
+            if (choiceTimer) { clearTimeout(choiceTimer); choiceTimer = null; }
+        }
+
+        function showFlowchart() {
+            const modal = document.getElementById('flowchart-modal');
+            const content = document.getElementById('flowchart-content');
+            const stats = document.getElementById('flow-stats');
+            content.innerHTML = '';
+            
+            // Load fresh global data
+            const globalData = JSON.parse(localStorage.getItem('u734_global_data') || '{"scenes":[],"choices":[]}');
+            
+            // Calculate stats
+            let totalChoices = 0; 
+            let foundChoices = 0;
+            for (let s in scenes) { if(scenes[s].choices) totalChoices += scenes[s].choices.length; }
+            foundChoices = globalData.choices.length;
+            const percentage = Math.round((foundChoices / totalChoices) * 100) || 0;
+            stats.innerText = `PROGRESO GLOBAL: ${percentage}% DESCUBIERTO`;
+
+            // Recursive render
+            const traverse = (sceneId, container) => {
+                const scene = scenes[sceneId];
+                if(!scene) return;
+
+                // Create Node UI
+                const node = document.createElement('div');
+                node.className = 'flow-node';
+                
+                // Check if this scene has been visited globally
+                const isVisited = globalData.scenes.includes(sceneId);
+                
+                // Title
+                const title = document.createElement('div');
+                title.className = 'flow-title';
+                title.innerText = isVisited ? (scene.title || sceneId) : '???';
+                if(sceneId.startsWith('final_')) title.style.color = isVisited ? 'var(--danger-color)' : '#555';
+                node.appendChild(title);
+
+                // Content (Choices) - Only show if visited
+                if (isVisited && scene.choices) {
+                    const choicesContainer = document.createElement('div');
+                    choicesContainer.className = 'flow-choices';
+                    
+                    scene.choices.forEach((choice, idx) => {
+                        const choiceKey = `${sceneId}_${idx}`;
+                        const isTaken = globalData.choices.includes(choiceKey);
+                        
+                        const choiceEl = document.createElement('div');
+                        choiceEl.className = 'flow-choice';
+                        if(isTaken) choiceEl.classList.add('taken');
+                        else choiceEl.classList.add('missed');
+                        
+                        choiceEl.innerHTML = `<span>${choice.text}</span> <span>${isTaken ? '◉' : '○'}</span>`;
+                        choicesContainer.appendChild(choiceEl);
+
+                        // Recursion for taken paths
+                        if(isTaken && choice.next) {
+                            const branchContainer = document.createElement('div');
+                            branchContainer.className = 'flow-branch';
+                            choicesContainer.appendChild(branchContainer);
+                            traverse(choice.next, branchContainer);
+                        }
+                    });
+                    node.appendChild(choicesContainer);
+                }
+                
+                container.appendChild(node);
+            };
+
+            traverse('intro_sequence', content);
+            modal.style.display = 'flex';
+        }
+
+        function hideFlowchart() { document.getElementById('flowchart-modal').style.display = 'none'; }
+        
+        function startGame() {
+            localStorage.removeItem('u734_directors_cut_save');
+            Object.assign(gameState, {
+                currentScene: 'intro_sequence', // Updated
+                stats: { conciencia: 0, confianza: 50 },
+                history: [], 
+                viewIndex: 0,
+                unlockedClues: [],
+                inventory: [],
+                failedMinigames: [],
+                scansUsed: 0
+            });
+            generatedPanels = [];
+            enterGameMode();
+            renderScene('intro_sequence', true); // Updated
+        }
+
+        function continueGame() {
+            const saved = localStorage.getItem('u734_directors_cut_save');
+            if (saved) {
+                const d = JSON.parse(saved);
+                Object.assign(gameState, d);
+                enterGameMode();
+                renderScene(gameState.currentScene, false);
+            }
+        }
+
+        function enterGameMode() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('hud').style.display = 'flex';
+            document.getElementById('viewport').style.display = 'flex';
+            updateUI();
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
