@@ -3,275 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LINUX ROOT ACCESS</title>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <title>ROOT_TERMINAL_ACCESS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #000000;
-            --terminal-green: #33ff00;
-            --terminal-dim: #1a8000;
-            --alert: #ff0000;
-            --warn: #ffcc00;
-            --scanline: rgba(0, 0, 0, 0.5);
+            --bg: #050505;
+            --term-green: #00ff41;
+            --term-dim: #008F11;
+            --err: #ff0000;
+            --warn: #ffb000;
+            --cyan: #00ffff;
+            --grid-line: rgba(0, 255, 65, 0.1);
         }
 
         body {
-            font-family: 'VT323', monospace;
-            background-color: var(--bg-color);
-            color: var(--terminal-green);
-            margin: 0;
-            padding: 20px;
+            background-color: var(--bg);
+            color: var(--term-green);
+            font-family: 'Fira Code', monospace;
+            margin: 0; padding: 20px;
             height: 100vh;
+            background-image: 
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 20px 20px;
             overflow-x: hidden;
-            text-shadow: 0 0 2px var(--terminal-dim);
-            font-size: 1.2rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* EFECTO MONITOR CRT (SCANLINES) */
-        body::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
-            z-index: 2;
-            background-size: 100% 2px, 3px 100%;
-            pointer-events: none;
         }
 
         /* HEADER */
         header {
-            width: 100%; max-width: 1100px;
-            border-bottom: 2px solid var(--terminal-green);
-            padding-bottom: 10px; margin-bottom: 20px;
-            display: flex; justify-content: space-between; align-items: flex-end;
-            z-index: 3;
-        }
-        h1 { margin: 0; font-size: 2.5rem; letter-spacing: 2px; text-transform: uppercase; }
-        .blink { animation: blinker 1s linear infinite; }
-        @keyframes blinker { 50% { opacity: 0; } }
-
-        /* HOST MONITOR (ASCII STYLE) */
-        .host-stats {
-            display: grid; grid-template-columns: 1fr 1fr 1fr;
-            width: 100%; max-width: 1100px;
-            border: 1px solid var(--terminal-dim);
+            border: 2px solid var(--term-green);
             padding: 15px; margin-bottom: 30px;
-            background: rgba(0, 20, 0, 0.8);
-            z-index: 3;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 0 15px var(--term-dim);
+            background: rgba(0,0,0,0.8);
         }
-        .stat-box { text-align: center; border-right: 1px dashed var(--terminal-dim); }
-        .stat-box:last-child { border-right: none; }
-        .big-num { font-size: 2.5rem; font-weight: bold; }
-        
-        /* SERVER GRID */
+        h1 { margin: 0; font-size: 1.8rem; text-shadow: 0 0 5px var(--term-green); }
+        .blink { animation: blink 1s infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* HOST STATS */
+        .stats-bar {
+            display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+            margin-bottom: 30px; font-size: 0.9rem;
+        }
+        .stat-item { border: 1px solid var(--term-dim); padding: 10px; text-align: center; }
+        .val { font-weight: bold; font-size: 1.2rem; color: var(--cyan); }
+
+        /* VM GRID */
         .grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px; width: 100%; max-width: 1100px; z-index: 3;
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            gap: 25px;
         }
 
         /* HACKER CARD */
         .card {
-            border: 1px solid var(--terminal-green);
-            background: #000;
-            padding: 15px;
+            border: 1px solid var(--term-green);
+            background: rgba(0, 10, 0, 0.9);
+            padding: 0;
+            transition: 0.2s;
             position: relative;
-            transition: all 0.1s;
         }
-        .card:hover {
-            box-shadow: 0 0 15px var(--terminal-dim);
-            transform: scale(1.01);
-        }
-        .card.stopped { border-color: var(--alert); color: var(--alert); }
-        .card.stopped button { border-color: var(--alert); color: var(--alert); }
-        .card.stopped .card-title { color: var(--alert); }
-
-        .card-header { 
-            border-bottom: 1px dashed var(--terminal-green); 
-            padding-bottom: 5px; margin-bottom: 10px;
+        .card:hover { box-shadow: 0 0 20px var(--term-dim); transform: translateY(-2px); }
+        
+        .card-top {
+            background: var(--term-green); color: black; padding: 5px 10px; font-weight: bold;
             display: flex; justify-content: space-between;
         }
-        .vm-details { font-size: 0.9rem; margin-bottom: 15px; opacity: 0.8; }
+        .card-body { padding: 15px; }
 
-        /* BUTTONS */
-        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        button {
-            background: black; color: var(--terminal-green);
-            border: 1px solid var(--terminal-green);
-            font-family: 'VT323', monospace;
-            font-size: 1.2rem; cursor: pointer;
-            padding: 5px; text-transform: uppercase;
-        }
-        button:hover { background: var(--terminal-green); color: black; }
-        button:disabled { opacity: 0.3; cursor: not-allowed; border-style: dashed; }
+        .specs-table { width: 100%; font-size: 0.8rem; color: var(--term-dim); margin-bottom: 15px; }
+        .specs-table td { padding: 2px 0; }
+        .highlight { color: var(--cyan); }
+
+        /* COMMAND MATRIX */
+        .cmd-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
         
-        .btn-snap { grid-column: span 2; border-color: var(--warn); color: var(--warn); }
-        .btn-snap:hover { background: var(--warn); color: black; }
-
-        /* LOG TERMINAL */
-        .terminal-log {
-            width: 100%; max-width: 1100px;
-            background: #000;
-            border: 1px solid var(--terminal-dim);
-            height: 200px; margin-top: 30px;
-            padding: 10px;
-            overflow-y: scroll;
-            font-size: 1rem;
-            z-index: 3;
+        button {
+            background: black; color: var(--term-green); border: 1px solid var(--term-dim);
+            padding: 8px; font-family: 'Fira Code', monospace; cursor: pointer;
+            font-size: 0.75rem; text-transform: uppercase; transition: 0.1s;
         }
-        .log-line { margin-bottom: 4px; border-bottom: 1px solid #111; }
-        .log-time { color: var(--terminal-dim); margin-right: 10px; }
+        button:hover { background: var(--term-green); color: black; }
+        button:active { transform: scale(0.95); }
+        button:disabled { opacity: 0.3; cursor: not-allowed; border-color: #333; color: #555; }
 
-        /* SCROLLBAR */
-        ::-webkit-scrollbar { width: 10px; }
-        ::-webkit-scrollbar-track { background: #000; }
-        ::-webkit-scrollbar-thumb { background: var(--terminal-dim); border: 1px solid var(--terminal-green); }
+        /* Special Buttons */
+        .btn-spy { grid-column: span 3; border-color: var(--cyan); color: var(--cyan); margin-top: 5px; }
+        .btn-spy:hover { background: var(--cyan); color: black; }
+        
+        .btn-danger { color: var(--err); border-color: var(--err); }
+        .btn-danger:hover { background: var(--err); color: white; }
+
+        /* LOGS */
+        .console {
+            position: fixed; bottom: 0; left: 0; right: 0; height: 120px;
+            background: black; border-top: 2px solid var(--term-green);
+            padding: 10px; font-size: 0.8rem; overflow-y: scroll;
+            opacity: 0.9;
+        }
+        .log-entry { margin-bottom: 2px; }
+        .log-ts { color: #555; margin-right: 10px; }
+
+        /* SPY MODAL */
+        #spy-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9); z-index: 100;
+            justify-content: center; align-items: center; flex-direction: column;
+        }
+        #spy-img { max-width: 90%; max-height: 80%; border: 2px solid var(--cyan); box-shadow: 0 0 50px var(--cyan); }
+        .close-btn { margin-top: 20px; padding: 10px 30px; font-size: 1.2rem; background: var(--err); color: white; border: none; cursor: pointer; }
 
     </style>
 </head>
 <body>
 
     <header>
-        <div>
-            <h1>> LINUX_SYSTEM_CONTROL<span class="blink">_</span></h1>
-            <small>ACCESS LEVEL: ROOT | ENCRYPTION: ON</small>
-        </div>
-        <div style="text-align: right;">
-            <div>STATUS: <span id="conn-status">CONNECTING...</span></div>
-            <div>UPTIME: <span id="uptime">00:00:00</span></div>
+        <h1>> VBOX_MASTER_CONTROL<span class="blink">_</span></h1>
+        <div style="text-align: right; font-size: 0.8rem;">
+            SECURE CONNECTION<br>ENCRYPTION: AES-256
         </div>
     </header>
 
-    <div class="host-stats">
-        <div class="stat-box">
-            <div>HOST_CPU_LOAD</div>
-            <div id="host-cpu" class="big-num">0%</div>
-            <div id="cpu-bar">----</div>
-        </div>
-        <div class="stat-box">
-            <div>PHYSICAL_MACHINE</div>
-            <div class="big-num">LINUX</div>
-            <div>KERNEL MODE</div>
-        </div>
-        <div class="stat-box">
-            <div>RAM_USAGE</div>
-            <div id="host-ram" class="big-num">0%</div>
-            <div id="ram-bar">----</div>
-        </div>
+    <div class="stats-bar">
+        <div class="stat-item">HOST CPU <div id="h-cpu" class="val">0%</div></div>
+        <div class="stat-item">HOST RAM <div id="h-ram" class="val">0%</div></div>
+        <div class="stat-item">TOTAL VMs <div id="vm-count" class="val">0</div></div>
+        <div class="stat-item">ACTIVE <div id="vm-active" class="val" style="color:var(--term-green)">0</div></div>
     </div>
 
     <div id="grid" class="grid">
         </div>
 
-    <div class="terminal-log" id="syslog">
-        <div class="log-line">> INITIALIZING SYSTEM INTERFACE...</div>
-        <div class="log-line">> WAITING FOR BACKEND HANDSHAKE...</div>
+    <div class="console" id="console">
+        <div class="log-entry">> INITIALIZING SYSTEM... DONE</div>
+        <div class="log-entry">> WAITING FOR HOST DATA...</div>
+    </div>
+
+    <div id="spy-modal">
+        <img id="spy-img" src="" alt="Live Capture">
+        <button class="close-btn" onclick="closeSpy()">CLOSE TRANSMISSION</button>
     </div>
 
     <script>
         const API = 'http://localhost:8000';
-        let isConnected = false;
 
-        async function refreshSystem() {
+        async function loop() {
             try {
                 const res = await fetch(`${API}/status`);
                 const data = await res.json();
-                
-                if (!isConnected) {
-                    log("CONNECTION ESTABLISHED WITH HOST.");
-                    document.getElementById('conn-status').innerText = "ONLINE";
-                    document.getElementById('conn-status').style.color = "#33ff00";
-                    isConnected = true;
-                }
-                
-                renderDashboard(data);
+                render(data);
             } catch (e) {
-                if (isConnected) {
-                    log("CRITICAL: CONNECTION LOST WITH BACKEND.");
-                    document.getElementById('conn-status').innerText = "OFFLINE";
-                    document.getElementById('conn-status').style.color = "red";
-                    isConnected = false;
-                }
+                log('CONNECTION_ERROR: Retrying handshake...', 'red');
             }
         }
 
-        function renderDashboard(data) {
-            // Update Host Stats
-            document.getElementById('host-cpu').innerText = data.host.cpu + '%';
-            document.getElementById('host-ram').innerText = data.host.ram + '%';
-            
-            // Visual bars (fake ASCII bars)
-            document.getElementById('cpu-bar').innerText = generateBar(data.host.cpu);
-            document.getElementById('ram-bar').innerText = generateBar(data.host.ram);
+        function render(data) {
+            // Stats
+            document.getElementById('h-cpu').innerText = data.host.cpu + '%';
+            document.getElementById('h-ram').innerText = data.host.ram + '%';
+            document.getElementById('vm-count').innerText = data.vms.length;
+            document.getElementById('vm-active').innerText = data.vms.filter(v => v.status === 'running').length;
 
-            // Render VMs
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
 
             data.vms.forEach(vm => {
-                const isOn = vm.status === 'running';
-                const statusTxt = isOn ? 'ACTIVE' : 'HALTED';
-                const statusClass = isOn ? 'running' : 'stopped';
-                
+                const s = vm.specs;
+                const status = vm.status.toUpperCase();
+                const isRun = vm.status === 'running';
+                const isPaused = vm.status === 'paused';
+                const color = isRun ? 'var(--term-green)' : (isPaused ? 'var(--warn)' : '#555');
+
                 const card = document.createElement('div');
-                card.className = `card ${statusClass}`;
+                card.className = 'card';
                 card.innerHTML = `
-                    <div class="card-header">
-                        <strong>[ ${vm.name} ]</strong>
-                        <span>${statusTxt}</span>
+                    <div class="card-top" style="background:${color}; color:${isRun ? 'black' : 'white'}">
+                        <span>${vm.name}</span>
+                        <span>[${status}]</span>
                     </div>
-                    <div class="vm-details">
-                        >> MEM_ALLOC: ${vm.ram_assigned}<br>
-                        >> CPU_CORES: ${vm.cpus}
-                    </div>
-                    <div class="actions">
-                        <button onclick="exec('${vm.name}', 'start')" ${isOn ? 'disabled' : ''}>INIT</button>
-                        <button onclick="exec('${vm.name}', 'stop')" ${!isOn ? 'disabled' : ''}>KILL</button>
-                        <button class="btn-snap" onclick="exec('${vm.name}', 'snapshot')">CREATE_SNAPSHOT</button>
+                    <div class="card-body">
+                        <table class="specs-table">
+                            <tr><td>OS TYPE:</td> <td class="highlight">${s.os || 'Unknown'}</td></tr>
+                            <tr><td>MEMORY:</td> <td class="highlight">${s.ram}</td></tr>
+                            <tr><td>VRAM:</td> <td class="highlight">${s.vram}</td></tr>
+                            <tr><td>MAC ADDR:</td> <td class="highlight">${s.mac || '--:--:--'}</td></tr>
+                        </table>
+
+                        <div class="cmd-grid">
+                            <button onclick="cmd('${vm.name}', 'start')" ${isRun || isPaused ? 'disabled' : ''}>BOOT</button>
+                            <button onclick="cmd('${vm.name}', 'pause')" ${!isRun ? 'disabled' : ''}>PAUSE</button>
+                            <button onclick="cmd('${vm.name}', 'resume')" ${!isPaused ? 'disabled' : ''}>RESUME</button>
+                            
+                            <button onclick="cmd('${vm.name}', 'acpi')" ${!isRun ? 'disabled' : ''}>ACPI_OFF</button>
+                            <button onclick="cmd('${vm.name}', 'reset')" ${!isRun ? 'disabled' : ''}>RESET</button>
+                            <button class="btn-danger" onclick="cmd('${vm.name}', 'stop')" ${!isRun && !isPaused ? 'disabled' : ''}>KILL</button>
+
+                            <button onclick="cmd('${vm.name}', 'snapshot')">SAVE</button>
+                            <button onclick="cmd('${vm.name}', 'restore')" style="color:var(--cyan)">RESTORE</button>
+                            <button class="btn-spy" onclick="spy('${vm.name}')" ${!isRun ? 'disabled' : ''}>👁️ CAPTURE SCREEN</button>
+                        </div>
                     </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
-        async function exec(name, action) {
-            log(`> EXECUTING ${action.toUpperCase()} ON TARGET: ${name}...`);
+        async function cmd(name, action) {
+            log(`EXECUTING: ${action.toUpperCase()} >> ${name}`);
+            await fetch(`${API}/${action}?name=${name}`);
+            setTimeout(loop, 500);
+        }
+
+        async function spy(name) {
+            log(`INITIATING VISUAL INTERCEPT >> ${name}...`);
+            const btn = event.target;
+            btn.innerText = "DOWNLOADING...";
+            
             try {
-                await fetch(`${API}/${action}?name=${name}`);
-                setTimeout(refreshSystem, 1000); // Fast refresh
-            } catch(e) {
-                log(`> ERROR: COMMAND FAILED FOR ${name}`);
-            }
+                const res = await fetch(`${API}/screenshot?name=${name}`);
+                const data = await res.json();
+                
+                if(data.status === 'ok') {
+                    document.getElementById('spy-img').src = "data:image/png;base64," + data.image;
+                    document.getElementById('spy-modal').style.display = 'flex';
+                } else {
+                    alert("CAPTURE FAILED: " + data.msg);
+                }
+            } catch(e) { log("SPY_MODULE ERROR"); }
+            
+            btn.innerText = "👁️ CAPTURE SCREEN";
         }
 
-        function generateBar(percent) {
-            const chars = Math.floor(percent / 10);
-            return '[' + '#'.repeat(chars) + '-'.repeat(10 - chars) + ']';
+        function closeSpy() {
+            document.getElementById('spy-modal').style.display = 'none';
         }
 
-        function log(msg) {
-            const term = document.getElementById('syslog');
-            const now = new Date().toLocaleTimeString();
-            term.innerHTML += `<div class="log-line"><span class="log-time">${now}</span> ${msg}</div>`;
-            term.scrollTop = term.scrollHeight; // Auto scroll
+        function log(msg, color) {
+            const c = document.getElementById('console');
+            const ts = new Date().toLocaleTimeString();
+            c.innerHTML += `<div class="log-entry" style="color:${color || 'inherit'}"><span class="log-ts">[${ts}]</span> ${msg}</div>`;
+            c.scrollTop = c.scrollHeight;
         }
 
-        // Uptime Clock
-        let sec = 0;
-        setInterval(() => {
-            sec++;
-            const date = new Date(0);
-            date.setSeconds(sec);
-            document.getElementById('uptime').innerText = date.toISOString().substr(11, 8);
-        }, 1000);
-
-        // Main Loop
-        setInterval(refreshSystem, 3000);
-        refreshSystem();
-
+        setInterval(loop, 3000);
+        loop();
     </script>
 </body>
 </html>
