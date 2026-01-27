@@ -3,138 +3,275 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EducaMaX Admin Pro</title>
+    <title>LINUX ROOT ACCESS</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0f172a; --card: #1e293b; --text: #f1f5f9; --accent: #38bdf8;
-            --success: #22c55e; --danger: #ef4444; --warn: #f59e0b;
+            --bg-color: #000000;
+            --terminal-green: #33ff00;
+            --terminal-dim: #1a8000;
+            --alert: #ff0000;
+            --warn: #ffcc00;
+            --scanline: rgba(0, 0, 0, 0.5);
         }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        
-        /* HOST MONITOR HEADER */
-        .host-monitor {
-            width: 100%; max-width: 1000px;
-            background: linear-gradient(145deg, #1e293b, #0f172a);
-            border: 1px solid #334155; border-radius: 15px;
-            padding: 20px; margin-bottom: 30px;
-            display: flex; justify-content: space-around; align-items: center;
-            box-shadow: 0 0 20px rgba(56, 189, 248, 0.1);
-        }
-        .monitor-metric { text-align: center; }
-        .metric-value { font-size: 2.5rem; font-weight: bold; color: var(--accent); }
-        .metric-label { font-size: 0.9rem; color: #94a3b8; letter-spacing: 1px; }
 
-        /* GRID */
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; width: 100%; max-width: 1000px; }
+        body {
+            font-family: 'VT323', monospace;
+            background-color: var(--bg-color);
+            color: var(--terminal-green);
+            margin: 0;
+            padding: 20px;
+            height: 100vh;
+            overflow-x: hidden;
+            text-shadow: 0 0 2px var(--terminal-dim);
+            font-size: 1.2rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* EFECTO MONITOR CRT (SCANLINES) */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            z-index: 2;
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+        }
+
+        /* HEADER */
+        header {
+            width: 100%; max-width: 1100px;
+            border-bottom: 2px solid var(--terminal-green);
+            padding-bottom: 10px; margin-bottom: 20px;
+            display: flex; justify-content: space-between; align-items: flex-end;
+            z-index: 3;
+        }
+        h1 { margin: 0; font-size: 2.5rem; letter-spacing: 2px; text-transform: uppercase; }
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        /* HOST MONITOR (ASCII STYLE) */
+        .host-stats {
+            display: grid; grid-template-columns: 1fr 1fr 1fr;
+            width: 100%; max-width: 1100px;
+            border: 1px solid var(--terminal-dim);
+            padding: 15px; margin-bottom: 30px;
+            background: rgba(0, 20, 0, 0.8);
+            z-index: 3;
+        }
+        .stat-box { text-align: center; border-right: 1px dashed var(--terminal-dim); }
+        .stat-box:last-child { border-right: none; }
+        .big-num { font-size: 2.5rem; font-weight: bold; }
         
-        /* CARDS */
+        /* SERVER GRID */
+        .grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px; width: 100%; max-width: 1100px; z-index: 3;
+        }
+
+        /* HACKER CARD */
         .card {
-            background: var(--card); border-radius: 12px; padding: 20px;
-            border-top: 4px solid #64748b; position: relative;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3); transition: transform 0.2s;
+            border: 1px solid var(--terminal-green);
+            background: #000;
+            padding: 15px;
+            position: relative;
+            transition: all 0.1s;
         }
-        .card:hover { transform: translateY(-5px); }
-        .card.running { border-top-color: var(--success); }
-        .card.stopped { border-top-color: var(--danger); }
+        .card:hover {
+            box-shadow: 0 0 15px var(--terminal-dim);
+            transform: scale(1.01);
+        }
+        .card.stopped { border-color: var(--alert); color: var(--alert); }
+        .card.stopped button { border-color: var(--alert); color: var(--alert); }
+        .card.stopped .card-title { color: var(--alert); }
 
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .vm-specs { font-size: 0.8rem; color: #94a3b8; background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 5px; margin-bottom: 15px; }
+        .card-header { 
+            border-bottom: 1px dashed var(--terminal-green); 
+            padding-bottom: 5px; margin-bottom: 10px;
+            display: flex; justify-content: space-between;
+        }
+        .vm-details { font-size: 0.9rem; margin-bottom: 15px; opacity: 0.8; }
 
         /* BUTTONS */
-        .btn-group { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        button { border: none; padding: 10px; border-radius: 6px; cursor: pointer; color: white; font-weight: bold; opacity: 0.9; transition: 0.2s; }
-        button:hover { opacity: 1; transform: scale(1.02); }
-        button:disabled { opacity: 0.3; cursor: not-allowed; }
+        .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        button {
+            background: black; color: var(--terminal-green);
+            border: 1px solid var(--terminal-green);
+            font-family: 'VT323', monospace;
+            font-size: 1.2rem; cursor: pointer;
+            padding: 5px; text-transform: uppercase;
+        }
+        button:hover { background: var(--terminal-green); color: black; }
+        button:disabled { opacity: 0.3; cursor: not-allowed; border-style: dashed; }
         
-        .btn-start { background: var(--success); }
-        .btn-stop { background: var(--danger); }
-        .btn-snap { background: var(--accent); grid-column: span 2; margin-top: 5px; color: #0f172a;}
+        .btn-snap { grid-column: span 2; border-color: var(--warn); color: var(--warn); }
+        .btn-snap:hover { background: var(--warn); color: black; }
 
-        .log-box { width: 100%; max-width: 1000px; background: black; color: #22c55e; font-family: monospace; padding: 10px; margin-top: 20px; border-radius: 8px; max-height: 150px; overflow-y: auto; font-size: 0.85rem;}
+        /* LOG TERMINAL */
+        .terminal-log {
+            width: 100%; max-width: 1100px;
+            background: #000;
+            border: 1px solid var(--terminal-dim);
+            height: 200px; margin-top: 30px;
+            padding: 10px;
+            overflow-y: scroll;
+            font-size: 1rem;
+            z-index: 3;
+        }
+        .log-line { margin-bottom: 4px; border-bottom: 1px solid #111; }
+        .log-time { color: var(--terminal-dim); margin-right: 10px; }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: var(--terminal-dim); border: 1px solid var(--terminal-green); }
+
     </style>
 </head>
 <body>
 
-    <div class="host-monitor">
-        <div class="monitor-metric">
-            <div class="metric-label">HOST CPU</div>
-            <div id="host-cpu" class="metric-value">0%</div>
+    <header>
+        <div>
+            <h1>> LINUX_SYSTEM_CONTROL<span class="blink">_</span></h1>
+            <small>ACCESS LEVEL: ROOT | ENCRYPTION: ON</small>
         </div>
-        <div class="monitor-metric">
-            <div style="font-size:3rem">🖥️</div>
-            <div class="metric-label">EDUCA-MAX</div>
+        <div style="text-align: right;">
+            <div>STATUS: <span id="conn-status">CONNECTING...</span></div>
+            <div>UPTIME: <span id="uptime">00:00:00</span></div>
         </div>
-        <div class="monitor-metric">
-            <div class="metric-label">HOST RAM</div>
-            <div id="host-ram" class="metric-value">0%</div>
+    </header>
+
+    <div class="host-stats">
+        <div class="stat-box">
+            <div>HOST_CPU_LOAD</div>
+            <div id="host-cpu" class="big-num">0%</div>
+            <div id="cpu-bar">----</div>
+        </div>
+        <div class="stat-box">
+            <div>PHYSICAL_MACHINE</div>
+            <div class="big-num">LINUX</div>
+            <div>KERNEL MODE</div>
+        </div>
+        <div class="stat-box">
+            <div>RAM_USAGE</div>
+            <div id="host-ram" class="big-num">0%</div>
+            <div id="ram-bar">----</div>
         </div>
     </div>
 
-    <div id="grid" class="grid"></div>
-    <div id="logs" class="log-box">System ready...</div>
+    <div id="grid" class="grid">
+        </div>
+
+    <div class="terminal-log" id="syslog">
+        <div class="log-line">> INITIALIZING SYSTEM INTERFACE...</div>
+        <div class="log-line">> WAITING FOR BACKEND HANDSHAKE...</div>
+    </div>
 
     <script>
         const API = 'http://localhost:8000';
+        let isConnected = false;
 
-        async function update() {
+        async function refreshSystem() {
             try {
                 const res = await fetch(`${API}/status`);
                 const data = await res.json();
-                render(data);
+                
+                if (!isConnected) {
+                    log("CONNECTION ESTABLISHED WITH HOST.");
+                    document.getElementById('conn-status').innerText = "ONLINE";
+                    document.getElementById('conn-status').style.color = "#33ff00";
+                    isConnected = true;
+                }
+                
+                renderDashboard(data);
             } catch (e) {
-                log('Error de conexión con Backend...');
+                if (isConnected) {
+                    log("CRITICAL: CONNECTION LOST WITH BACKEND.");
+                    document.getElementById('conn-status').innerText = "OFFLINE";
+                    document.getElementById('conn-status').style.color = "red";
+                    isConnected = false;
+                }
             }
         }
 
-        function render(data) {
-            // 1. Actualizar Host Stats
+        function renderDashboard(data) {
+            // Update Host Stats
             document.getElementById('host-cpu').innerText = data.host.cpu + '%';
             document.getElementById('host-ram').innerText = data.host.ram + '%';
+            
+            // Visual bars (fake ASCII bars)
+            document.getElementById('cpu-bar').innerText = generateBar(data.host.cpu);
+            document.getElementById('ram-bar').innerText = generateBar(data.host.ram);
 
-            // 2. Actualizar VMs
+            // Render VMs
             const grid = document.getElementById('grid');
             grid.innerHTML = '';
-            
+
             data.vms.forEach(vm => {
                 const isOn = vm.status === 'running';
-                const div = document.createElement('div');
-                div.className = `card ${vm.status}`;
-                div.innerHTML = `
+                const statusTxt = isOn ? 'ACTIVE' : 'HALTED';
+                const statusClass = isOn ? 'running' : 'stopped';
+                
+                const card = document.createElement('div');
+                card.className = `card ${statusClass}`;
+                card.innerHTML = `
                     <div class="card-header">
-                        <h2>${vm.name}</h2>
-                        <span style="color:${isOn ? 'var(--success)' : 'var(--danger)'}">
-                            ● ${isOn ? 'RUNNING' : 'STOPPED'}
-                        </span>
+                        <strong>[ ${vm.name} ]</strong>
+                        <span>${statusTxt}</span>
                     </div>
-                    
-                    <div class="vm-specs">
-                        💾 RAM: ${vm.ram_assigned}MB | 🧠 CPU: ${vm.cpus} Core(s)
+                    <div class="vm-details">
+                        >> MEM_ALLOC: ${vm.ram_assigned}<br>
+                        >> CPU_CORES: ${vm.cpus}
                     </div>
-
-                    <div class="btn-group">
-                        <button class="btn-start" onclick="cmd('start','${vm.name}')" ${isOn?'disabled':''}>▶ START</button>
-                        <button class="btn-stop" onclick="cmd('stop','${vm.name}')" ${!isOn?'disabled':''}>⏹ STOP</button>
-                        <button class="btn-snap" onclick="cmd('snapshot','${vm.name}')">📸 BACKUP SNAPSHOT</button>
+                    <div class="actions">
+                        <button onclick="exec('${vm.name}', 'start')" ${isOn ? 'disabled' : ''}>INIT</button>
+                        <button onclick="exec('${vm.name}', 'stop')" ${!isOn ? 'disabled' : ''}>KILL</button>
+                        <button class="btn-snap" onclick="exec('${vm.name}', 'snapshot')">CREATE_SNAPSHOT</button>
                     </div>
                 `;
-                grid.appendChild(div);
+                grid.appendChild(card);
             });
         }
 
-        async function cmd(action, name) {
-            log(`Enviando comando: ${action} -> ${name}...`);
-            await fetch(`${API}/${action}?name=${name}`);
-            setTimeout(update, 1000);
+        async function exec(name, action) {
+            log(`> EXECUTING ${action.toUpperCase()} ON TARGET: ${name}...`);
+            try {
+                await fetch(`${API}/${action}?name=${name}`);
+                setTimeout(refreshSystem, 1000); // Fast refresh
+            } catch(e) {
+                log(`> ERROR: COMMAND FAILED FOR ${name}`);
+            }
+        }
+
+        function generateBar(percent) {
+            const chars = Math.floor(percent / 10);
+            return '[' + '#'.repeat(chars) + '-'.repeat(10 - chars) + ']';
         }
 
         function log(msg) {
-            const box = document.getElementById('logs');
-            const time = new Date().toLocaleTimeString();
-            box.innerHTML = `[${time}] ${msg}<br>` + box.innerHTML;
+            const term = document.getElementById('syslog');
+            const now = new Date().toLocaleTimeString();
+            term.innerHTML += `<div class="log-line"><span class="log-time">${now}</span> ${msg}</div>`;
+            term.scrollTop = term.scrollHeight; // Auto scroll
         }
 
-        setInterval(update, 3000);
-        update();
+        // Uptime Clock
+        let sec = 0;
+        setInterval(() => {
+            sec++;
+            const date = new Date(0);
+            date.setSeconds(sec);
+            document.getElementById('uptime').innerText = date.toISOString().substr(11, 8);
+        }, 1000);
+
+        // Main Loop
+        setInterval(refreshSystem, 3000);
+        refreshSystem();
+
     </script>
 </body>
 </html>
